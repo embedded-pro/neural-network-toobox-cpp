@@ -38,6 +38,7 @@ jobs:
       - run: git diff
       - uses: github/codeql-action/upload-sarif@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4.37.3
         if: ${{ success() || failure() }}
+        continue-on-error: true
         with:
           sarif_file: megalinter-reports/megalinter-report.sarif
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
