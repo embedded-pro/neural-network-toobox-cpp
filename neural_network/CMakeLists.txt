@@ -1,0 +1,4 @@
+add_subdirectory(activation)
+add_subdirectory(layer)
+add_subdirectory(losses)
+add_subdirectory(model)
