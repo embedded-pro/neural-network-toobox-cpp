@@ -12,4 +12,4 @@ Components for building, training, and evaluating feed-forward neural networks e
 | [Loss Functions](losses/Loss.md)                   | Objective functions: MSE, MAE, Binary Cross-Entropy, Categorical Cross-Entropy          |
 | [Model](model/Model.md)                            | Variadic-template model composing layers, optimizer, and loss into a trainable pipeline |
 
-> **See also:** [Optimization](../optimization/README.md) for optimizers (Gradient Descent) and [Regularization](../regularization/README.md) for weight penalties (L1, L2) — these are general-purpose domains used by neural networks and other algorithms.
+> **See also:** Optimization and Regularization primitives are provided by [numerical-toolbox-cpp](https://github.com/embedded-pro/numerical-toolbox-cpp) and consumed via FetchContent.

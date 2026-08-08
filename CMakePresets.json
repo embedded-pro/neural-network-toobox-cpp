@@ -46,6 +46,34 @@
         "NEURAL_NETWORK_TOOLBOX_BUILD_SIMULATOR": true
       },
       "generator": "Ninja"
+    },
+    {
+      "name": "qemu-cortex-m4",
+      "displayName": "QEMU Cortex-M4 Tests",
+      "inherits": "defaults",
+      "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m4-fpv4-sp-d16.cmake",
+      "generator": "Ninja Multi-Config",
+      "cacheVariables": {
+        "CMAKE_CONFIGURATION_TYPES": "RelWithDebInfo",
+        "NEURAL_NETWORK_TOOLBOX_BUILD_TESTS": "On",
+        "NEURAL_NETWORK_TOOLBOX_BUILD_SIMULATOR": "Off",
+        "QEMU_MACHINE": "mps2-an386",
+        "CMAKE_CXX_FLAGS": "-DGTEST_HAS_STREAM_REDIRECTION=0 -DGTEST_HAS_POSIX_RE=0 -D_POSIX_C_SOURCE=200112L"
+      }
+    },
+    {
+      "name": "qemu-cortex-m7",
+      "displayName": "QEMU Cortex-M7 Tests",
+      "inherits": "defaults",
+      "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m7-fpv5-d16.cmake",
+      "generator": "Ninja Multi-Config",
+      "cacheVariables": {
+        "CMAKE_CONFIGURATION_TYPES": "RelWithDebInfo",
+        "NEURAL_NETWORK_TOOLBOX_BUILD_TESTS": "On",
+        "NEURAL_NETWORK_TOOLBOX_BUILD_SIMULATOR": "Off",
+        "QEMU_MACHINE": "mps2-an500",
+        "CMAKE_CXX_FLAGS": "-DGTEST_HAS_STREAM_REDIRECTION=0 -DGTEST_HAS_POSIX_RE=0 -D_POSIX_C_SOURCE=200112L"
+      }
     }
   ],
   "buildPresets": [
@@ -77,6 +105,28 @@
       "name": "coverage",
       "configuration": "Debug",
       "configurePreset": "coverage"
+    },
+    {
+      "name": "qemu-cortex-m4-RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "configurePreset": "qemu-cortex-m4",
+      "targets": [
+        "neural_network.activation_test",
+        "neural_network.layer_test",
+        "neural_network.losses_test",
+        "neural_network.model_test"
+      ]
+    },
+    {
+      "name": "qemu-cortex-m7-RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "configurePreset": "qemu-cortex-m7",
+      "targets": [
+        "neural_network.activation_test",
+        "neural_network.layer_test",
+        "neural_network.losses_test",
+        "neural_network.model_test"
+      ]
     }
   ],
   "testPresets": [
@@ -107,6 +157,18 @@
       "name": "host-single-Debug",
       "configurePreset": "host-single-Debug",
       "configuration": "Debug",
+      "inherits": "defaults"
+    },
+    {
+      "name": "qemu-cortex-m4",
+      "configurePreset": "qemu-cortex-m4",
+      "configuration": "RelWithDebInfo",
+      "inherits": "defaults"
+    },
+    {
+      "name": "qemu-cortex-m7",
+      "configurePreset": "qemu-cortex-m7",
+      "configuration": "RelWithDebInfo",
       "inherits": "defaults"
     }
   ]

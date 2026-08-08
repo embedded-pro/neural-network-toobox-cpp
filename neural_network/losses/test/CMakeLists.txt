@@ -7,6 +7,8 @@ target_link_libraries(neural_network.losses_test PUBLIC
     neural_network.losses
 )
 
+neural_network_add_qemu_test(neural_network.losses_test)
+
 target_sources(neural_network.losses_test PRIVATE
     TestBinaryCrossEntropy.cpp
     TestCategoricalCrossEntropy.cpp
