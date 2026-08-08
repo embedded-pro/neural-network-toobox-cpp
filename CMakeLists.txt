@@ -99,7 +99,7 @@ if (NEURAL_NETWORK_TOOLBOX_BUILD_TESTS)
     emil_enable_testing()
 endif()
 
-include(QemuHelpers)
+include(NeuralNetworkQemuHelpers)
 
 if(DEFINED QEMU_MACHINE)
     add_subdirectory(platform/qemu)

@@ -5,7 +5,12 @@ argument-hint: "Describe the algorithm, feature, bug fix, or change you want to 
 model: "Claude Sonnet 4.6"
 ---
 
-Analyze the following task for the **neural-network-toolbox** project — a robot-manipulator algorithms library (kinematics, dynamics, trajectories, and manipulator control) targeting resource-constrained embedded systems, consuming shared numerical primitives from numerical-toolbox-cpp via FetchContent. Gather relevant context from the codebase — identify affected modules, existing patterns, the float-only numeric policy, and documentation requirements. Then provide a brief scope summary and use the handoff buttons to route to the appropriate specialist:
+Analyze the following task for the **neural-network-toolbox** project — a neural network algorithms
+library (activations, layers, losses, model) targeting resource-constrained embedded systems,
+consuming shared numerical primitives from numerical-toolbox-cpp via FetchContent.
+Gather relevant context from the codebase — identify affected modules, existing patterns,
+the float-only numeric policy, and documentation requirements.
+Then provide a brief scope summary and use the handoff buttons to route to the appropriate specialist:
 
 - **Plan Implementation**: For complex tasks needing detailed upfront design (new algorithms, architectural changes, multi-file modifications)
 - **Execute Directly**: For straightforward changes with a clear path (bug fixes, small improvements)

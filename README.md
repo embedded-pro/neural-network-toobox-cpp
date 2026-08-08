@@ -33,7 +33,7 @@ The numerical-toolbox dependency is fetched automatically. Includes are namespac
 
 | Category                                                     | Description                                       |
 |--------------------------------------------------------------|---------------------------------------------------|
-| [Neural Network](doc/neural_network/README.md)               | Activations, Layers, Losses, Model                |
+| [Neural Network](doc/README.md)                              | Activations, Layers, Losses, Model                |
 
 Each category page lists its algorithms with a brief description and links to the detailed
 documentation.
@@ -42,7 +42,7 @@ documentation.
 
 The entire documentation set is also published as a single book — read it online as a
 [GitHub Pages site](https://embedded-pro.github.io/neural-network-toobox-cpp/) or download the latest
-PDF from the [Releases page](../../releases/latest). Both are generated automatically from `doc/`
+PDF from the [Releases page](https://github.com/embedded-pro/neural-network-toobox-cpp/releases/latest). Both are generated automatically from `doc/`
 (cover, Summary/table of contents, one chapter per category, consolidated references, back cover).
 
 Build it locally with [Pandoc](https://pandoc.org) + XeLaTeX installed:

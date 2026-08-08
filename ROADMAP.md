@@ -14,13 +14,13 @@ All items are *(float-first)* — weights and activations exceed the `Q15`/`Q31`
 
 ### Backlog (by priority)
 
-| #   | Component                                | Target module        | Difficulty |
-|-----|------------------------------------------|----------------------|------------|
-| N1  | Convolutional layer (1D)                 | `layer` (new)        | ★★☆☆☆      |
-| N2  | Batch normalisation layer                | `layer` (new)        | ★★☆☆☆      |
-| N3  | Dropout layer (inference mask)           | `layer` (new)        | ★☆☆☆☆      |
-| N4  | ELU / SELU activation                    | `activation`         | ★☆☆☆☆      |
-| N5  | Recurrent layer (Elman / vanilla RNN)    | `layer` (new)        | ★★★☆☆      |
-| N6  | LSTM cell                                | `layer` (new)        | ★★★☆☆      |
-| N7  | On-device SGD training loop              | `model`              | ★★��☆☆      |
-| N8  | Weight serialization / deserialization   | `model` (new)        | ★★☆☆☆      |
+| #   | Component                              | Target module   | Difficulty |
+|-----|----------------------------------------|-----------------|------------|
+| N1  | Convolutional layer (1D)               | `layer` (new)   | ★★☆☆☆      |
+| N2  | Batch normalisation layer              | `layer` (new)   | ★★☆☆☆      |
+| N3  | Dropout layer (inference mask)         | `layer` (new)   | ★☆☆☆☆      |
+| N4  | ELU / SELU activation                  | `activation`    | ★☆☆☆☆      |
+| N5  | Recurrent layer (Elman / vanilla RNN)  | `layer` (new)   | ★★★☆☆      |
+| N6  | LSTM cell                              | `layer` (new)   | ★★★☆☆      |
+| N7  | On-device SGD training loop            | `model`         | ★★★☆☆      |
+| N8  | Weight serialization / deserialization | `model` (new)   | ★★☆☆☆      |
