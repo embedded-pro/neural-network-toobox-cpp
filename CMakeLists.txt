@@ -45,7 +45,16 @@ if (NEURAL_NETWORK_TOOLBOX_STANDALONE)
     set(EMIL_BUILD_ECHO_COMPILERS Off CACHE BOOL "" FORCE)
     set(EMIL_ENABLE_DOCKER_TOOLS Off CACHE BOOL "" FORCE)
 
+    if(DEFINED QEMU_MACHINE)
+        set(gtest_disable_pthreads ON CACHE BOOL "" FORCE)
+    endif()
+
     FetchContent_MakeAvailable(emil)
+
+    if(DEFINED QEMU_MACHINE)
+        function(emil_add_test target)
+        endfunction()
+    endif()
 
     FetchContent_Declare(
         numerical_toolbox
@@ -88,6 +97,12 @@ endif()
 if (NEURAL_NETWORK_TOOLBOX_BUILD_TESTS)
     include(CTest)
     emil_enable_testing()
+endif()
+
+include(QemuHelpers)
+
+if(DEFINED QEMU_MACHINE)
+    add_subdirectory(platform/qemu)
 endif()
 
 add_subdirectory(neural_network)
