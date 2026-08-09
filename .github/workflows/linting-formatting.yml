@@ -39,7 +39,7 @@ jobs:
         if: success() || failure()
         run: sudo chown -R "$(id -u):$(id -g)" .
       - run: git diff
-      - uses: github/codeql-action/upload-sarif@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4.37.3
+      - uses: github/codeql-action/upload-sarif@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
         if: ${{ success() || failure() }}
         continue-on-error: true
         with:
