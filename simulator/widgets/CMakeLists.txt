@@ -8,7 +8,6 @@ target_include_directories(neural_network.simulator.widgets PUBLIC
 )
 
 target_link_libraries(neural_network.simulator.widgets PUBLIC
-    neural_network.simulator.utils
     Qt6::Widgets
 )
 
@@ -19,10 +18,6 @@ set_target_properties(neural_network.simulator.widgets PROPERTIES
 target_sources(neural_network.simulator.widgets PRIVATE
     ChartInteraction.cpp
     ChartInteraction.hpp
-    FrequencyChartWidget.cpp
-    FrequencyChartWidget.hpp
-    SignalConfigWidget.cpp
-    SignalConfigWidget.hpp
     TimeSeriesChartWidget.cpp
     TimeSeriesChartWidget.hpp
 )
