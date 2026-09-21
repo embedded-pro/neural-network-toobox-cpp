@@ -1,78 +1,90 @@
 #include "simulator/NeuralNetwork/view/NnMainWindow.hpp"
-#include "simulator/NeuralNetwork/view/NnConfigurationPanel.hpp"
-#include "simulator/widgets/TimeSeriesChartWidget.hpp"
-#include <QSplitter>
-#include <QStatusBar>
-#include <QTabWidget>
+#include "ui/theme/Theme.hpp"
+#include <array>
 
 namespace simulator::neural_network::nn::view
 {
+    namespace
+    {
+        constexpr std::array<ui::shell::PageSpec, 2> pages{
+            ui::shell::PageSpec{ "Training Loss" },
+            ui::shell::PageSpec{ "Predictions" }
+        };
+
+        const ui::shell::ShellSpec shellSpec{
+            "Neural Network Simulator",
+            ui::Size{ 1200.0f, 700.0f },
+            350.0f,
+            pages,
+            "Configure network parameters and press Train"
+        };
+    }
+
     NnMainWindow::NnMainWindow(QWidget* parent)
         : QMainWindow(parent)
+        , formView(new ui::backend::qt::QtFormView{ this })
+        , shell(*this, shellSpec)
+        , lossView(new ui::backend::qt::QtPaintedWidget{ lossChart, this })
+        , predictionView(new ui::backend::qt::QtPaintedWidget{ predictionChart, this })
     {
-        setWindowTitle("Neural Network Simulator");
-        resize(1200, 700);
+        formView->Build(form.Model());
+        shell.SetPanel(formView);
 
-        auto* splitter = new QSplitter(Qt::Horizontal, this);
+        lossView->SetPanCursorEnabled(true);
+        predictionView->SetPanCursorEnabled(true);
 
-        configPanel = new NnConfigurationPanel(splitter);
-        configPanel->setMaximumWidth(350);
+        shell.SetPage(0, lossView);
+        shell.SetPage(1, predictionView);
 
-        tabWidget = new QTabWidget(splitter);
-
-        lossChart = new widgets::TimeSeriesChartWidget(tabWidget);
-        predictionChart = new widgets::TimeSeriesChartWidget(tabWidget);
-
-        tabWidget->addTab(lossChart, "Training Loss");
-        tabWidget->addTab(predictionChart, "Predictions");
-
-        splitter->addWidget(configPanel);
-        splitter->addWidget(tabWidget);
-        splitter->setStretchFactor(0, 0);
-        splitter->setStretchFactor(1, 1);
-
-        setCentralWidget(splitter);
-        statusBar()->showMessage("Configure network parameters and press Train");
-
-        connect(configPanel, &NnConfigurationPanel::ComputeRequested, this, &NnMainWindow::OnComputeRequested);
+        form.Model().onActionTriggered = [this](ui::model::ActionId)
+        {
+            OnComputeRequested();
+        };
     }
 
     void NnMainWindow::OnComputeRequested()
     {
-        auto config = configPanel->GetConfiguration();
+        auto config = form.BuildConfiguration();
 
         NnSimulator simulator;
         simulator.Configure(config);
         auto result = simulator.Run();
 
-        lossChart->SetTimeAxis(result.epochIndex);
-        lossChart->SetPanels({
+        const auto& theme = ui::theme::Current();
+
+        lossChart.SetAxisValues(result.epochIndex);
+        lossChart.SetPanels({
             {
                 "Training Loss (MSE)",
                 "Loss",
                 {
-                    { "MSE", QColor(231, 76, 60), result.lossHistory },
+                    { "MSE", theme.Series(1), result.lossHistory },
                 },
                 1,
             },
         });
 
-        predictionChart->SetTimeAxis(result.predictionInputs);
-        predictionChart->SetPanels({
+        predictionChart.SetAxisValues(result.predictionInputs);
+        predictionChart.SetPanels({
             {
                 "Target vs Prediction",
                 "Value",
                 {
-                    { "Target", QColor(41, 128, 185), result.predictionTargets },
-                    { "Prediction", QColor(231, 76, 60), result.predictionOutputs },
+                    { "Target", theme.Series(0), result.predictionTargets },
+                    { "Prediction", theme.Series(1), result.predictionOutputs },
                 },
                 1,
             },
         });
 
-        auto finalLoss = result.lossHistory.empty() ? 0.0f : result.lossHistory.back();
-        statusBar()->showMessage(QString("Training complete: %1 epochs, final loss = %2")
+        lossView->update();
+        predictionView->update();
+
+        const auto finalLoss = result.lossHistory.empty() ? 0.0f : result.lossHistory.back();
+
+        shell.SetStatus(QString("Training complete: %1 epochs, final loss = %2")
                 .arg(config.nn.epochs)
-                .arg(static_cast<double>(finalLoss), 0, 'g', 6));
+                .arg(static_cast<double>(finalLoss), 0, 'g', 6)
+                .toStdString());
     }
 }

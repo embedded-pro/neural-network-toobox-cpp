@@ -56,6 +56,21 @@ if (NEURAL_NETWORK_TOOLBOX_STANDALONE)
         endfunction()
     endif()
 
+    if (NEURAL_NETWORK_TOOLBOX_BUILD_SIMULATOR)
+        FetchContent_Declare(
+            ui
+            GIT_REPOSITORY https://github.com/embedded-pro/ui-cpp.git
+            GIT_TAG        main
+        )
+
+        # Set explicitly rather than inferred by ui-cpp from a consumer's simulator flag: e-foc
+        # configures its Qt tools on every host build, so there is no consumer flag that means
+        # the same thing everywhere.
+        set(UI_BUILD_QT_BACKEND On CACHE BOOL "" FORCE)
+
+        FetchContent_MakeAvailable(ui)
+    endif()
+
     FetchContent_Declare(
         numerical_toolbox
         GIT_REPOSITORY https://github.com/embedded-pro/numerical-toolbox-cpp.git

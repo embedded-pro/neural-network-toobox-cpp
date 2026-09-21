@@ -8,13 +8,13 @@ target_include_directories(neural_network.simulator.nn.view PUBLIC
 
 target_link_libraries(neural_network.simulator.nn.view PUBLIC
     neural_network.simulator.nn.application
-    neural_network.simulator.widgets
+    neural_network.simulator.shell
+    ui.charts
+    ui.backend.qt
     Qt6::Widgets
 )
 
 target_sources(neural_network.simulator.nn.view PRIVATE
-    NnConfigurationPanel.hpp
-    NnConfigurationPanel.cpp
     NnMainWindow.hpp
     NnMainWindow.cpp
 )
