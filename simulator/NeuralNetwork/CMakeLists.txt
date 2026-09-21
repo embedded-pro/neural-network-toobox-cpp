@@ -9,6 +9,7 @@ emil_build_for(neural_network.simulator.nn HOST All PREREQUISITE_BOOL NEURAL_NET
 target_link_libraries(neural_network.simulator.nn PRIVATE
     neural_network.simulator.nn.application
     neural_network.simulator.nn.view
+    neural_network.simulator.shell
 )
 
 target_sources(neural_network.simulator.nn PRIVATE

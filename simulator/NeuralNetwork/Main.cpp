@@ -1,12 +1,7 @@
 #include "simulator/NeuralNetwork/view/NnMainWindow.hpp"
-#include <QApplication>
+#include "simulator/shell/AppRunner.hpp"
 
 int main(int argc, char* argv[])
 {
-    QApplication app(argc, argv);
-
-    simulator::neural_network::nn::view::NnMainWindow window;
-    window.show();
-
-    return app.exec();
+    return simulator::shell::Run<simulator::neural_network::nn::view::NnMainWindow>(argc, argv, ui::theme::Light());
 }
