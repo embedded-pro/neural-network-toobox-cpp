@@ -63,9 +63,6 @@ if (NEURAL_NETWORK_TOOLBOX_STANDALONE)
             GIT_TAG        main
         )
 
-        # Set explicitly rather than inferred by ui-cpp from a consumer's simulator flag: e-foc
-        # configures its Qt tools on every host build, so there is no consumer flag that means
-        # the same thing everywhere.
         set(UI_BUILD_QT_BACKEND On CACHE BOOL "" FORCE)
 
         FetchContent_MakeAvailable(ui)
