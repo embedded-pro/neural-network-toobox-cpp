@@ -2,5 +2,5 @@
 
 namespace neural_network
 {
-    template class CategoricalCrossEntropy<float, 2>;
+    template class CategoricalCrossEntropy<float, 3>;
 }

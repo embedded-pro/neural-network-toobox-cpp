@@ -105,6 +105,6 @@ namespace neural_network
     }
 
 #ifdef NEURAL_NETWORK_TOOLBOX_COVERAGE_BUILD
-    extern template class CategoricalCrossEntropy<float, 2>;
+    extern template class CategoricalCrossEntropy<float, 3>;
 #endif
 }

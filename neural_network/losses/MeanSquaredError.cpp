@@ -2,5 +2,5 @@
 
 namespace neural_network
 {
-    template class MeanSquaredError<float, 2>;
+    template class MeanSquaredError<float, 4>;
 }

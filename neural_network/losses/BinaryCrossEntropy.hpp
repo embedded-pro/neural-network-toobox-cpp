@@ -77,6 +77,6 @@ namespace neural_network
     }
 
 #ifdef NEURAL_NETWORK_TOOLBOX_COVERAGE_BUILD
-    extern template class BinaryCrossEntropy<float, 2>;
+    extern template class BinaryCrossEntropy<float, 4>;
 #endif
 }
