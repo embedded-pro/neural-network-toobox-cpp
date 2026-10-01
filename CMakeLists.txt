@@ -32,7 +32,7 @@ if (NEURAL_NETWORK_TOOLBOX_STANDALONE)
     FetchContent_Declare(
         emil
         GIT_REPOSITORY https://github.com/embedded-pro/embedded-infra-lib.git
-        GIT_TAG        2848dbf163a6ebf159e29f7f4f73b96f7773d20d # Unreleased
+        GIT_TAG        b1056e80ab5376d7e4ee821c5b3c5680bc01f751 # Unreleased
     )
 
     set(EMIL_INCLUDE_MBEDTLS Off CACHE BOOL "" FORCE)
@@ -41,16 +41,7 @@ if (NEURAL_NETWORK_TOOLBOX_STANDALONE)
     set(EMIL_BUILD_ECHO_COMPILERS Off CACHE BOOL "" FORCE)
     set(EMIL_ENABLE_DOCKER_TOOLS Off CACHE BOOL "" FORCE)
 
-    if(DEFINED QEMU_MACHINE)
-        set(gtest_disable_pthreads ON CACHE BOOL "" FORCE)
-    endif()
-
     FetchContent_MakeAvailable(emil)
-
-    if(DEFINED QEMU_MACHINE)
-        function(emil_add_test target)
-        endfunction()
-    endif()
 
     if (NEURAL_NETWORK_TOOLBOX_BUILD_SIMULATOR)
         FetchContent_Declare(
@@ -115,10 +106,6 @@ if (NEURAL_NETWORK_TOOLBOX_BUILD_TESTS)
 endif()
 
 include(NeuralNetworkQemuHelpers)
-
-if(DEFINED QEMU_MACHINE)
-    add_subdirectory(platform/qemu)
-endif()
 
 add_subdirectory(neural_network)
 

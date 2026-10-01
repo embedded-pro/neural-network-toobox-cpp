@@ -253,7 +253,7 @@ Normal:   w = σ z,  z = √(−2 ln u1) cos(2π u2)   ⇒  z ~ N(0, 1)  (Box & 
   `target_sources(neural_network.initialization PRIVATE ...)`, `WeightInitialization.cpp` →
   `neural_network_add_coverage_sources(neural_network.initialization ...)`, `add_subdirectory(test)`.
   `test/CMakeLists.txt`: `neural_network.initialization_test` (`emil_build_for` on
-  `NEURAL_NETWORK_TOOLBOX_BUILD_TESTS`, `emil_add_test`, `neural_network_add_qemu_test`), linking
+  `NEURAL_NETWORK_TOOLBOX_BUILD_TESTS`, `emil_add_test`, `neural_network_link_qemu_runtime`), linking
   `gmock_main`, `neural_network.initialization`, `neural_network.layer`, `neural_network.activation`
   (for the Dense integration case). Register `add_subdirectory(initialization)` in
   `neural_network/CMakeLists.txt`, append `neural_network.initialization` to `NEURAL_NETWORK_TOOLBOX_INSTALL_TARGETS`

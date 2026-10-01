@@ -32,8 +32,10 @@ Read the spec's three files first (`implementation.md`, `tests.md`, `explanation
      the installed export set), and add a `doc/<module>/` folder.
 
 5. **QEMU wiring** — a new `neural_network.<module>_test` executable gets the same QEMU hook as the
-   existing test targets (the helper from `cmake/NeuralNetworkQemuHelpers.cmake`, called right after
-   `target_link_libraries` — copy it from a sibling `neural_network/<domain>/test/CMakeLists.txt`),
+   existing test targets: `neural_network_link_qemu_runtime(<target>)` from
+   `cmake/NeuralNetworkQemuHelpers.cmake`, called after `emil_add_test` (it links emil's `hal.qemu.*`
+   runtime and sets the ctest pass/fail patterns) — copy it from a sibling
+   `neural_network/<domain>/test/CMakeLists.txt`,
    and append `neural_network.<module>_test` to the `targets` list of both the
    `qemu-cortex-m4-RelWithDebInfo` and `qemu-cortex-m7-RelWithDebInfo` build presets in
    `CMakePresets.json` (those presets build only the listed targets, so an unlisted test is never built
