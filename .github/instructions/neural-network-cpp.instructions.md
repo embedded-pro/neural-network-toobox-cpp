@@ -10,6 +10,10 @@ resource-constrained embedded systems. It consumes the shared numerical primitiv
 `optimization`, `regularization`, …) from numerical-toolbox-cpp via FetchContent. Follow these
 rules strictly.
 
+Scope: library code (`neural_network/**`, including tests) and `platform/**`. `simulator/**` is
+host-only Qt tooling: heap containers, `std::string`/`QString` and Qt types are allowed there, and
+the float-only rule does not apply (see `AGENTS.md` › Scope).
+
 ## Memory — No Heap Allocation
 
 Never use `new`, `delete`, `malloc`, `free`, `std::make_unique`, or `std::make_shared`.
@@ -43,7 +47,12 @@ Every algorithm header MUST include:
 ```
 
 Apply `OPTIMIZE_FOR_SPEED` (from `numerical/math/CompilerOptimizations.hpp`) on hot-path methods:
-`Forward()`, `Backward()`, `Compute()`, `Update()`.
+`Forward()`, `Backward()`, `ForwardVector()`, `BackwardVector()`, `Cost()`, `Gradient()`.
+
+## Math Functions
+
+Call `math::Exp`, `math::Log`, `math::Tanh`, … from `numerical/math/Math.hpp` in production code —
+never `std::` cmath directly. Tests use `std::` directly.
 
 ## Naming
 
@@ -72,7 +81,8 @@ Apply `OPTIMIZE_FOR_SPEED` (from `numerical/math/CompilerOptimizations.hpp`) on 
 ## Documentation — MANDATORY
 
 For every algorithm added or modified, update the corresponding `doc/{domain}/{AlgorithmName}.md`
-file. Follow `doc/TEMPLATE.md` exactly. Documentation is **design-first**: cover mathematical
+file (or the section of the shared family doc, e.g. `doc/activation/Activation.md`) and its row in
+`doc/{domain}/README.md`. Follow `doc/TEMPLATE.md` exactly; `python3 scripts/validate-docs.py` must pass. Documentation is **design-first**: cover mathematical
 background, algorithm behaviour, complexity, pitfalls, and connections. Do **not** include
 implementation details, class names, template parameters, or usage code examples.
 

@@ -1,4 +1,7 @@
+#include "Semihosting.hpp"
+#include <array>
 #include <cstdint>
+#include <cstdlib>
 
 extern int main(int argc, char** argv);
 
@@ -7,7 +10,7 @@ extern "C"
     extern void Default_Handler_Forwarded();
     extern void HardwareInitialization();
     extern void __libc_init_array();
-    extern void _exit(int status) __attribute__((noreturn));
+    extern void initialise_monitor_handles();
 
     static void Default_Handler();
 
@@ -116,6 +119,48 @@ static void (*const g_pfnVectors[])(void) __attribute__((section(".isr_vector"),
 };
 #pragma GCC diagnostic pop
 
+namespace
+{
+    constexpr std::size_t maxCommandLineLength = 512;
+    constexpr std::size_t maxArguments = 16;
+
+    std::array<char, maxCommandLineLength> commandLine{};
+    std::array<char*, maxArguments + 1> arguments{};
+
+    int ParseCommandLine()
+    {
+        struct
+        {
+            char* buffer;
+            uint32_t length;
+        } block{ commandLine.data(), static_cast<uint32_t>(commandLine.size() - 1) };
+
+        if (platform::qemu::SemihostingCall(platform::qemu::SemihostingOperation::getCommandLine, &block) != 0u)
+            block.length = 0;
+
+        commandLine[block.length] = '\0';
+
+        int count = 0;
+        bool inArgument = false;
+        for (uint32_t i = 0; i < block.length; ++i)
+        {
+            if (commandLine[i] == ' ')
+            {
+                commandLine[i] = '\0';
+                inArgument = false;
+            }
+            else if (!inArgument && count < static_cast<int>(maxArguments))
+            {
+                arguments[count++] = &commandLine[i];
+                inArgument = true;
+            }
+        }
+
+        arguments[count] = nullptr;
+        return count;
+    }
+}
+
 extern "C" void Reset_Handler()
 {
     __asm volatile("cpsid i");
@@ -131,12 +176,15 @@ extern "C" void Reset_Handler()
     for (uint32_t* bss = &_sbss; bss < &_ebss;)
         *bss++ = 0U;
 
+    initialise_monitor_handles();
     __libc_init_array();
 
     __asm volatile("cpsie i");
 
     HardwareInitialization();
-    _exit(main(0, nullptr));
+
+    const int argc = ParseCommandLine();
+    std::exit(main(argc, arguments.data()));
 }
 
 static void Default_Handler()

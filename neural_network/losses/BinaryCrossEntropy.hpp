@@ -4,73 +4,76 @@
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
+#include "neural_network/losses/Loss.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Math.hpp"
-#include "neural_network/losses/Loss.hpp"
 #include "numerical/regularization/Regularization.hpp"
+#include <algorithm>
 
 namespace neural_network
 {
-    template<typename QNumberType, std::size_t NumberOfFeatures>
+    template<typename T, std::size_t NumberOfFeatures>
     class BinaryCrossEntropy
-        : public Loss<QNumberType, NumberOfFeatures>
+        : public Loss<T, NumberOfFeatures>
     {
     public:
-        using Vector = typename Loss<QNumberType, NumberOfFeatures>::Vector;
+        using Vector = typename Loss<T, NumberOfFeatures>::Vector;
 
-        BinaryCrossEntropy(const Vector& target, regularization::Regularization<QNumberType, NumberOfFeatures>& regularization);
-        QNumberType Cost(const Vector& parameters) override;
-        Vector Gradient(const Vector& parameters) override;
+        static constexpr T epsilon{ static_cast<T>(1e-7) };
+
+        BinaryCrossEntropy(const Vector& expectedTarget, regularization::Regularization<T, NumberOfFeatures>& regularizationTerm);
+
+        T Cost(const Vector& predictions) override;
+        Vector Gradient(const Vector& predictions) override;
 
     private:
+        static constexpr T inverseSize{ T{ 1 } / static_cast<T>(NumberOfFeatures) };
+
+        static T ClampProbability(T probability);
+
         Vector target;
-        regularization::Regularization<QNumberType, NumberOfFeatures>& regularization;
+        regularization::Regularization<T, NumberOfFeatures>& regularization;
     };
 
-    // Implementation //
-
-    template<typename QNumberType, std::size_t NumberOfFeatures>
-    BinaryCrossEntropy<QNumberType, NumberOfFeatures>::BinaryCrossEntropy(
-        const Vector& target,
-        regularization::Regularization<QNumberType, NumberOfFeatures>& regularization)
-        : target(target)
-        , regularization(regularization)
+    template<typename T, std::size_t NumberOfFeatures>
+    BinaryCrossEntropy<T, NumberOfFeatures>::BinaryCrossEntropy(const Vector& expectedTarget, regularization::Regularization<T, NumberOfFeatures>& regularizationTerm)
+        : target{ expectedTarget }
+        , regularization{ regularizationTerm }
     {}
 
-    template<typename QNumberType, std::size_t NumberOfFeatures>
-    OPTIMIZE_FOR_SPEED
-        QNumberType
-        BinaryCrossEntropy<QNumberType, NumberOfFeatures>::Cost(const Vector& parameters)
+    template<typename T, std::size_t NumberOfFeatures>
+    OPTIMIZE_FOR_SPEED T BinaryCrossEntropy<T, NumberOfFeatures>::Cost(const Vector& predictions)
     {
-        QNumberType cost = QNumberType(0.0f);
+        T sum{ 0 };
 
         for (std::size_t i = 0; i < NumberOfFeatures; ++i)
         {
-            QNumberType pred = std::max(std::min(parameters[i], QNumberType(0.9999f)), QNumberType(0.0001f));
-
-            cost += -(target[i] * math::Log(math::ToFloat(pred)) +
-                      (QNumberType(0.9999f) - target[i]) * math::Log(math::ToFloat(QNumberType(0.9999f) - pred)));
+            const T probability{ ClampProbability(predictions[i]) };
+            sum -= target[i] * math::Log(probability) + (T{ 1 } - target[i]) * math::Log(T{ 1 } - probability);
         }
 
-        return cost + regularization.Calculate(parameters);
+        return sum * inverseSize + regularization.Calculate(predictions);
     }
 
-    template<typename QNumberType, std::size_t NumberOfFeatures>
-    typename BinaryCrossEntropy<QNumberType, NumberOfFeatures>::Vector
-        OPTIMIZE_FOR_SPEED
-        BinaryCrossEntropy<QNumberType, NumberOfFeatures>::Gradient(const Vector& parameters)
+    template<typename T, std::size_t NumberOfFeatures>
+    OPTIMIZE_FOR_SPEED typename BinaryCrossEntropy<T, NumberOfFeatures>::Vector BinaryCrossEntropy<T, NumberOfFeatures>::Gradient(const Vector& predictions)
     {
-        Vector gradient;
-        auto regGradient = regularization.Gradient(parameters);
+        const Vector regularizationGradient{ regularization.Gradient(predictions) };
+        Vector gradient{};
 
         for (std::size_t i = 0; i < NumberOfFeatures; ++i)
         {
-            QNumberType pred = std::max(std::min(parameters[i], QNumberType(0.9999f)), QNumberType(0.0001f));
-
-            gradient[i] = (pred - target[i]) / (pred * (QNumberType(0.9999f) - pred)) + regGradient[i];
+            const T probability{ ClampProbability(predictions[i]) };
+            gradient[i] = (probability - target[i]) / (probability * (T{ 1 } - probability)) * inverseSize + regularizationGradient[i];
         }
 
         return gradient;
+    }
+
+    template<typename T, std::size_t NumberOfFeatures>
+    T BinaryCrossEntropy<T, NumberOfFeatures>::ClampProbability(T probability)
+    {
+        return std::clamp(probability, epsilon, T{ 1 } - epsilon);
     }
 
 #ifdef NEURAL_NETWORK_TOOLBOX_COVERAGE_BUILD

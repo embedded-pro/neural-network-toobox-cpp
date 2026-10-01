@@ -1,50 +1,41 @@
 #include "neural_network/activation/ReLU.hpp"
-#include "gmock/gmock.h"
+#include "neural_network/activation/test/ActivationFiniteDifference.hpp"
+#include "numerical/math/Tolerance.hpp"
+#include <array>
+#include <gtest/gtest.h>
 
 namespace
 {
-    template<typename T>
     class TestReLU
         : public ::testing::Test
     {
-    public:
-        neural_network::ReLU<T> activation;
+    protected:
+        neural_network::ReLU<float> activation;
     };
-
-    using TestedTypes = ::testing::Types<float, math::Q15, math::Q31>;
-    TYPED_TEST_SUITE(TestReLU, TestedTypes);
 }
 
-TYPED_TEST(TestReLU, ForwardPositiveInput)
+TEST_F(TestReLU, ForwardPassesPositiveAndZeroesNonPositive)
 {
-    EXPECT_EQ(this->activation.Forward(TypeParam(0.5f)), TypeParam(0.5f));
-    EXPECT_EQ(this->activation.Forward(TypeParam(0.999f)), TypeParam(0.999f));
+    EXPECT_NEAR(activation.Forward(2.5f), 2.5f, math::Tolerance<float>());
+    EXPECT_NEAR(activation.Forward(-1.5f), 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(activation.Forward(0.0f), 0.0f, math::Tolerance<float>());
 }
 
-TYPED_TEST(TestReLU, ForwardNegativeInput)
+TEST_F(TestReLU, BackwardIsExactlyOneForPositiveAndZeroOtherwise)
 {
-    EXPECT_EQ(this->activation.Forward(TypeParam(-0.5f)), TypeParam(0.0f));
-    EXPECT_EQ(this->activation.Forward(TypeParam(-0.999f)), TypeParam(0.0f));
+    EXPECT_FLOAT_EQ(activation.Backward(3.0f), 1.0f);
+    EXPECT_FLOAT_EQ(activation.Backward(-3.0f), 0.0f);
+    EXPECT_FLOAT_EQ(activation.Backward(0.0f), 0.0f);
 }
 
-TYPED_TEST(TestReLU, ForwardZeroInput)
+TEST_F(TestReLU, BackwardVectorMatchesFiniteDifference)
 {
-    EXPECT_EQ(this->activation.Forward(TypeParam(0.0f)), TypeParam(0.0f));
-}
+    const std::array<float, 4> input{ -2.0f, -0.5f, 0.7f, 1.5f };
+    const std::array<float, 4> upstream{ 0.3f, -1.2f, 0.8f, -0.4f };
 
-TYPED_TEST(TestReLU, BackwardPositiveInput)
-{
-    EXPECT_EQ(this->activation.Backward(TypeParam(0.5f)), TypeParam(0.9999f));
-    EXPECT_EQ(this->activation.Backward(TypeParam(0.999f)), TypeParam(0.9999f));
-}
+    const auto analytic{ neural_network::test_support::AnalyticGradient(activation, input, upstream) };
+    const auto numeric{ neural_network::test_support::CentralDifferenceGradient(activation, input, upstream) };
 
-TYPED_TEST(TestReLU, BackwardNegativeInput)
-{
-    EXPECT_EQ(this->activation.Backward(TypeParam(-0.5f)), TypeParam(0.0f));
-    EXPECT_EQ(this->activation.Backward(TypeParam(-0.999f)), TypeParam(0.0f));
-}
-
-TYPED_TEST(TestReLU, BackwardZeroInput)
-{
-    EXPECT_EQ(this->activation.Backward(TypeParam(0.0f)), TypeParam(0.0f));
+    for (std::size_t i = 0; i < input.size(); ++i)
+        EXPECT_NEAR(analytic[i], numeric[i], math::Tolerance<float>());
 }

@@ -1,50 +1,55 @@
 #include "neural_network/activation/Sigmoid.hpp"
-#include "gmock/gmock.h"
+#include "neural_network/activation/test/ActivationFiniteDifference.hpp"
+#include "numerical/math/Tolerance.hpp"
+#include <array>
+#include <gtest/gtest.h>
 
 namespace
 {
-    template<typename T>
     class TestSigmoid
         : public ::testing::Test
     {
-    public:
-        neural_network::Sigmoid<T> activation;
+    protected:
+        neural_network::Sigmoid<float> activation;
     };
-
-    using TestedTypes = ::testing::Types<float, math::Q15, math::Q31>;
-    TYPED_TEST_SUITE(TestSigmoid, TestedTypes);
 }
 
-TYPED_TEST(TestSigmoid, ForwardZeroInput)
+TEST_F(TestSigmoid, ForwardMatchesReferenceValues)
 {
-    EXPECT_NEAR(math::ToFloat(this->activation.Forward(TypeParam(0.0f))), 0.5f, 0.001f);
+    EXPECT_NEAR(activation.Forward(0.0f), 0.5f, math::Tolerance<float>());
+    EXPECT_NEAR(activation.Forward(2.0f), 0.8807971f, math::Tolerance<float>());
+    EXPECT_NEAR(activation.Forward(-2.0f), 0.1192029f, math::Tolerance<float>());
 }
 
-TYPED_TEST(TestSigmoid, ForwardPositiveInput)
+TEST_F(TestSigmoid, BackwardAtZeroIsExactlyOneQuarter)
 {
-    EXPECT_NEAR(math::ToFloat(this->activation.Forward(TypeParam(0.5f))), 0.622f, 0.001f);
-    EXPECT_NEAR(math::ToFloat(this->activation.Forward(TypeParam(0.999f))), 0.731f, 0.001f);
+    EXPECT_FLOAT_EQ(activation.Backward(0.0f), 0.25f);
 }
 
-TYPED_TEST(TestSigmoid, ForwardNegativeInput)
+TEST_F(TestSigmoid, BackwardMatchesFiniteDifference)
 {
-    EXPECT_NEAR(math::ToFloat(this->activation.Forward(TypeParam(-0.5f))), 0.378f, 0.001f);
-    EXPECT_NEAR(math::ToFloat(this->activation.Forward(TypeParam(-0.999f))), 0.269f, 0.001f);
+    for (const float x : { -3.0f, -0.5f, 1.0f, 4.0f })
+        EXPECT_NEAR(activation.Backward(x), neural_network::test_support::CentralDifference(activation, x), math::Tolerance<float>());
 }
 
-TYPED_TEST(TestSigmoid, BackwardZeroInput)
+TEST_F(TestSigmoid, BackwardVectorMatchesFiniteDifference)
 {
-    EXPECT_NEAR(math::ToFloat(this->activation.Backward(TypeParam(0.0f))), 0.25f, 0.001f);
+    const std::array<float, 4> input{ -3.0f, -0.5f, 1.0f, 4.0f };
+    const std::array<float, 4> upstream{ 0.3f, -1.2f, 0.8f, -0.4f };
+
+    const auto analytic{ neural_network::test_support::AnalyticGradient(activation, input, upstream) };
+    const auto numeric{ neural_network::test_support::CentralDifferenceGradient(activation, input, upstream) };
+
+    for (std::size_t i = 0; i < input.size(); ++i)
+        EXPECT_NEAR(analytic[i], numeric[i], math::Tolerance<float>());
 }
 
-TYPED_TEST(TestSigmoid, BackwardPositiveInput)
+TEST_F(TestSigmoid, SaturatesWithoutOverflowOrNegativeDerivative)
 {
-    EXPECT_NEAR(math::ToFloat(this->activation.Backward(TypeParam(0.5f))), 0.235f, 0.001f);
-    EXPECT_NEAR(math::ToFloat(this->activation.Backward(TypeParam(0.999f))), 0.197f, 0.001f);
-}
-
-TYPED_TEST(TestSigmoid, BackwardNegativeInput)
-{
-    EXPECT_NEAR(math::ToFloat(this->activation.Backward(TypeParam(-0.5f))), 0.235f, 0.001f);
-    EXPECT_NEAR(math::ToFloat(this->activation.Backward(TypeParam(-0.999f))), 0.197f, 0.001f);
+    EXPECT_NEAR(activation.Forward(50.0f), 1.0f, math::Tolerance<float>());
+    EXPECT_NEAR(activation.Forward(-50.0f), 0.0f, math::Tolerance<float>());
+    EXPECT_GE(activation.Backward(50.0f), 0.0f);
+    EXPECT_GE(activation.Backward(-50.0f), 0.0f);
+    EXPECT_NEAR(activation.Backward(50.0f), 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(activation.Backward(-50.0f), 0.0f, math::Tolerance<float>());
 }

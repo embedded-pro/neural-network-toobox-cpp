@@ -5,7 +5,8 @@ Chapter and section ordering is *derived* from the existing README tables, so
 the booklet stays in sync with the library automatically:
 
   1. Category order comes from the Documentation table in the top-level README.md
-     (each `[Name](doc/<domain>/README.md)` link, in order).
+     (each `[Name](doc/<domain>/README.md)` link, in order). A link to the category
+     index `doc/README.md` expands to the `<domain>/README.md` links it lists.
   2. Algorithm order within a category comes from that category's
      `doc/<domain>/README.md` table (each `[Title](File.md)` link, in order).
   3. Any doc/**/*.md not reached by the tables (excluding README.md, TEMPLATE.md
@@ -54,18 +55,38 @@ IMAGE_RE = re.compile(r"(!\[[^\]]*\]\()([^)]+)(\))")
 
 
 def category_order() -> list[pathlib.Path]:
-    """Return category doc dirs in the order the top-level README lists them."""
+    """Return category doc dirs in the order the top-level README lists them.
+
+    A link to doc/README.md (the category index) expands to the domain READMEs it
+    lists, in order.
+    """
     text = README.read_text(encoding="utf-8")
     dirs: list[pathlib.Path] = []
     seen: set[pathlib.Path] = set()
     for _, target in LINK_RE.findall(text):
         target = target.split("#", 1)[0].strip()
-        if not target.startswith("doc/") or not target.endswith("/README.md"):
+        if not target.startswith("doc/") or not target.endswith("README.md"):
             continue
         cat = (ROOT / target).resolve().parent
-        if cat not in seen and cat.is_dir():
-            seen.add(cat)
-            dirs.append(cat)
+        cats = index_categories() if cat == DOC_ROOT else [cat]
+        for cat in cats:
+            if cat not in seen and cat.is_dir():
+                seen.add(cat)
+                dirs.append(cat)
+    return dirs
+
+
+def index_categories() -> list[pathlib.Path]:
+    """Domain dirs linked from doc/README.md as `<domain>/README.md`, in order."""
+    index = DOC_ROOT / "README.md"
+    if not index.is_file():
+        return []
+    dirs: list[pathlib.Path] = []
+    for _, target in LINK_RE.findall(index.read_text(encoding="utf-8")):
+        target = target.split("#", 1)[0].strip()
+        if target.startswith(("http://", "https://", "../")) or not target.endswith("/README.md"):
+            continue
+        dirs.append((DOC_ROOT / target).resolve().parent)
     return dirs
 
 
@@ -104,6 +125,8 @@ def all_docs() -> list[pathlib.Path]:
 
 
 def title_of(path: pathlib.Path, fallback: str) -> str:
+    if not path.is_file():
+        return fallback
     match = H1_RE.search(path.read_text(encoding="utf-8"))
     return match.group(1).strip() if match else fallback
 
@@ -145,7 +168,7 @@ def split_references(text: str) -> tuple[str, list[str]]:
 
 
 def demote_and_rewrite(text: str, doc: pathlib.Path) -> str:
-    """Demote every heading one level and make image paths absolute.
+    """Demote every heading one level and make image paths repository-relative.
 
     Skips heading/image edits inside fenced code blocks.
     """
@@ -162,17 +185,33 @@ def demote_and_rewrite(text: str, doc: pathlib.Path) -> str:
             continue
         if HEADING_RE.match(line):
             line = "#" + line
-        line = IMAGE_RE.sub(lambda m: _abs_image(m, doc), line)
+        line = IMAGE_RE.sub(lambda m: _root_image(m, doc), line)
         out.append(line)
     return "\n".join(out)
 
 
-def _abs_image(match: re.Match, doc: pathlib.Path) -> str:
+def _root_image(match: re.Match, doc: pathlib.Path) -> str:
+    """Rewrite a doc-relative image path relative to ROOT (Pandoc runs with cwd=ROOT)."""
     target = match.group(2).strip()
     if target.startswith(("http://", "https://", "/")):
         return match.group(0)
     resolved = (doc.parent / target).resolve()
-    return f"{match.group(1)}{resolved}{match.group(3)}"
+    try:
+        resolved = resolved.relative_to(ROOT)
+    except ValueError:
+        pass
+    return f"{match.group(1)}{resolved.as_posix()}{match.group(3)}"
+
+
+def copy_images(book_md: pathlib.Path) -> None:
+    """Copy the images book.md references next to index.html, keeping their paths."""
+    for _, target, _ in IMAGE_RE.findall(book_md.read_text(encoding="utf-8")):
+        source = ROOT / target
+        if target.startswith(("http://", "https://", "/")) or not source.is_file():
+            continue
+        destination = BUILD_DIR / target
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, destination)
 
 
 def normalize_ref(line: str) -> str:
@@ -286,6 +325,7 @@ def render_pdf(book_md: pathlib.Path) -> int:
 def render_html(book_md: pathlib.Path) -> int:
     out = BUILD_DIR / "index.html"
     shutil.copyfile(BOOKLET_ASSETS / "book.css", BUILD_DIR / "book.css")
+    copy_images(book_md)
     cmd = pandoc_common(book_md) + [
         "--standalone",
         f"--mathjax={MATHJAX_CDN}",

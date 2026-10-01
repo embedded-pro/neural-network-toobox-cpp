@@ -5,7 +5,6 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
 endif()
 
 option(CMAKE_COMPILE_WARNING_AS_ERROR "Enable warnings-as-error" On)
-option(NEURAL_NETWORK_TOOLBOX_INCLUDE_DEFAULT_INIT "Include default initialization code; turn off when providing custom initialization" On)
 option(NEURAL_NETWORK_TOOLBOX_BUILD_SIMULATOR "Enable build of the Qt simulator applications" Off)
 option(NEURAL_NETWORK_TOOLBOX_BUILD_TESTS "Enable build of the tests" Off)
 option(NEURAL_NETWORK_TOOLBOX_ENABLE_OPTIMIZATIONS "Enable compiler optimizations for numerical routines" On)
@@ -15,10 +14,12 @@ if (NEURAL_NETWORK_TOOLBOX_BUILD_TESTS)
     # Library needs to see that test utilities need to be built.
     set(BUILD_TESTING On)
     add_definitions(-DNEURAL_NETWORK_TOOLBOX_ENABLE_ASSERTIONS=1)
+    add_definitions(-DNUMERICAL_TOOLBOX_ENABLE_ASSERTIONS=1)
 endif()
 
 if (NEURAL_NETWORK_TOOLBOX_ENABLE_OPTIMIZATIONS)
     add_definitions(-DNeuralNetworkToolbox_ENABLE_OPTIMIZATIONS=1)
+    add_definitions(-DNumericalToolbox_ENABLE_OPTIMIZATIONS=1)
 endif()
 
 if (EMIL_ENABLE_COVERAGE)
@@ -60,24 +61,23 @@ if (NEURAL_NETWORK_TOOLBOX_STANDALONE)
         FetchContent_Declare(
             ui
             GIT_REPOSITORY https://github.com/embedded-pro/ui-cpp.git
-            GIT_TAG        main
+            GIT_TAG        13406639f7ffb6ca8811865b0a8b35034f46ebaf # Unreleased
         )
 
-        # Set explicitly rather than inferred by ui-cpp from a consumer's simulator flag: e-foc
-        # configures its Qt tools on every host build, so there is no consumer flag that means
-        # the same thing everywhere.
         set(UI_BUILD_QT_BACKEND On CACHE BOOL "" FORCE)
-
-        FetchContent_MakeAvailable(ui)
     endif()
 
     FetchContent_Declare(
         numerical_toolbox
         GIT_REPOSITORY https://github.com/embedded-pro/numerical-toolbox-cpp.git
-        GIT_TAG        main
+        GIT_TAG        1225b3c422beab93e0ff8fd7231f8d7e087f6da4 # Unreleased (v3.1.2+8)
     )
 
     FetchContent_MakeAvailable(numerical_toolbox)
+
+    if (NEURAL_NETWORK_TOOLBOX_BUILD_SIMULATOR)
+        FetchContent_MakeAvailable(ui)
+    endif()
 endif()
 
 project(neural-network-toolbox LANGUAGES C CXX ASM VERSION 1.0.0) # x-release-please-version
@@ -101,6 +101,9 @@ endif()
 
 set_directory_properties(PROPERTY USE_FOLDERS ON)
 
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
 # When building neural-network-toolbox by itself do not exclude any targets from all
 # Libraries will only be excluded from all when neural-network-toolbox is consumed as a dependency.
 if (NEURAL_NETWORK_TOOLBOX_STANDALONE)
@@ -123,7 +126,6 @@ endif()
 add_subdirectory(neural_network)
 
 if (NEURAL_NETWORK_TOOLBOX_BUILD_SIMULATOR)
-    find_package(Qt6 REQUIRED COMPONENTS Widgets)
     add_subdirectory(simulator)
 endif()
 
@@ -134,6 +136,69 @@ emil_coverage_targets(DIRECTORIES .)
 if (NEURAL_NETWORK_TOOLBOX_STANDALONE)
     emil_folderize_all_targets()
 endif()
+
+set(NEURAL_NETWORK_TOOLBOX_INSTALL_TARGETS
+    neural_network.activation
+    neural_network.layer
+    neural_network.losses
+    neural_network.model
+)
+
+install(TARGETS ${NEURAL_NETWORK_TOOLBOX_INSTALL_TARGETS}
+    EXPORT NeuralNetworkToolboxTargets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/neural_network
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    FILES_MATCHING
+    PATTERN "*.hpp"
+    PATTERN "test" EXCLUDE
+    PATTERN "test_doubles" EXCLUDE
+)
+
+if (NEURAL_NETWORK_TOOLBOX_STANDALONE AND DEFINED emil_SOURCE_DIR)
+    install(DIRECTORY ${emil_SOURCE_DIR}/infra
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        FILES_MATCHING
+        PATTERN "*.hpp"
+        PATTERN "test" EXCLUDE
+        PATTERN "test_doubles" EXCLUDE
+    )
+endif()
+
+install(EXPORT NeuralNetworkToolboxTargets
+    FILE NeuralNetworkToolboxTargets.cmake
+    NAMESPACE neural-network-toolbox::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/NeuralNetworkToolbox
+)
+
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/NeuralNetworkToolboxConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/NeuralNetworkToolboxConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/NeuralNetworkToolbox
+)
+
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/NeuralNetworkToolboxConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/NeuralNetworkToolboxConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/NeuralNetworkToolboxConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/NeuralNetworkToolbox
+)
+
+install(FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE
+    ${CMAKE_CURRENT_SOURCE_DIR}/README.md
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/neural-network-toolbox
+)
 
 if (NOT TARGET package)
     set(CPACK_GENERATOR "ZIP;TGZ")

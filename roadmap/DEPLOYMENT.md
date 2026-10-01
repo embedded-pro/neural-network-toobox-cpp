@@ -8,11 +8,14 @@ Read the spec's three files first (`implementation.md`, `tests.md`, `explanation
      `#include "numerical/math/CompilerOptimizations.hpp"`.
    - `template<typename T[, std::size_t sizes...]>` with
      `static_assert(std::is_floating_point_v<T>, "<Name> supports floating-point types");`.
-   - Implement per `implementation.md`; `OPTIMIZE_FOR_SPEED` on the hot path(s).
+   - Implement per `implementation.md`; `OPTIMIZE_FOR_SPEED` on the hot path(s)
+     (`Forward/Backward/ForwardVector/BackwardVector/Cost/Gradient`). Transcendentals via
+     `math::` from `numerical/math/Math.hpp`.
    - Bottom: `#ifdef NEURAL_NETWORK_TOOLBOX_COVERAGE_BUILD` / `extern template class <Name><float, ...>;` / `#endif`.
 
 2. **Coverage** `neural_network/<domain>/<Name>.cpp`
-   - Include the header; `namespace <ns> { template class <Name><float, ...>; }`.
+   - Include the header; `namespace neural_network { template class <Name><float, ...>; }`.
+   - Float only — the same `<float, ...>` arguments as the `extern template` in step 1.
 
 3. **Test** `neural_network/<domain>/test/Test<Name>.cpp`
    - Per `tests.md`. `TEST_F` on `float`; `StrictMock` only; fixture in an anonymous namespace.
@@ -23,19 +26,29 @@ Read the spec's three files first (`implementation.md`, `tests.md`, `explanation
    - Add `.hpp` to `target_sources(...)`, `.cpp` to `neural_network_add_coverage_sources(...)`,
      `Test<Name>.cpp` to the `_test` target's `target_sources`.
    - New module: create `neural_network/<module>/CMakeLists.txt` via
-     `neural_network_add_header_library(...)`, add a `test/` subdir, register it in the parent
-     `CMakeLists.txt`, and add a `doc/<module>/` folder.
+     `neural_network_add_header_library(...)` and `neural_network_add_coverage_sources(...)`, add a
+     `test/` subdir, register it in the parent `CMakeLists.txt`, and add a `doc/<module>/` folder.
 
-5. **Doc** `doc/<domain>/<Name>.md` per `doc/TEMPLATE.md` (design-first; no code/class names/usage).
-   Add its row to `doc/<domain>/README.md` and to `README.md`'s Documentation table — these README
-   tables are the booklet's ordering source, so the booklet (`scripts/build-booklet.py`) regenerates
-   automatically in CI; never edit the booklet by hand.
+5. **QEMU wiring** — a new `neural_network.<module>_test` executable gets the same QEMU hook as the
+   existing test targets (the helper from `cmake/NeuralNetworkQemuHelpers.cmake`, called right after
+   `target_link_libraries` — copy it from a sibling `neural_network/<domain>/test/CMakeLists.txt`),
+   so it also runs under the `qemu-cortex-m4` / `qemu-cortex-m7` presets. Tests added to an existing
+   target need nothing extra.
 
-6. **Build & test**, fix until green:
+6. **Doc** `doc/<domain>/<Name>.md` per `doc/TEMPLATE.md` (design-first; no code/class names/usage)
+   — or a new section in the domain's shared family doc (e.g. `doc/activation/Activation.md`).
+   Add its row to `doc/<domain>/README.md`; a new domain also gets a row in the `doc/README.md`
+   category index (which `README.md`'s Documentation table links). These README tables are the
+   booklet's ordering source, so the booklet (`scripts/build-booklet.py`) regenerates automatically
+   in CI; never edit the booklet by hand. `python3 scripts/validate-docs.py` must pass.
+
+7. **Build & test**, fix until green:
    `cmake --preset host && cmake --build --preset host && ctest --preset host`
-   (scope to the target/test where possible).
+   (needs Qt6 for the simulator; without it use `host-single-Debug` for all three steps; scope to the
+   target/test where possible). Optionally `cmake --preset coverage && cmake --build --preset coverage
+   && ctest --preset coverage` to confirm the coverage TU builds.
 
-7. **Remove roadmap spec** — delete the entire `roadmap/<domain>/<Name>/` directory once all tests are green.
+8. **Remove roadmap spec** — delete the entire `roadmap/<domain>/<Name>/` directory once all tests are green.
 
 **Report**: the file paths created/edited/deleted + the test result. Nothing else.
 

@@ -30,7 +30,9 @@
       "settings": {
         "editor.formatOnSave": true,
         "files.insertFinalNewline": true,
-        "gcovViewer.buildDirectories": ["${workspaceFolder}/build/coverage"],
+        "gcovViewer.buildDirectories": [
+          "${workspaceFolder}/build/coverage"
+        ],
         "gcovViewer.highlightMissedLines": true
       }
     }

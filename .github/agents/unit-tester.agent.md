@@ -18,15 +18,15 @@ You add or extend the unit tests for ONE algorithm at a time in
 1. Read the target algorithm's `neural_network/<domain>/<Name>.hpp` public interface and its
    `doc/<domain>/<Name>.md`. Read the existing `neural_network/<domain>/test/Test<Name>.cpp` if present.
 2. Look up the algorithm's **family** in `TESTING.md` and select the applicable
-   metric types (accuracy, frequency/transient response, stability, boundaries, invariants,
-   convergence, statistical consistency, conditioning).
+   metric types (M1 accuracy, M5 convergence, M6 boundaries, M7 invariants).
 3. Author/extend `neural_network/<domain>/test/Test<Name>.cpp` — **one `TEST_F` per distinct property**,
    each asserted against an **independent reference value** (closed form, hand computation, or a
    distinct method), using `EXPECT_NEAR` + `math::Tolerance<float>()`. Fixture + aliases in an
    anonymous namespace; `TEST_F` macros outside it.
 4. If the test source is new, wire it into `neural_network/<domain>/test/CMakeLists.txt`.
 5. Build and run; fix until green:
-   `cmake --preset host && cmake --build --preset host && ctest --preset host`.
+   `cmake --preset host && cmake --build --preset host && ctest --preset host`
+   (no Qt6: `host-single-Debug` for all three).
 6. Report file paths + pass/fail. Nothing else.
 
 ## Hard rules

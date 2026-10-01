@@ -16,10 +16,10 @@ Canonical rules: `AGENTS.md`. Implement exactly what's asked — nothing more.
 2. Implement one file at a time per all `AGENTS.md` rules.
 3. Write tests first: `TEST_F` on `float`, `StrictMock` only, no heap, Arrange/Act/Assert.
 4. Update `CMakeLists.txt` (new files), `doc/{domain}/{Name}.md` (every algorithm change),
-   and `doc/{domain}/README.md` (new algorithms only).
+   and `doc/{domain}/README.md` (new algorithms only); `python3 scripts/validate-docs.py` must pass.
    If a new simulator: add a `cppdbg` entry to `.vscode/launch.json` before `"Linux Debug"`.
 5. Build: `cmake --preset host && cmake --build --preset host`
-   Test: `ctest --preset host`. Fix until green.
+   Test: `ctest --preset host`. Fix until green. (No Qt6: use `host-single-Debug` for all three.)
 6. Report file paths + pass/fail. Nothing else.
 
 ## Memory — quick reference
@@ -42,7 +42,8 @@ extern template class Algorithm<float, N>;
 Matching `.cpp`: `template class Algorithm<float, N>;` — add via `neural_network_add_coverage_sources()`.
 
 ## Namespace convention
-Active filters (Kalman family): `namespace filters` — **not** `namespace filters::active`.
+Everything in `namespace neural_network`. Shared primitives keep their upstream namespaces
+(`math`, `optimization`, `regularization`) from numerical-toolbox-cpp.
 
 ## What NOT to do
 - No extra features, unrelated refactors, docstrings, or one-off abstractions.

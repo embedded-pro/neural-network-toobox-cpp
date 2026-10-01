@@ -7,8 +7,10 @@ target_include_directories(neural_network.simulator.shell INTERFACE
 
 target_sources(neural_network.simulator.shell INTERFACE
     AppRunner.hpp
+    Guard.hpp
 )
 
 target_link_libraries(neural_network.simulator.shell INTERFACE
+    ui.shell
     ui.backend.qt
 )

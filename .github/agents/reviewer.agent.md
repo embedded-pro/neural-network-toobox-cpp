@@ -42,11 +42,10 @@ End with totals + verdict: APPROVE / REQUEST CHANGES.
 
 **Embedded optimizations (WARNING)**
 - [ ] `#pragma GCC optimize("O3","fast-math")` after `#pragma once` in algorithm headers.
-- [ ] `OPTIMIZE_FOR_SPEED` on `Filter/Compute/Update/Solve/Step`.
+- [ ] `OPTIMIZE_FOR_SPEED` on `Forward/Backward/ForwardVector/BackwardVector/Cost/Gradient`.
 
 **Namespaces (WARNING)**
-- [ ] Active filters (Kalman family): `namespace filters` — **not** `namespace filters::active`.
-- [ ] Passive filters: `namespace filters::passive`. Window functions: `namespace windowing`.
+- [ ] Everything in `namespace neural_network`; shared primitives keep `math`/`optimization`/`regularization`.
 
 **Style (WARNING)**
 - [ ] Allman braces, brace-init `{}`, PascalCase types/methods, camelCase members.
@@ -67,6 +66,6 @@ End with totals + verdict: APPROVE / REQUEST CHANGES.
 
 **Docs (CRITICAL)**
 - [ ] `doc/{domain}/{Name}.md` updated per `doc/TEMPLATE.md`. No class names, no code examples.
-- [ ] `doc/{domain}/README.md` updated if a new algorithm was added.
+- [ ] `doc/{domain}/README.md` updated if a new algorithm was added; `python3 scripts/validate-docs.py` passes.
 
 **Terse**: report file paths + CRITICAL/WARNING counts. Don't narrate; don't re-read files.

@@ -16,6 +16,13 @@ namespace
         return *reinterpret_cast<volatile const uint32_t*>(addr);
     }
 
+    uint32_t ActiveException()
+    {
+        uint32_t ipsr;
+        __asm volatile("mrs %0, ipsr" : "=r"(ipsr));
+        return ipsr & 0x1FFu;
+    }
+
     bool IsCodeAddr(uint32_t v)
     {
         return (v & 1u) != 0u && (v & ~1u) < kFlashEnd;
@@ -89,7 +96,7 @@ void FaultHandler::Dispatch(uint32_t* sp, uint32_t exLr)
     const uint32_t mmfar = ScbReg(kMmfar);
     const uint32_t bfar = ScbReg(kBfar);
 
-    const uint32_t ipsr = xpsr & 0x1FFu;
+    const uint32_t ipsr = ActiveException();
     const uint32_t mmfsr = cfsr & 0xFFu;
     const uint32_t bfsr = (cfsr >> 8) & 0xFFu;
     const uint32_t ufsr = cfsr >> 16;
@@ -114,7 +121,7 @@ void FaultHandler::Dispatch(uint32_t* sp, uint32_t exLr)
             break;
     }
 
-    printf("\n\n=== FAULT: %s ===\n", faultName);
+    printf("\n\n=== FAULT: %s (exception %u) ===\n", faultName, (unsigned)ipsr);
 
     printf("PC   0x%08x  LR   0x%08x  SP   0x%08x\n",
         (unsigned)pc,
@@ -192,5 +199,6 @@ void FaultHandler::Dispatch(uint32_t* sp, uint32_t exLr)
     }
 
     printf("==================\n\n");
+    fflush(stdout);
     _exit(1);
 }

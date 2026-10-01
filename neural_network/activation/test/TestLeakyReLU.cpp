@@ -1,58 +1,46 @@
 #include "neural_network/activation/LeakyReLU.hpp"
-#include "gmock/gmock.h"
+#include "neural_network/activation/test/ActivationFiniteDifference.hpp"
+#include "numerical/math/Tolerance.hpp"
+#include <array>
+#include <gtest/gtest.h>
 
 namespace
 {
-    template<typename T>
     class TestLeakyReLU
         : public ::testing::Test
     {
-    public:
-        neural_network::LeakyReLU<T> activation;
+    protected:
+        neural_network::LeakyReLU<float> activation{ 0.2f };
     };
-
-    using TestedTypes = ::testing::Types<float, math::Q15, math::Q31>;
-    TYPED_TEST_SUITE(TestLeakyReLU, TestedTypes);
 }
 
-TYPED_TEST(TestLeakyReLU, ForwardPositiveInput)
+TEST_F(TestLeakyReLU, ForwardScalesNegativeInputBySlope)
 {
-    EXPECT_EQ(this->activation.Forward(TypeParam(0.5f)), TypeParam(0.5f));
-    EXPECT_EQ(this->activation.Forward(TypeParam(0.999f)), TypeParam(0.999f));
+    EXPECT_NEAR(activation.Forward(3.0f), 3.0f, math::Tolerance<float>());
+    EXPECT_NEAR(activation.Forward(-2.0f), -0.4f, math::Tolerance<float>());
 }
 
-TYPED_TEST(TestLeakyReLU, ForwardNegativeInput)
+TEST_F(TestLeakyReLU, BackwardIsExactlyOneForPositiveAndSlopeOtherwise)
 {
-    const auto alpha = TypeParam(0.01f);
-    neural_network::LeakyReLU<TypeParam> activation(alpha);
-
-    EXPECT_EQ(activation.Forward(TypeParam(-0.5f)), TypeParam(-0.005f));
+    EXPECT_FLOAT_EQ(activation.Backward(1.5f), 1.0f);
+    EXPECT_FLOAT_EQ(activation.Backward(-1.5f), 0.2f);
 }
 
-TYPED_TEST(TestLeakyReLU, ForwardZeroInput)
+TEST_F(TestLeakyReLU, DefaultSlopeIsOneHundredth)
 {
-    EXPECT_EQ(this->activation.Forward(TypeParam(0.0f)), TypeParam(0.0f));
+    const neural_network::LeakyReLU<float> defaultActivation;
+
+    EXPECT_NEAR(defaultActivation.Forward(-1.0f), -0.01f, math::Tolerance<float>());
 }
 
-TYPED_TEST(TestLeakyReLU, BackwardPositiveInput)
+TEST_F(TestLeakyReLU, BackwardVectorMatchesFiniteDifference)
 {
-    EXPECT_EQ(this->activation.Backward(TypeParam(0.5f)), TypeParam(0.9999f));
-    EXPECT_EQ(this->activation.Backward(TypeParam(0.999f)), TypeParam(0.9999f));
-}
+    const std::array<float, 4> input{ -2.0f, -0.5f, 0.7f, 1.5f };
+    const std::array<float, 4> upstream{ 0.3f, -1.2f, 0.8f, -0.4f };
 
-TYPED_TEST(TestLeakyReLU, BackwardNegativeInput)
-{
-    const auto alpha = TypeParam(0.01f);
-    neural_network::LeakyReLU<TypeParam> activation(alpha);
+    const auto analytic{ neural_network::test_support::AnalyticGradient(activation, input, upstream) };
+    const auto numeric{ neural_network::test_support::CentralDifferenceGradient(activation, input, upstream) };
 
-    EXPECT_EQ(activation.Backward(TypeParam(-0.5f)), alpha);
-    EXPECT_EQ(activation.Backward(TypeParam(-0.999f)), alpha);
-}
-
-TYPED_TEST(TestLeakyReLU, BackwardZeroInput)
-{
-    const auto alpha = TypeParam(0.01f);
-    neural_network::LeakyReLU<TypeParam> activation(alpha);
-
-    EXPECT_EQ(activation.Backward(TypeParam(0.0f)), alpha);
+    for (std::size_t i = 0; i < input.size(); ++i)
+        EXPECT_NEAR(analytic[i], numeric[i], math::Tolerance<float>());
 }

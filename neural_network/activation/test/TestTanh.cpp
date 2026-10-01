@@ -1,76 +1,53 @@
 #include "neural_network/activation/Tanh.hpp"
-#include "gmock/gmock.h"
+#include "neural_network/activation/test/ActivationFiniteDifference.hpp"
+#include "numerical/math/Tolerance.hpp"
+#include <array>
+#include <gtest/gtest.h>
 
 namespace
 {
-    template<typename T>
     class TestTanh
         : public ::testing::Test
     {
-    public:
-        neural_network::Tanh<T> activation;
+    protected:
+        neural_network::Tanh<float> activation;
     };
-
-    using TestedTypes = ::testing::Types<float, math::Q15, math::Q31>;
-    TYPED_TEST_SUITE(TestTanh, TestedTypes);
 }
 
-TYPED_TEST(TestTanh, ForwardZeroInput)
+TEST_F(TestTanh, ForwardMatchesReferenceValues)
 {
-    EXPECT_NEAR(math::ToFloat(this->activation.Forward(TypeParam(0.0f))), 0.0f, 0.001f);
+    EXPECT_NEAR(activation.Forward(0.5f), 0.4621172f, math::Tolerance<float>());
+    EXPECT_NEAR(activation.Forward(-1.0f), -0.7615942f, math::Tolerance<float>());
 }
 
-TYPED_TEST(TestTanh, ForwardSmallPositiveInput)
+TEST_F(TestTanh, BackwardAtZeroIsExactlyOne)
 {
-    EXPECT_NEAR(math::ToFloat(this->activation.Forward(TypeParam(0.5f))), 0.462f, 0.001f);
-    EXPECT_NEAR(math::ToFloat(this->activation.Forward(TypeParam(0.9f))), 0.716f, 0.001f);
+    EXPECT_FLOAT_EQ(activation.Backward(0.0f), 1.0f);
 }
 
-TYPED_TEST(TestTanh, ForwardSmallNegativeInput)
+TEST_F(TestTanh, BackwardMatchesFiniteDifference)
 {
-    EXPECT_NEAR(math::ToFloat(this->activation.Forward(TypeParam(-0.5f))), -0.462f, 0.001f);
-    EXPECT_NEAR(math::ToFloat(this->activation.Forward(TypeParam(-0.9f))), -0.716f, 0.001f);
+    for (const float x : { -2.0f, -0.3f, 0.7f, 1.5f })
+        EXPECT_NEAR(activation.Backward(x), neural_network::test_support::CentralDifference(activation, x), math::Tolerance<float>());
 }
 
-TYPED_TEST(TestTanh, BackwardZeroInput)
+TEST_F(TestTanh, BackwardVectorMatchesFiniteDifference)
 {
-    EXPECT_NEAR(math::ToFloat(this->activation.Backward(TypeParam(0.0f))), 1.0f, 0.001f);
+    const std::array<float, 4> input{ -2.0f, -0.3f, 0.7f, 1.5f };
+    const std::array<float, 4> upstream{ 0.3f, -1.2f, 0.8f, -0.4f };
+
+    const auto analytic{ neural_network::test_support::AnalyticGradient(activation, input, upstream) };
+    const auto numeric{ neural_network::test_support::CentralDifferenceGradient(activation, input, upstream) };
+
+    for (std::size_t i = 0; i < input.size(); ++i)
+        EXPECT_NEAR(analytic[i], numeric[i], math::Tolerance<float>());
 }
 
-TYPED_TEST(TestTanh, BackwardSmallPositiveInput)
+TEST_F(TestTanh, SaturatesWithoutNegativeDerivative)
 {
-    TypeParam x1 = TypeParam(0.5f);
-    TypeParam y1 = this->activation.Forward(x1);
-    EXPECT_NEAR(math::ToFloat(this->activation.Backward(x1)),
-        1.0f - math::ToFloat(y1) * math::ToFloat(y1), 0.001f);
-
-    TypeParam x2 = TypeParam(0.8f);
-    TypeParam y2 = this->activation.Forward(x2);
-    EXPECT_NEAR(math::ToFloat(this->activation.Backward(x2)),
-        1.0f - math::ToFloat(y2) * math::ToFloat(y2), 0.001f);
-}
-
-TYPED_TEST(TestTanh, BackwardSmallNegativeInput)
-{
-    TypeParam x1 = TypeParam(-0.5f);
-    TypeParam y1 = this->activation.Forward(x1);
-    EXPECT_NEAR(math::ToFloat(this->activation.Backward(x1)),
-        1.0f - math::ToFloat(y1) * math::ToFloat(y1), 0.001f);
-
-    TypeParam x2 = TypeParam(-0.8f);
-    TypeParam y2 = this->activation.Forward(x2);
-    EXPECT_NEAR(math::ToFloat(this->activation.Backward(x2)),
-        1.0f - math::ToFloat(y2) * math::ToFloat(y2), 0.001f);
-}
-
-TYPED_TEST(TestTanh, SymmetryProperty)
-{
-    for (float x = 0.1f; x <= 0.9f; x += 0.2f)
-    {
-        TypeParam posInput = TypeParam(x);
-        TypeParam negInput = TypeParam(-x);
-
-        EXPECT_NEAR(math::ToFloat(this->activation.Forward(posInput)),
-            -math::ToFloat(this->activation.Forward(negInput)), 0.001f);
-    }
+    EXPECT_NEAR(activation.Forward(20.0f), 1.0f, math::Tolerance<float>());
+    EXPECT_NEAR(activation.Forward(-20.0f), -1.0f, math::Tolerance<float>());
+    EXPECT_GE(activation.Backward(20.0f), 0.0f);
+    EXPECT_GE(activation.Backward(-20.0f), 0.0f);
+    EXPECT_NEAR(activation.Backward(20.0f), 0.0f, math::Tolerance<float>());
 }

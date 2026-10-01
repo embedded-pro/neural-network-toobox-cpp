@@ -1,15 +1,14 @@
 ---
 description: "Author metric-driven unit tests for one neural_network/ algorithm — TEST_F on float, no heap, StrictMock, reference-value assertions selected per family from TESTING.md."
 agent: "unit-tester"
-argument-hint: "Name the neural_network/ algorithm to author unit tests for (e.g. Biquad, KalmanFilter, RungeKuttaIntegrators)"
+argument-hint: "Name the neural_network/ algorithm to author unit tests for (e.g. Dense, Softmax, CategoricalCrossEntropy)"
 model: "Claude Sonnet 5"
 ---
 
 Author (or extend) the unit tests for the named **neural-network-toolbox** algorithm in
 `neural_network/<domain>/test/Test<Name>.cpp`. Follow the `unit-tester` workflow: read the algorithm's
 public interface and doc; look up its family in `TESTING.md` and select the metric
-types to assert (accuracy, frequency/transient response, stability, boundaries, invariants,
-convergence, statistical consistency, conditioning); write one `TEST_F` on `float` per distinct
+types to assert (M1 accuracy, M5 convergence, M6 boundaries, M7 invariants); write one `TEST_F` on `float` per distinct
 property against an independent reference value (`EXPECT_NEAR` + `math::Tolerance<float>()`); wire
 CMake; build, run, and report paths + pass/fail. Rules: `AGENTS.md` +
 `.github/instructions/testing.instructions.md` (float-only, no heap, StrictMock, no redundant cases).

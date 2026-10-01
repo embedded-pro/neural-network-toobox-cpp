@@ -4,43 +4,57 @@
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
+#include "neural_network/activation/ActivationFunction.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Math.hpp"
-#include "neural_network/activation/ActivationFunction.hpp"
 
 namespace neural_network
 {
-    template<typename QNumberType>
-    class Tanh
-        : public ActivationFunction<QNumberType>
+    template<typename T>
+    class Tanh final
+        : public ActivationFunction<T>
     {
+        static_assert(std::is_floating_point_v<T>, "Tanh requires a floating-point type");
+
     public:
-        QNumberType Forward(QNumberType x) const override;
-        QNumberType Backward(QNumberType x) const override;
+        T Forward(T x) const override;
+        T Backward(T x) const override;
+        void ForwardVector(std::span<T> output, std::span<const T> input) const override;
+        void BackwardVector(std::span<T> result, std::span<const T> preActivation, std::span<const T> output, std::span<const T> outputGradient) const override;
     };
 
-    // Implementation
-
-    template<typename QNumberType>
-    OPTIMIZE_FOR_SPEED
-        QNumberType
-        Tanh<QNumberType>::Forward(QNumberType x) const
+    template<typename T>
+    OPTIMIZE_FOR_SPEED T Tanh<T>::Forward(T x) const
     {
-        return QNumberType(math::Tanh(math::ToFloat(x)));
+        return math::Tanh(x);
     }
 
-    template<typename QNumberType>
-    OPTIMIZE_FOR_SPEED
-        QNumberType
-        Tanh<QNumberType>::Backward(QNumberType x) const
+    template<typename T>
+    OPTIMIZE_FOR_SPEED T Tanh<T>::Backward(T x) const
     {
-        QNumberType y = Forward(x);
-        return QNumberType(0.9999f) - y * y;
+        const T y{ Forward(x) };
+        return T{ 1 } - y * y;
+    }
+
+    template<typename T>
+    OPTIMIZE_FOR_SPEED void Tanh<T>::ForwardVector(std::span<T> output, std::span<const T> input) const
+    {
+        really_assert(output.size() == input.size());
+
+        for (std::size_t i = 0; i < output.size(); ++i)
+            output[i] = Forward(input[i]);
+    }
+
+    template<typename T>
+    OPTIMIZE_FOR_SPEED void Tanh<T>::BackwardVector(std::span<T> result, std::span<const T> preActivation, std::span<const T> output, std::span<const T> outputGradient) const
+    {
+        really_assert(result.size() == preActivation.size() && result.size() == output.size() && result.size() == outputGradient.size());
+
+        for (std::size_t i = 0; i < result.size(); ++i)
+            result[i] = outputGradient[i] * (T{ 1 } - output[i] * output[i]);
     }
 
 #ifdef NEURAL_NETWORK_TOOLBOX_COVERAGE_BUILD
     extern template class Tanh<float>;
-    extern template class Tanh<math::Q15>;
-    extern template class Tanh<math::Q31>;
 #endif
 }
