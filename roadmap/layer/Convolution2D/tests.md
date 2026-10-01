@@ -226,7 +226,7 @@ Convolution2DAndGlobalAveragePoolingFeedDenseAndBackpropagate:
 
 ## Reference vectors
 
-Computed by `scratchpad/specs/Convolution2D/reference.py` (output in `reference.out`) with float32
+Computed by [`reference.py`](reference.py) (run `python3 reference.py`) with float32
 rounding at every operation and the same central-difference step as the tests (`h = 1e-3`):
 
 | Quantity                                                               | Value                                                                  |

@@ -45,8 +45,8 @@ layer with forward/backward, four losses ([MSE](neural_network/losses/MeanSquare
 > - A parameter-free layer cannot be implemented, because `Matrix<T,0,1>` fails its positive-dimension
 >   `static_assert` (N8 adds the zero-parameter specialisation).
 > - Layers carry no sequence state (N17).
-> - Dense copies its weights into RAM next to a same-size gradient buffer and parameter mirror:
->   `sizeof(Dense<float,64,64>)` = 50 960 B for 16 640 B of weights (N10).
+> - Dense copies its weights into RAM next to a same-size gradient buffer:
+>   `sizeof(Dense<float,64,64>)` = 34 328 B for 16 640 B of weights (N10).
 >
 > Critical path: inference N1 → N8 → N10 → N11/N12 → N13; training N8 + N9 (+ N3, N14) → N16.
 
@@ -130,7 +130,7 @@ with per-channel scales, not `Q15`/`Q31` (see *Deferred*).
 - *Algorithm / paper:* Goodfellow et al., *Deep Learning*, §6.2.2.2; P. Blanchard, D. Higham, N. Higham, "Accurately computing the log-sum-exp and softmax functions," *IMA J. Numer. Anal.* 41(4), 2021.
 - *Reuses / builds on:* [Loss.hpp](neural_network/losses/Loss.hpp); N1.
 
-**N10. [Flash-resident inference weights](roadmap/layer/FlashResidentWeights/implementation.md).** A storage policy (or an inference-only variant) for Dense, and for every later parameterised layer, that references `const` weights placed in flash (`constexpr` arrays in `.rodata`) and drops the gradient, parameter-mirror and saved-input buffers. RAM then holds only activations.
+**N10. [Flash-resident inference weights](roadmap/layer/FlashResidentWeights/implementation.md).** A storage policy (or an inference-only variant) for Dense, and for every later parameterised layer, that references `const` weights placed in flash (`constexpr` arrays in `.rodata`) and drops the gradient and saved-input/pre-activation buffers. RAM then holds only activations.
 - *Algorithm / paper:* R. David et al., "TensorFlow Lite Micro," *MLSys*, 2021; L. Lai, N. Suda, V. Chandra, "CMSIS-NN," arXiv:1801.06601, 2018.
 - *Reuses / builds on:* N8; `math::Matrix` constexpr constructor.
 

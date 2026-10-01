@@ -92,7 +92,7 @@ AffineNormalizationComposesAndFoldsIntoDense:
 
 ## Reference vectors
 
-Computed by `scratchpad/specs/AffineNormalization/reference.py`. It uses float32 rounding at every
+Computed by [`reference.py`](reference.py). It uses float32 rounding at every
 operation and the same central-difference step as the tests:
 
 | Quantity                                                         | Value                                                               |

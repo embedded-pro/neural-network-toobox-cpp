@@ -26,6 +26,7 @@ namespace neural_network
         using WeightMatrix = math::Matrix<T, OutputSize, InputSize>;
 
         Dense(const WeightMatrix& initialWeights, const ActivationFunction<T>& activationFunction);
+        Dense(const WeightMatrix& initialWeights, const ActivationFunction<T>&& activationFunction) = delete;
 
         void Forward(const InputVector& layerInput) override;
         const InputVector& Backward(const OutputVector& outputGradient) override;

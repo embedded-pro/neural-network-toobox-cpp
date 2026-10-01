@@ -5,7 +5,7 @@
       "name": "Neural Network Simulator",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/host/simulator/NeuralNetwork/Debug/neural_network.simulator.nn",
+      "program": "${workspaceFolder}/build/host/simulator/model/NeuralNetwork/Debug/neural_network.simulator.model.neural_network",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",

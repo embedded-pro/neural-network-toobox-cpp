@@ -44,11 +44,11 @@ namespace neural_network
         const T maxLogit{ MaxLogit(logits) };
         const T shiftedLogSumExp{ ShiftedLogSumExp(logits, maxLogit) };
 
-        T cost{ 0 };
+        T weightedShifted{ 0 };
         for (std::size_t i = 0; i < NumberOfFeatures; ++i)
-            cost += target[i] * (shiftedLogSumExp - (logits[i] - maxLogit));
+            weightedShifted += target[i] * (logits[i] - maxLogit);
 
-        return cost + regularization.Calculate(logits);
+        return TargetSum() * shiftedLogSumExp - weightedShifted + regularization.Calculate(logits);
     }
 
     template<typename T, std::size_t NumberOfFeatures>
@@ -56,12 +56,19 @@ namespace neural_network
     {
         const Vector regularizationGradient{ regularization.Gradient(logits) };
         const T maxLogit{ MaxLogit(logits) };
-        const T shiftedLogSumExp{ ShiftedLogSumExp(logits, maxLogit) };
         const T targetSum{ TargetSum() };
 
         Vector gradient{};
+        T sum{ 0 };
         for (std::size_t i = 0; i < NumberOfFeatures; ++i)
-            gradient[i] = math::Exp(logits[i] - maxLogit - shiftedLogSumExp) * targetSum - target[i] + regularizationGradient[i];
+        {
+            gradient[i] = math::Exp(logits[i] - maxLogit);
+            sum += gradient[i];
+        }
+
+        const T scale{ targetSum / sum };
+        for (std::size_t i = 0; i < NumberOfFeatures; ++i)
+            gradient[i] = gradient[i] * scale - target[i] + regularizationGradient[i];
 
         return gradient;
     }

@@ -134,7 +134,7 @@ Convolution1DFeedsDenseThroughChannelsLastLayout:
 
 ## Reference vectors
 
-Computed by `scratchpad/specs/Convolution1D/reference.py` with float32 rounding at every operation and
+Computed by [`reference.py`](reference.py) with float32 rounding at every operation and
 the same central-difference step as the tests (`h = 1e-3`):
 
 | Quantity                                                        | Value                                                                  |

@@ -64,3 +64,17 @@ TEST_F(TestCategoricalCrossEntropy, LargeLogitsGiveFiniteCostAndGradient)
     EXPECT_NEAR(gradient[1], -1.0f, math::Tolerance<float>());
     EXPECT_NEAR(gradient[2], 0.0f, math::Tolerance<float>());
 }
+
+TEST_F(TestCategoricalCrossEntropy, TiedLargeLogitsSplitProbabilityEvenly)
+{
+    const Vector tiedLogits{ 1.0e8f, 1.0e8f, -1.0e8f };
+    EXPECT_CALL(regularization, Calculate(::testing::_)).WillOnce(::testing::Return(0.0f));
+    EXPECT_CALL(regularization, Gradient(::testing::_)).WillOnce(::testing::Return(Vector{}));
+
+    EXPECT_NEAR(loss.Cost(tiedLogits), 0.6931472f, math::Tolerance<float>());
+
+    const auto gradient{ loss.Gradient(tiedLogits) };
+    EXPECT_NEAR(gradient[0], 0.5f, math::Tolerance<float>());
+    EXPECT_NEAR(gradient[1], -0.5f, math::Tolerance<float>());
+    EXPECT_NEAR(gradient[2], 0.0f, math::Tolerance<float>());
+}

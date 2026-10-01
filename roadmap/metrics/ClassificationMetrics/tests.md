@@ -104,7 +104,7 @@ ResetClearsCountsAndMakesRatiosUndefined:
 
 ## Reference vectors
 
-Computed by `scratchpad/specs/ClassificationMetrics/reference.py` (numpy `float32` scores, exact
+Computed by [`reference.py`](reference.py) (numpy `float32` scores, exact
 `Fraction` arithmetic for the ratios, cross-checked against scikit-learn 1.9.1 `confusion_matrix`,
 `accuracy_score`, `precision_score`/`recall_score`/`f1_score(average=None)`, `balanced_accuracy_score`
 and `f1_score(average="macro")`):

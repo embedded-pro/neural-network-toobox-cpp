@@ -245,7 +245,7 @@ Normal:   w = σ z,  z = √(−2 ln u1) cos(2π u2)   ⇒  z ~ N(0, 1)  (Box & 
   is not covered by the class instantiation.
 - Test: `neural_network/initialization/test/TestWeightInitialization.cpp`.
 - Doc: `doc/initialization/WeightInitialization.md` (per `doc/TEMPLATE.md`) in a new `doc/initialization/`
-  folder with its `README.md`. Add the rows as `roadmap/DEPLOYMENT.md` step 5 describes. Also change
+  folder with its `README.md`. Add the rows as `roadmap/DEPLOYMENT.md` step 6 describes. Also change
   `doc/layer/Dense.md` ("The caller supplies the initial weights") to point to it.
 - CMake (new module): `neural_network/initialization/CMakeLists.txt` with
   `neural_network_add_header_library(neural_network.initialization)`, the same `target_include_directories`
@@ -256,5 +256,7 @@ Normal:   w = σ z,  z = √(−2 ln u1) cos(2π u2)   ⇒  z ~ N(0, 1)  (Box & 
   `NEURAL_NETWORK_TOOLBOX_BUILD_TESTS`, `emil_add_test`, `neural_network_add_qemu_test`), linking
   `gmock_main`, `neural_network.initialization`, `neural_network.layer`, `neural_network.activation`
   (for the Dense integration case). Register `add_subdirectory(initialization)` in
-  `neural_network/CMakeLists.txt`.
+  `neural_network/CMakeLists.txt`, append `neural_network.initialization` to `NEURAL_NETWORK_TOOLBOX_INSTALL_TARGETS`
+  in the root `CMakeLists.txt`, and append `neural_network.initialization_test` to the `targets` of both
+  `qemu-cortex-m4-RelWithDebInfo` and `qemu-cortex-m7-RelWithDebInfo` in `CMakePresets.json`.
 - Generic pattern: see `roadmap/DEPLOYMENT.md`.

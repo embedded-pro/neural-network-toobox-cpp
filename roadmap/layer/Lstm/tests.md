@@ -216,7 +216,7 @@ LstmFeedsDenseHeadAndResetStateRestartsSequence:
 
 ## Reference vectors
 
-Computed by `scratchpad/specs/Lstm/reference.py`, with float32 rounding at every operation, the same summation
+Computed by [`reference.py`](reference.py), with float32 rounding at every operation, the same summation
 order as the pseudocode (and the stable two-branch sigmoid of `Sigmoid.hpp`), and the same central-difference
 step as the tests (`h = 1e-3`). A float64 run agrees with every float32 forward value below (states, gates, `tanh c`) to within `1e-7`. An
 independent vectorised float64 implementation of the PyTorch `nn.LSTM` equations reproduces `h1..h3` and `c3`, and

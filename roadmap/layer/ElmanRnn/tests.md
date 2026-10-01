@@ -161,7 +161,7 @@ ElmanRnnFeedsDenseHeadAndResetStateRestartsSequence:
 
 ## Reference vectors
 
-Computed by `scratchpad/specs/ElmanRnn/reference.py`, with float32 rounding at every operation, the same
+Computed by [`reference.py`](reference.py), with float32 rounding at every operation, the same
 summation order as the pseudocode, and the same central-difference step as the tests (`h = 1e-3`). A
 float64 run agrees with every float32 value below to within `1e-7`.
 

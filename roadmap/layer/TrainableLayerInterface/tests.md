@@ -145,7 +145,7 @@ ConcreteActivationTemplateMatchesInterfaceActivation:
 
 ## Reference vectors
 
-Computed by `scratchpad/specs/TrainableLayerInterface/reference.py`, with float32 rounding at every
+Computed by [`reference.py`](reference.py), with float32 rounding at every
 operation and the same central-difference step (`h = 1e-3`) as the tests. The closed forms were
 cross-checked in float64.
 

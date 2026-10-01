@@ -107,7 +107,7 @@ ConsecutiveCallsContinueOneStream:
 
 ## Reference vectors
 
-Computed by `scratchpad/specs/WeightInitialization/reference.py`. It emulates float32 rounding after
+Computed by [`reference.py`](reference.py). It emulates float32 rounding after
 every operation (`struct` round-trip), implements `fmix32` + xorshift32 on masked Python integers, and
 cross-checks both primitives against published values: raw xorshift32 from state 1 gives `270369`,
 and `fmix32(1) = 0x514E28B7`.

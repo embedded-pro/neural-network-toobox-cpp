@@ -118,7 +118,7 @@ MixedModelExposesOnlyTrainableParameters:
 
 ## Reference vectors
 
-Computed by `scratchpad/specs/FlashResidentWeights/reference.py` (float32 at every operation, same
+Computed by [`reference.py`](reference.py) (float32 at every operation, same
 summation order as the layer). The closed forms were cross-checked in float64. The same values were
 reproduced by a C++ prototype of `FlashDense` built against the current `Dense.hpp`, `Tanh`,
 `LeakyReLU` and `Softmax` (`proto.cpp`), and the mock and span cases were run as gtest cases

@@ -73,7 +73,7 @@ LargeOutlierKeepsCostFiniteAndGradientBoundedByDelta:
 
 ## Reference vectors
 
-Computed by `scratchpad/specs/HuberLoss/reference.py` (numpy `float32`, same branch-free formula and FD
+Computed by [`reference.py`](reference.py) (numpy `float32`, same branch-free formula and FD
 step as the helper; the quadratic/linear piecewise form in `float64` agrees on every cost):
 
 | Quantity                                                  | Value                                                         |

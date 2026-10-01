@@ -168,7 +168,7 @@ post-activation BN (which can also be folded into the following Dense with the f
 - Test: `neural_network/layer/test/TestAffineNormalization.cpp`, plus one integration case in
   `neural_network/model/test/TestModel.cpp` (see `tests.md`).
 - Doc: `doc/layer/AffineNormalization.md` (per `doc/TEMPLATE.md`). Add its row to the layer
-  documentation tables as `roadmap/DEPLOYMENT.md` step 5 describes.
+  documentation tables as `roadmap/DEPLOYMENT.md` step 6 describes.
 - CMake: `AffineNormalization.hpp` → `target_sources(neural_network.layer PRIVATE ...)`;
   `AffineNormalization.cpp` → `neural_network_add_coverage_sources(neural_network.layer ...)`;
   `TestAffineNormalization.cpp` → `neural_network.layer_test`.

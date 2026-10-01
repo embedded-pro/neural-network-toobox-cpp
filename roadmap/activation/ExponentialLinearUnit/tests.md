@@ -76,7 +76,7 @@ so it would fail for a wrong constant pair.
 
 ## Reference vectors
 
-Computed by `scratchpad/specs/ExponentialLinearUnit/reference.py` (float32 emulation of the
+Computed by [`reference.py`](reference.py) (float32 emulation of the
 pseudocode and of `ActivationFiniteDifference.hpp`, cross-checked against double `expm1`/`exp`):
 
 | Quantity                                                    | Value                                                           |

@@ -174,8 +174,8 @@ test_golden_files_are_reproduced:
 
 ## Reference vectors
 
-Computed by `scratchpad/specs/WeightExport/reference.py` (blob, hash, CRC, float32 forward in the layer's
-summation order) and `exporter_reference.py` (folds, permutations, literals). Folds were done in float64 and
+Computed by [`reference.py`](reference.py) (blob, hash, CRC, float32 forward in the layer's
+summation order) and [`exporter_reference.py`](exporter_reference.py) (folds, permutations, literals). Folds were done in float64 and
 cross-checked in float32. A C++ prototype of `WeightBlob` against the current `Dense.hpp`, `LeakyReLU`,
 `Tanh` and emil `infra::Crc32` (`proto.cpp`, GCC 13 and Clang 18) reproduced the golden bytes from `Save`,
 every `Validate` status below, the unaligned `Decode`, the zero-copy view and the forward value.

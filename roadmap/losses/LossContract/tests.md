@@ -141,9 +141,9 @@ expectations (Model's `Train` behaviour is unchanged).
 
 ## Reference vectors
 
-Computed by `scratchpad/specs/LossContract/reference.py` (numpy: `float32` mirror of the C++ loops,
+Computed by [`reference.py`](reference.py) (numpy: `float32` mirror of the C++ loops,
 cross-checked in `float64` against the textbook `−[y log σ + (1−y) log(1−σ)]`, `np.logaddexp`, and
-max-shifted log-sum-exp; output in `reference.out`):
+max-shifted log-sum-exp; run `python3 reference.py`):
 
 | Quantity                                                    | Value                                                                  |
 |-------------------------------------------------------------|------------------------------------------------------------------------|

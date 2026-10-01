@@ -100,9 +100,9 @@ cmake --preset host  # host preset enables it automatically
 cmake -DNEURAL_NETWORK_TOOLBOX_BUILD_SIMULATOR=ON ...
 ```
 
-The executable target is `neural_network.simulator.nn`. Prerequisites: `qt6-base-dev` and
-`libgl1-mesa-dev` (Ubuntu/Debian). Set `QT_QPA_PLATFORM=offscreen` to run the simulator tests on a
-headless machine.
+The executable target is `neural_network.simulator.model.neural_network`. Prerequisites:
+`qt6-base-dev` and `libgl1-mesa-dev` (Ubuntu/Debian). Set `QT_QPA_PLATFORM=offscreen` to run the
+simulator tests on a headless machine.
 
 ## Roadmap
 

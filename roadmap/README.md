@@ -16,6 +16,9 @@ roadmap/<domain>/<AlgorithmName>/
 └── explanation.md      # short plain-language overview + the reference paper
 ```
 
+A folder whose `tests.md` quotes computed reference values also holds the script that produced them
+(`reference.py`, numpy float32; run it from that folder with `python3 reference.py`).
+
 All pseudocode respects the library constraints: **no heap**, no recursion, bounded containers /
 `std::array`, `OPTIMIZE_FOR_SPEED` on hot paths, and the **float-only** policy — a generic
 `template<typename T>` interface guarded by `static_assert(std::is_floating_point_v<T>)` and

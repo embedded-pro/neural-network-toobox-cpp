@@ -199,7 +199,7 @@ DepthwiseSeparableConvolutionFeedsDenseThroughChannelsLastLayout:
 
 ## Reference vectors
 
-Computed by `scratchpad/specs/DepthwiseSeparableConvolution/reference.py` with float32 rounding at every
+Computed by [`reference.py`](reference.py) with float32 rounding at every
 operation, the loop order of `implementation.md` and the same central-difference step as the tests
 (`h = 1e-3`); float64 forward values agree to the printed digits.
 

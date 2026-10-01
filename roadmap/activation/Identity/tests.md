@@ -54,7 +54,7 @@ IdentityActivationEmitsRawAffineOutput:
 
 ## Reference vectors
 
-Computed by `scratchpad/specs/Identity/reference.py` (float32-rounded, same step as the helper):
+Computed by [`reference.py`](reference.py) (float32-rounded, same step as the helper):
 
 | Quantity                                         | Value                                                     |
 |--------------------------------------------------|-----------------------------------------------------------|

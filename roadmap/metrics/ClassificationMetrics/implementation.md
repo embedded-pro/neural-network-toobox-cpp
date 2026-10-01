@@ -259,5 +259,7 @@ agree in exact arithmetic.
   `test/CMakeLists.txt`: `neural_network.metrics_test` (`emil_build_for` on
   `NEURAL_NETWORK_TOOLBOX_BUILD_TESTS`, `emil_add_test`, `neural_network_add_qemu_test`), linking
   `gmock_main` and `neural_network.metrics`. Register `add_subdirectory(metrics)` in
-  `neural_network/CMakeLists.txt`.
+  `neural_network/CMakeLists.txt`, append `neural_network.metrics` to `NEURAL_NETWORK_TOOLBOX_INSTALL_TARGETS`
+  in the root `CMakeLists.txt`, and append `neural_network.metrics_test` to the `targets` of both
+  `qemu-cortex-m4-RelWithDebInfo` and `qemu-cortex-m7-RelWithDebInfo` in `CMakePresets.json`.
 - Generic pattern: see `roadmap/DEPLOYMENT.md`.

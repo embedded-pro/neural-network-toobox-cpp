@@ -196,7 +196,7 @@ RepeatedEpochsFitTwoSampleRegression:
 
 ## Reference vectors
 
-Computed by `scratchpad/specs/MiniBatchTraining/reference.py` with float32 rounding at every operation,
+Computed by [`reference.py`](reference.py) with float32 rounding at every operation,
 the same `h = 1e-3` central difference as the tests, and the trainer algorithm above. `ḡ` was
 cross-checked in float64 (agrees to `2·10⁻⁷`). The 40-epoch trajectory was reproduced by an independent
 float64 finite-difference gradient descent (`J = 2.6·10⁻⁶` at epoch 22 in both).

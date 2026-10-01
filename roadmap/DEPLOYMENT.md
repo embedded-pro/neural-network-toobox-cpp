@@ -27,13 +27,17 @@ Read the spec's three files first (`implementation.md`, `tests.md`, `explanation
      `Test<Name>.cpp` to the `_test` target's `target_sources`.
    - New module: create `neural_network/<module>/CMakeLists.txt` via
      `neural_network_add_header_library(...)` and `neural_network_add_coverage_sources(...)`, add a
-     `test/` subdir, register it in the parent `CMakeLists.txt`, and add a `doc/<module>/` folder.
+     `test/` subdir, register it in the parent `CMakeLists.txt`, append `neural_network.<module>` to
+     `NEURAL_NETWORK_TOOLBOX_INSTALL_TARGETS` in the root `CMakeLists.txt` (otherwise it is left out of
+     the installed export set), and add a `doc/<module>/` folder.
 
 5. **QEMU wiring** — a new `neural_network.<module>_test` executable gets the same QEMU hook as the
    existing test targets (the helper from `cmake/NeuralNetworkQemuHelpers.cmake`, called right after
    `target_link_libraries` — copy it from a sibling `neural_network/<domain>/test/CMakeLists.txt`),
-   so it also runs under the `qemu-cortex-m4` / `qemu-cortex-m7` presets. Tests added to an existing
-   target need nothing extra.
+   and append `neural_network.<module>_test` to the `targets` list of both the
+   `qemu-cortex-m4-RelWithDebInfo` and `qemu-cortex-m7-RelWithDebInfo` build presets in
+   `CMakePresets.json` (those presets build only the listed targets, so an unlisted test is never built
+   and its QEMU ctest entry fails). Tests added to an existing target need nothing extra.
 
 6. **Doc** `doc/<domain>/<Name>.md` per `doc/TEMPLATE.md` (design-first; no code/class names/usage)
    — or a new section in the domain's shared family doc (e.g. `doc/activation/Activation.md`).
@@ -48,7 +52,8 @@ Read the spec's three files first (`implementation.md`, `tests.md`, `explanation
    target/test where possible). Optionally `cmake --preset coverage && cmake --build --preset coverage
    && ctest --preset coverage` to confirm the coverage TU builds.
 
-8. **Remove roadmap spec** — delete the entire `roadmap/<domain>/<Name>/` directory once all tests are green.
+8. **Remove roadmap spec** — delete the entire `roadmap/<domain>/<Name>/` directory (including its
+   `reference.py` scripts) once all tests are green.
 
 **Report**: the file paths created/edited/deleted + the test result. Nothing else.
 

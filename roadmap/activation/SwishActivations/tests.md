@@ -98,7 +98,7 @@ BackwardVectorMatchesFiniteDifference:
 
 ## Reference vectors
 
-Computed by `scratchpad/specs/SwishActivations/reference.py` (numpy `float32`, same operation order as
+Computed by [`reference.py`](reference.py) (numpy `float32`, same operation order as
 the pseudocode and the same `h = 1e-3` step and float accumulation as `ActivationFiniteDifference.hpp`;
 float64 cross-check agrees to 7 significant digits):
 

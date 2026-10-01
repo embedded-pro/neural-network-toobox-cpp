@@ -108,7 +108,7 @@ PoolingLayersComposeWithDenseAndBackpropagate:
 
 ## Reference vectors
 
-Computed by `scratchpad/specs/Pooling1D/reference.py`. It uses float32 rounding at every operation
+Computed by [`reference.py`](reference.py). It uses float32 rounding at every operation
 and the same central-difference step as the tests:
 
 | Quantity                                                        | Value                                                                  |
