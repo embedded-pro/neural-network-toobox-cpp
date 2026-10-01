@@ -8,7 +8,7 @@ target_link_libraries(neural_network.model_test PUBLIC
     neural_network.model
 )
 
-neural_network_add_qemu_test(neural_network.model_test)
+neural_network_link_qemu_runtime(neural_network.model_test)
 
 target_sources(neural_network.model_test PRIVATE
     TestModel.cpp

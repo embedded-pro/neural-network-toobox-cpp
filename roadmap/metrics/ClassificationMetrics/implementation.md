@@ -257,7 +257,7 @@ agree in exact arithmetic.
   `target_sources(neural_network.metrics PRIVATE ...)`; `ClassificationMetrics.cpp` →
   `neural_network_add_coverage_sources(neural_network.metrics ...)`; `add_subdirectory(test)`.
   `test/CMakeLists.txt`: `neural_network.metrics_test` (`emil_build_for` on
-  `NEURAL_NETWORK_TOOLBOX_BUILD_TESTS`, `emil_add_test`, `neural_network_add_qemu_test`), linking
+  `NEURAL_NETWORK_TOOLBOX_BUILD_TESTS`, `emil_add_test`, `neural_network_link_qemu_runtime`), linking
   `gmock_main` and `neural_network.metrics`. Register `add_subdirectory(metrics)` in
   `neural_network/CMakeLists.txt`, append `neural_network.metrics` to `NEURAL_NETWORK_TOOLBOX_INSTALL_TARGETS`
   in the root `CMakeLists.txt`, and append `neural_network.metrics_test` to the `targets` of both

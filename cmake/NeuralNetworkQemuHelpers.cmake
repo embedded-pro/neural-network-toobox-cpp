@@ -1,30 +1,21 @@
-set(NEURAL_NETWORK_QEMU_RUN_TEST_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/../platform/qemu/RunTest.cmake)
-
-function(neural_network_add_qemu_test target)
-    if(NOT DEFINED QEMU_MACHINE)
+function(neural_network_link_qemu_runtime target)
+    if(NOT EMIL_BUILD_QEMU)
         return()
     endif()
-
-    cmake_parse_arguments(PARSE_ARGV 1 QEMU_TEST "EXPECT_FAILURE" "" "")
-
-    find_program(QEMU_SYSTEM_ARM qemu-system-arm REQUIRED)
-
-    if(QEMU_TEST_EXPECT_FAILURE)
-        set(expectation "failure")
-    else()
-        set(expectation "success")
-    endif()
-
-    target_link_libraries(${target} PRIVATE platform_qemu_startup)
-
-    add_test(
-        NAME qemu.${target}
-        COMMAND ${CMAKE_COMMAND}
-            -DQEMU=${QEMU_SYSTEM_ARM}
-            -DQEMU_MACHINE=${QEMU_MACHINE}
-            -DQEMU_KERNEL=$<TARGET_FILE:${target}>
-            -DQEMU_EXPECTATION=${expectation}
-            -P ${NEURAL_NETWORK_QEMU_RUN_TEST_SCRIPT}
+    target_link_libraries(${target} PRIVATE
+        hal.cortex_m
+        hal.cortex_m.runtime
+        hal.qemu.syscalls
+        hal.qemu.default_init
+        hal.qemu.sync
+        hal.qemu.cortex
+        gmock_main
     )
-    set_tests_properties(qemu.${target} PROPERTIES TIMEOUT 120)
+    if(TEST ${target})
+        set_tests_properties(${target} PROPERTIES
+            PASS_REGULAR_EXPRESSION "\\[  PASSED  \\] [1-9][0-9]* test"
+            FAIL_REGULAR_EXPRESSION "\\[  FAILED  \\]"
+            TIMEOUT 120
+        )
+    endif()
 endfunction()
