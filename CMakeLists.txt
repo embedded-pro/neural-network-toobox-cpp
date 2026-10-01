@@ -17,11 +17,6 @@ if (NEURAL_NETWORK_TOOLBOX_BUILD_TESTS)
     add_definitions(-DNUMERICAL_TOOLBOX_ENABLE_ASSERTIONS=1)
 endif()
 
-if (NEURAL_NETWORK_TOOLBOX_ENABLE_OPTIMIZATIONS)
-    add_definitions(-DNeuralNetworkToolbox_ENABLE_OPTIMIZATIONS=1)
-    add_definitions(-DNumericalToolbox_ENABLE_OPTIMIZATIONS=1)
-endif()
-
 if (EMIL_ENABLE_COVERAGE)
     add_definitions(-DNEURAL_NETWORK_TOOLBOX_COVERAGE_BUILD=1)
 endif()
@@ -70,8 +65,10 @@ if (NEURAL_NETWORK_TOOLBOX_STANDALONE)
     FetchContent_Declare(
         numerical_toolbox
         GIT_REPOSITORY https://github.com/embedded-pro/numerical-toolbox-cpp.git
-        GIT_TAG        1225b3c422beab93e0ff8fd7231f8d7e087f6da4 # Unreleased (v3.1.2+8)
+        GIT_TAG        69ff13e719895b74b167c4742130442c6b96a857 # Unreleased
     )
+
+    set(NUMERICAL_TOOLBOX_ENABLE_OPTIMIZATIONS ${NEURAL_NETWORK_TOOLBOX_ENABLE_OPTIMIZATIONS} CACHE BOOL "" FORCE)
 
     FetchContent_MakeAvailable(numerical_toolbox)
 
