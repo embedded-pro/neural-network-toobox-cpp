@@ -45,7 +45,9 @@ and included as `numerical/<domain>/…`.
 ```
 
 `OPTIMIZE_FOR_SPEED` on hot paths (`Forward/Backward/ForwardVector/BackwardVector/Cost/Gradient`).
-Pure interfaces exempt. It expands only when `NEURAL_NETWORK_TOOLBOX_ENABLE_OPTIMIZATIONS` is on.
+Pure interfaces exempt. It expands only when `NEURAL_NETWORK_TOOLBOX_ENABLE_OPTIMIZATIONS` is on: the option
+is forwarded to `NUMERICAL_TOOLBOX_ENABLE_OPTIMIZATIONS`, and `NumericalToolbox_ENABLE_OPTIMIZATIONS` reaches
+every target as a usage requirement of `numerical.math`. Never re-add it with `add_definitions`.
 
 ## Style
 
