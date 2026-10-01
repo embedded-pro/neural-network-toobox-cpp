@@ -4,7 +4,7 @@
 
 ## Data structures
 
-```
+```text
 template<typename T, std::size_t NumberOfFeatures>   # static_assert(std::is_floating_point_v<T>) via Loss; instantiated for float
 class HuberLoss : public Loss<T, NumberOfFeatures>:
     using Vector = typename Loss<T, NumberOfFeatures>::Vector      # math::Vector<T, N> (Matrix<T, N, 1>)
@@ -18,7 +18,7 @@ class HuberLoss : public Loss<T, NumberOfFeatures>:
 
 ## Interface
 
-```
+```text
 HuberLoss(const Vector& expectedTarget,
           regularization::Regularization<T, N>& regularizationTerm,
           T delta = T{1})                              # really_assert(delta > T{0}); default 1 as in Keras/PyTorch
@@ -33,7 +33,7 @@ Vector Gradient(const Vector& predictions) override    # ObjectiveFunction<T, N>
 
 Per element, residual `eᵢ = ŷᵢ − yᵢ`:
 
-```
+```text
 ρ_δ(e) = ½ e²              if |e| ≤ δ
          δ (|e| − ½ δ)     otherwise
 
@@ -45,14 +45,14 @@ J(ŷ)       = (1/N) Σᵢ ρ_δ(ŷᵢ − yᵢ) + R(ŷ)
 
 Branch-free evaluation with `c = clip(e, −δ, δ)` (same `c` for cost and gradient):
 
-```
+```text
 ρ_δ(e) = c · (e − ½ c)
     |e| ≤ δ:  c = e     ⇒ e·(e − ½e)  = ½e²
     e >  δ:   c = δ     ⇒ δ·(e − ½δ)  = δ(|e| − ½δ)
     e < −δ:   c = −δ    ⇒ −δ·(e + ½δ) = δ(−e − ½δ) = δ(|e| − ½δ)
 ```
 
-```
+```text
 function Cost(predictions):                        # OPTIMIZE_FOR_SPEED
     sum = T{0}
     for i in 0..N-1:
@@ -76,7 +76,7 @@ Continuity at the threshold `|e| = δ`: both branches give `ρ = ½δ²` and `ψ
 
 Limiting cases (the test references):
 
-```
+```text
 δ ≥ maxᵢ |eᵢ|   ⇒ J − R = ½ · MSE          ∇ = ½ · ∇MSE = eᵢ/N
 δ ≤ minᵢ |eᵢ|   ⇒ J − R = δ·MAE − ½δ²      ∇ = δ · ∇MAE = δ·sign(eᵢ)/N
 δ → 0           ⇒ (J − R)/δ → MAE

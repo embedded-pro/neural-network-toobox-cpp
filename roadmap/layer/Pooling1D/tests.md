@@ -4,7 +4,7 @@
 
 ## Fixture
 
-```
+```text
 class TestPooling1D : public ::testing::Test:
     using MaxNonOverlapping = neural_network::MaxPooling1D<float, 6, 2, 2>          # K = S = 2 ⇒ Lₒ = 3
     using MaxOverlapping    = neural_network::MaxPooling1D<float, 6, 2, 3, 2>       # K = 3, S = 2 ⇒ Lₒ = 2, t = 5 dropped
@@ -33,7 +33,7 @@ class TestPooling1D : public ::testing::Test:
 
 ## Test cases (Arrange / Act / Assert)
 
-```
+```text
 OutputLengthFollowsValidPaddingFormula:
     Assert:  MaxNonOverlapping::OutputSize == 6                   # ⌊(6−2)/2⌋+1 = 3 positions × 2 channels
              MaxOverlapping::OutputSize    == 4                   # ⌊(6−3)/2⌋+1 = 2 × 2
@@ -87,7 +87,7 @@ Integration case, deployed as `TEST_F(TestModel, PoolingLayersComposeWithDenseAn
 `neural_network/model/test/TestModel.cpp`. It exercises `Model` with parameter-free layers: the
 `TotalParameters` count, the `SetParameters` offsets that skip them, and the backward chain through them:
 
-```
+```text
 PoolingLayersComposeWithDenseAndBackpropagate:
     Arrange: Model<float, 12, 1,
                    MaxPooling1D<float, 6, 2, 2>,                  # 12 → 6
@@ -111,20 +111,20 @@ PoolingLayersComposeWithDenseAndBackpropagate:
 Computed by [`reference.py`](reference.py). It uses float32 rounding at every operation
 and the same central-difference step as the tests:
 
-| Quantity                                                        | Value                                                                  |
-|-----------------------------------------------------------------|------------------------------------------------------------------------|
-| Max `K = S = 2` forward                                         | `(0.5, 0.9, 2.0, 0.1, 1.7, 1.4)`                                       |
-| Max `K = 3, S = 2` forward / argmax flat indices                | `(2.0, 0.9, 2.0, 1.4)` / `(4, 3, 4, 9)`                                |
-| Max `K = 3, S = 2` backward, `g = (0.8, -1.3, 0.4, 0.25)`       | `(0, 0, 0, -1.3, 1.2, 0, 0, 0, 0, 0.25, 0, 0)`                         |
-| … finite difference                                             | `(0, 0, 0, -1.2999772, 1.1999011, 0, 0, 0, 0, 0.24998187, 0, 0)` (max err `9.9e-5`) |
-| Tie `x = (0.7, 0.7, -0.3, -0.3)`, `K = 2`, `g = (1, 2)`         | forward `(0.7, -0.3)`, backward `(1, 0, 2, 0)`                         |
-| Average `K = 3, S = 2` forward                                  | `(0.43333334, 0.06666666, 0.6333333, -0.19999997)`                     |
-| Average `K = 3, S = 2` backward                                 | `(0.26666668, -0.43333334, 0.26666668, -0.43333334, 0.40000004, -0.35, 0.13333334, 0.08333334, 0.13333334, 0.08333334, 0, 0)` |
-| … finite difference                                             | max err `1.3e-5`                                                       |
-| Global average forward / backward (`g = (0.8, -1.3)`)           | `(0.48333335, 0.01666667)` / `(0.13333334, -0.21666667)` per position  |
-| … finite difference                                             | max err `1.9e-5`                                                       |
-| Model `Max → GAP → Dense(tanh)`, `W = (0.5, -0.25)`, `b = 0.1`  | pooled `(1.4, 0.8)`, `z = 0.6`, `y = 0.5370496`, `1 − y² = 0.7115778`  |
-| Model `Backward(1)`                                             | `(0.1185963, 0, 0, -0.05929815, 0.1185963, -0.05929815, 0, 0, 0, -0.05929815, 0.1185963, 0)`; FD max err `1.7e-5` |
+| Quantity                                                       | Value                                                                                                                         |
+|----------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------|
+| Max `K = S = 2` forward                                        | `(0.5, 0.9, 2.0, 0.1, 1.7, 1.4)`                                                                                              |
+| Max `K = 3, S = 2` forward / argmax flat indices               | `(2.0, 0.9, 2.0, 1.4)` / `(4, 3, 4, 9)`                                                                                       |
+| Max `K = 3, S = 2` backward, `g = (0.8, -1.3, 0.4, 0.25)`      | `(0, 0, 0, -1.3, 1.2, 0, 0, 0, 0, 0.25, 0, 0)`                                                                                |
+| … finite difference                                            | `(0, 0, 0, -1.2999772, 1.1999011, 0, 0, 0, 0, 0.24998187, 0, 0)` (max err `9.9e-5`)                                           |
+| Tie `x = (0.7, 0.7, -0.3, -0.3)`, `K = 2`, `g = (1, 2)`        | forward `(0.7, -0.3)`, backward `(1, 0, 2, 0)`                                                                                |
+| Average `K = 3, S = 2` forward                                 | `(0.43333334, 0.06666666, 0.6333333, -0.19999997)`                                                                            |
+| Average `K = 3, S = 2` backward                                | `(0.26666668, -0.43333334, 0.26666668, -0.43333334, 0.40000004, -0.35, 0.13333334, 0.08333334, 0.13333334, 0.08333334, 0, 0)` |
+| … finite difference                                            | max err `1.3e-5`                                                                                                              |
+| Global average forward / backward (`g = (0.8, -1.3)`)          | `(0.48333335, 0.01666667)` / `(0.13333334, -0.21666667)` per position                                                         |
+| … finite difference                                            | max err `1.9e-5`                                                                                                              |
+| Model `Max → GAP → Dense(tanh)`, `W = (0.5, -0.25)`, `b = 0.1` | pooled `(1.4, 0.8)`, `z = 0.6`, `y = 0.5370496`, `1 − y² = 0.7115778`                                                         |
+| Model `Backward(1)`                                            | `(0.1185963, 0, 0, -0.05929815, 0.1185963, -0.05929815, 0, 0, 0, -0.05929815, 0.1185963, 0)`; FD max err `1.7e-5`             |
 
 ## Edge cases
 

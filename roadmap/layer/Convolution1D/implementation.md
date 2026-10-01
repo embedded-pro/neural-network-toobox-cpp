@@ -4,7 +4,7 @@
 
 ## Data structures
 
-```
+```text
 # sizes (all compile-time):
 #   L = Length, Cin = InChannels, Cout = OutChannels, K = KernelSize, S = Stride
 #   Lout = (L − K) / S + 1          (integer division = ⌊(L − K)/S⌋ + 1, "valid" padding)
@@ -50,7 +50,7 @@ class Convolution1DStream:                     # inference-only causal streaming
 
 ## Interface
 
-```
+```text
 # Convolution1D<T, L, Cin, Cout, K, S>
 using KernelMatrix = math::Matrix<T, Cout, K·Cin>   # row o = filter o, column k·Cin + c (same shape idea as Dense::WeightMatrix)
 static constexpr std::size_t OutputLength = Lout
@@ -79,7 +79,7 @@ void               Reset()                          # history = 0, oldest = 0, p
 
 ## Algorithm (pseudocode)
 
-```
+```text
 function Convolution1D(kernels, activation):
     for o in 0..Cout-1:
         for j in 0..K·Cin-1:  parameters[o·K·Cin + j] = kernels.at(o, j)
@@ -147,7 +147,7 @@ function Reset():
 
 Math (one sample, `W[o,k,c]`, `b[o]`, upstream `g = ∂L/∂y`, `[·]` = Iverson bracket):
 
-```
+```text
 forward:           z[t,o] = b[o] + Σ_{k=0}^{K−1} Σ_{c=0}^{Cin−1} W[o,k,c] · x[t·S + k, c]       (cross-correlation)
                    y[t,o] = f(z[t,o])
 activation VJP:    δ = J_f(z)ᵀ g;  element-wise f ⇒ δ[t,o] = f'(z[t,o]) · g[t,o]
@@ -163,7 +163,7 @@ accumulation:      G ← G + ∇_θ L_s per Backward (N8); N16 divides by the ba
 
 Streaming equivalence (what `Convolution1DStream` computes):
 
-```
+```text
 frames x_0, x_1, … pushed one per call; x_n = 0 for n < 0 (zero history)
 Push(x_n) returns true ⇔ n mod S = 0, and then
     Output() = f( b + Σ_k Σ_c W[·,k,c] · x_{n − (K−1) + k}[c] )

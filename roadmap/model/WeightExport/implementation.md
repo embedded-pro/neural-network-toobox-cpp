@@ -12,7 +12,7 @@ defines, so no layer needs to change:
 - **Secondary path, run time (over-the-air).** The same exporter, or `WeightBlob::Save` on the device,
   writes a versioned little-endian blob. The device validates the blob and then loads it layer by layer.
 
-```
+```text
 # θ layout per layer (unchanged; owned by each layer's spec)
 #   Dense<T, In, Out>             θ = [W row-major (W_ij at i·In + j), b]              P = In·Out + Out
 #   AffineNormalization<T, N>     θ = [a, b]                                            P = 2N          (N2)
@@ -68,7 +68,7 @@ same descriptor, and one blob or header feeds either layer.
 
 ## Interface
 
-```
+```text
 # WeightBlob<T, Layers...>
 static BlobStatus          Validate(infra::ConstByteRange blob)                 # full check, no side effects
 static std::optional<View> Open(infra::ConstByteRange blob)                     # Validate == ok ⇒ View
@@ -124,7 +124,7 @@ The application pins the header to its model type with
 
 ## Algorithm (pseudocode)
 
-```
+```text
 function detail::Fnv1a32(words):                 # constexpr loop, no recursion
     h = 0x811C9DC5
     for w in words:
@@ -198,7 +198,7 @@ to float32, and then writes the header and/or the blob. The conversion functions
 framework's shapes, so `scripts/test-export-weights.py` tests them without TensorFlow or PyTorch installed.
 Only the model walk (`model.layers`, `named_children()`) imports a framework, and it does so lazily.
 
-```
+```text
 Dense    Keras  kernel K ∈ ℝ^{In×Out}, bias c        →  W = Kᵀ (W_ij = K_ji),  θ = [vec_rowmajor(W), c]
          Torch  weight W ∈ ℝ^{Out×In}, bias c        →  θ = [vec_rowmajor(W), c]         (no transpose)
          use_bias=False / bias=None                  →  c = 0
@@ -221,7 +221,7 @@ choose differently only this permutation table changes, not the blob format.
 BatchNorm folding (frozen statistics, `a = γ / √(σ² + ε)`, `b = β − a μ`, with `ε` read from the framework
 layer: Keras default `1e-3`, PyTorch `1e-5`). The identities are the ones stated in N2:
 
-```
+```text
 pre-activation   Dense/Conv(linear) → BN → act     W' = diag(a) W,   c' = a ⊙ c + b         (row k scaled by a_k)
                                                    Conv: W'[o][k][ch] = a_o W[o][k][ch],  c'_o = a_o c_o + b_o
 post-activation  act → BN → Dense                  W' = W diag(a),   c' = c + W b           (column j scaled by a_j)
@@ -240,7 +240,7 @@ their count. It refuses NaN or ±Inf with a non-zero exit code. It prints one li
 
 Math (forward identities the exporter relies on; there is no Backward in this item):
 
-```
+```text
 layout:        θ_{i·In + j} = W_ij,  θ_{In·Out + i} = b_i        (Keras: W_ij = K_ji)
 BN (frozen):   BN(z)_k = γ_k (z_k − μ_k)/√(σ²_k + ε) + β_k = a_k z_k + b_k                       (exact)
 pre-act fold:  a ⊙ (W x + c) + b = (diag(a) W) x + (a ⊙ c + b)                                  (exact)

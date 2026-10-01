@@ -4,7 +4,7 @@
 
 ## Data structures
 
-```
+```text
 # sizes (all compile-time):
 #   X = InputSize, H = HiddenSize, K = BpttWindow (truncation depth, K ≥ 1)
 #   gate order q ∈ {i = 0, f = 1, g = 2, o = 3} (PyTorch order; Keras i, f, c, o is the same); gate row ρ = q·H + u, u ∈ [0, H)
@@ -61,7 +61,7 @@ class FlashLstm final : public InferenceLayer<T, X, H>,      # N8 inference base
 
 Class diagram (N8/N10/N17 hierarchy, extended):
 
-```
+```text
 InferenceLayer<T, In, Out>        Forward, Output
  ├─ FlashLstm<T, X, H>            (+ StatefulLayer<T, 2H>)                  ← inference only, weights in flash
  └─ Layer<T, In, Out, P>          + Backward, Parameters, SetParameters, ParameterGradients, ZeroGradients
@@ -71,7 +71,7 @@ StatefulLayer<T, S>               ResetState, State, SetState               ← 
 
 ## Interface
 
-```
+```text
 # Lstm<T, X, H, K>
 using InputWeightMatrix     = math::Matrix<T, 4H, X>     # rows (i; f; g; o), PyTorch weight_ih_l0 shape
 using RecurrentWeightMatrix = math::Matrix<T, 4H, H>     # rows (i; f; g; o), PyTorch weight_hh_l0 shape
@@ -107,7 +107,7 @@ and `FlashLstm` through `StateSize = 2H` and the `StatefulLayer<T, 2H>` base.
 
 ## Algorithm (pseudocode)
 
-```
+```text
 # index helpers (inline): Wx(ρ, j) = parameters[ρ·X + j]    Wh(ρ, k) = parameters[4H·X + ρ·H + k]
 #                         B(ρ)     = parameters[4H·X + 4H·H + ρ]
 #                         GWx, GWh, GB: the same offsets into parameterGradients
@@ -197,7 +197,7 @@ function FlashLstm::SetState(s):    state = s;  output = s[0 .. H)
 
 Math (one sequence after `ResetState`/`SetState` at step `t₀`; `W^q` = the `H` rows of gate `q`; `σ` logistic):
 
-```
+```text
 forward:     a_s = W_x x_s + W_h h_{s−1} + b                     (4H; blocks a^i, a^f, a^g, a^o)
              i_s = σ(a^i),  f_s = σ(a^f),  g_s = tanh(a^g),  o_s = σ(a^o)
              c_s = f_s ⊙ c_{s−1} + i_s ⊙ g_s

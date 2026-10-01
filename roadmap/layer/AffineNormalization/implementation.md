@@ -4,7 +4,7 @@
 
 ## Data structures
 
-```
+```text
 template<typename T, std::size_t Size>         # static_assert(std::is_floating_point_v<T>); instantiated for float
 class AffineNormalization final : public Layer<T, Size, Size, 2 * Size>:
     ParameterVector parameters                 # [a_0 … a_{N-1}, b_0 … b_{N-1}]  (scales, then shifts)
@@ -18,7 +18,7 @@ class AffineNormalization final : public Layer<T, Size, Size, 2 * Size>:
 
 ## Interface
 
-```
+```text
 using ScaleVector = math::Vector<T, Size>        # same type as InputVector / OutputVector
 
 AffineNormalization()                                             # identity: a = 1, b = 0
@@ -41,7 +41,7 @@ void                   SetParameters(const ParameterVector& parameters) override
 
 ## Algorithm (pseudocode)
 
-```
+```text
 function AffineNormalization():
     for i in 0..N-1:
         parameters[i]     = T{1}
@@ -84,7 +84,7 @@ function Output():          return output
 
 Math (per feature `i`, upstream `g = ∂L/∂y`):
 
-```
+```text
 forward:            y_i = a_i x_i + b_i
 Jacobian (input):   ∂y_i/∂x_j = a_i δ_ij                 # J = diag(a), independent of x
 backward (input):   ∂L/∂x_i = a_i g_i
@@ -93,7 +93,7 @@ parameter grads:    ∂L/∂a_i = g_i x_i,   ∂L/∂b_i = g_i    # derived here
 
 Frozen batch normalisation at inference (Ioffe & Szegedy, Alg. 2):
 
-```
+```text
 BN(x_i) = γ_i (x_i − μ_i) / √(σ²_i + ε) + β_i
         = a_i x_i + b_i   with   a_i = γ_i / √(σ²_i + ε),   b_i = β_i − a_i μ_i       # exact identity
 ```
@@ -102,7 +102,7 @@ Standardisation is the special case `γ = 1`, `β = 0`, `ε = 0`, `σ²_i = s_i�
 
 Folding (the offline form that N13 applies; stated here so the tests can pin it):
 
-```
+```text
 before a Dense:  W (a ⊙ x + b) + c = (W · diag(a)) x + (W b + c)     # W'_{kj} = W_{kj} a_j,  c'_k = c_k + Σ_j W_{kj} b_j
 after a linear (pre-activation) output z = W x + c:
                  a ⊙ z + b = (diag(a) · W) x + (a ⊙ c + b)          # W'_{kj} = a_k W_{kj},  c'_k = a_k c_k + b_k

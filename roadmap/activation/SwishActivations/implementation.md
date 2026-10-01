@@ -4,7 +4,7 @@
 
 ## Data structures
 
-```
+```text
 template<typename T>                           # static_assert(std::is_floating_point_v<T>); instantiated for float
 class SiLU final : public ActivationFunction<T>:
     Sigmoid<T> sigmoid                         # reused sign-branched stable sigmoid; Sigmoid is final ⇒ direct call
@@ -30,7 +30,7 @@ class HardSwish final : public ActivationFunction<T>:
 
 ## Interface
 
-```
+```text
 # identical for SiLU<T>, HardSigmoid<T>, HardSwish<T>; all four override ActivationFunction<T>
 T    Forward(T x) const                                              # hot path
 T    Backward(T x) const                                             # exact derivative (see Math)
@@ -43,7 +43,7 @@ void BackwardVector(span<T> result, span<const T> preActivation,
 
 ## Algorithm (pseudocode)
 
-```
+```text
 # ---------------- SiLU  f(x) = x·σ(x) ----------------
 function SiLU.Forward(x):                       # OPTIMIZE_FOR_SPEED
     return x * sigmoid.Forward(x)               # σ via sign-branched form: no exp overflow for any finite x
@@ -94,7 +94,7 @@ function HardSwish.ForwardVector / BackwardVector:
 
 Math (per element, `a = f(z)`, upstream `g = ∂L/∂a`; every Jacobian is diagonal):
 
-```
+```text
 σ(z) = 1 / (1 + e^{−z}),   σ'(z) = σ(z)(1 − σ(z))
 
 SiLU:         f(z)  = z σ(z)
@@ -126,11 +126,11 @@ set and does not affect imported weights.
 
 ## Complexity & memory
 
-| Function     | `Forward` per element               | `Backward` per element                 |
-|--------------|-------------------------------------|----------------------------------------|
-| SiLU         | 1 `exp` + 1 div + 2 add/mul         | 1 `exp` + 1 div + 5 add/mul            |
-| Hard-Sigmoid | 2 compares + 1 FMA                  | 2 compares                             |
-| Hard-Swish   | 2 compares + 1 add + 2 mul          | 2 compares + 1 FMA                     |
+| Function     | `Forward` per element       | `Backward` per element      |
+|--------------|-----------------------------|-----------------------------|
+| SiLU         | 1 `exp` + 1 div + 2 add/mul | 1 `exp` + 1 div + 5 add/mul |
+| Hard-Sigmoid | 2 compares + 1 FMA          | 2 compares                  |
+| Hard-Swish   | 2 compares + 1 add + 2 mul  | 2 compares + 1 FMA          |
 
 - `ForwardVector` / `BackwardVector`: `O(N)`, no temporaries, no heap, no recursion.
 - RAM: 0 floats of state. `HardSigmoid` / `HardSwish` hold one vptr; `SiLU` holds its own vptr plus the

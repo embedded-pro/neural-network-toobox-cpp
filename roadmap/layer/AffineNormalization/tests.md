@@ -4,7 +4,7 @@
 
 ## Fixture
 
-```
+```text
 class TestAffineNormalization : public ::testing::Test:
     using Normalization   = neural_network::AffineNormalization<float, 3>
     using Vector3         = Normalization::InputVector
@@ -25,7 +25,7 @@ class TestAffineNormalization : public ::testing::Test:
 
 ## Test cases (Arrange / Act / Assert)
 
-```
+```text
 DefaultConstructedIsIdentity:
     Arrange: Normalization layer{}
     Act:     layer.Forward(input)
@@ -76,7 +76,7 @@ Integration case, deployed as `TEST_F(TestModel, AffineNormalizationComposesAndF
 `neural_network/model/test/TestModel.cpp`. The layer test target does not link `neural_network.model`,
 and the model target is where layer chaining and parameter concatenation are exercised:
 
-```
+```text
 AffineNormalizationComposesAndFoldsIntoDense:
     Arrange: Model<float, 3, 1, AffineNormalization<float, 3>, Dense<float, 3, 1>> model{
                  make_layer<AffineNormalization<float, 3>>(scale, shift),
@@ -95,20 +95,20 @@ AffineNormalizationComposesAndFoldsIntoDense:
 Computed by [`reference.py`](reference.py). It uses float32 rounding at every
 operation and the same central-difference step as the tests:
 
-| Quantity                                                         | Value                                                               |
-|------------------------------------------------------------------|---------------------------------------------------------------------|
-| Forward, `a = (2, -0.5, 0.25)`, `b = (1, 0.5, -3)`, `x = (0.3, -0.7, 1.1)` | `(1.6, 0.85, -2.725)`                                     |
-| Forward after `SetParameters(1.5, 0, -4, -1, 2, 0.5)`            | `(-0.55, 2.0, -3.9)`                                                |
-| `Backward(g = (0.8, -1.3, 0.4))` analytic `a ⊙ g`                | `(1.6, 0.65, 0.1)`                                                  |
-| `Backward` finite difference                                     | `(1.5999674, 0.6499886, 0.1000166)` (max err `3.3e-5`)              |
-| `FromBatchNorm` scales `a`                                       | `(0.7499063, 1.5968096, 19.069252)`                                 |
-| `FromBatchNorm` shifts `b`                                       | `(-0.2749531, 1.3968096, -57.207756)`                               |
-| BN output at `x = (1, -0.5, 3.2)` (direct and folded agree)      | `(0.4749531, 0.5984048, 3.8138504)`                                 |
-| `FromStandardisation` `a`                                        | `(2.0, 0.028571429, 50.0)`                                          |
-| `FromStandardisation` `b`                                        | `(-19.62, 0.034285717, -165.0)`                                     |
-| Standardised `mean` / `mean + sd` / `mean − 2 sd`                | `0` / `1` / `-2` per feature (float32 max err `1.2e-7`)             |
-| Model `Affine → Dense(tanh)` pre-activation and output           | `-0.06` → `-0.0599281`; folded Dense `W' = (0.8, 0.15, 0.05)`, `c' = -0.25` gives the same value |
-| N8 parameter gradients (not asserted here)                       | `∂L/∂a = g ⊙ x = (0.24, 0.91, 0.44)`, `∂L/∂b = g = (0.8, -1.3, 0.4)`; FD `(0.2400279, 0.9099841, 0.4400015)` / `(0.8000731, -1.2999772, 0.4000067)` |
+| Quantity                                                                   | Value                                                                                                                                               |
+|----------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| Forward, `a = (2, -0.5, 0.25)`, `b = (1, 0.5, -3)`, `x = (0.3, -0.7, 1.1)` | `(1.6, 0.85, -2.725)`                                                                                                                               |
+| Forward after `SetParameters(1.5, 0, -4, -1, 2, 0.5)`                      | `(-0.55, 2.0, -3.9)`                                                                                                                                |
+| `Backward(g = (0.8, -1.3, 0.4))` analytic `a ⊙ g`                          | `(1.6, 0.65, 0.1)`                                                                                                                                  |
+| `Backward` finite difference                                               | `(1.5999674, 0.6499886, 0.1000166)` (max err `3.3e-5`)                                                                                              |
+| `FromBatchNorm` scales `a`                                                 | `(0.7499063, 1.5968096, 19.069252)`                                                                                                                 |
+| `FromBatchNorm` shifts `b`                                                 | `(-0.2749531, 1.3968096, -57.207756)`                                                                                                               |
+| BN output at `x = (1, -0.5, 3.2)` (direct and folded agree)                | `(0.4749531, 0.5984048, 3.8138504)`                                                                                                                 |
+| `FromStandardisation` `a`                                                  | `(2.0, 0.028571429, 50.0)`                                                                                                                          |
+| `FromStandardisation` `b`                                                  | `(-19.62, 0.034285717, -165.0)`                                                                                                                     |
+| Standardised `mean` / `mean + sd` / `mean − 2 sd`                          | `0` / `1` / `-2` per feature (float32 max err `1.2e-7`)                                                                                             |
+| Model `Affine → Dense(tanh)` pre-activation and output                     | `-0.06` → `-0.0599281`; folded Dense `W' = (0.8, 0.15, 0.05)`, `c' = -0.25` gives the same value                                                    |
+| N8 parameter gradients (not asserted here)                                 | `∂L/∂a = g ⊙ x = (0.24, 0.91, 0.44)`, `∂L/∂b = g = (0.8, -1.3, 0.4)`; FD `(0.2400279, 0.9099841, 0.4400015)` / `(0.8000731, -1.2999772, 0.4000067)` |
 
 ## Edge cases
 

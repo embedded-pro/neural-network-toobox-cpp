@@ -62,9 +62,9 @@ and an exported CMake package, usable with `find_package(NeuralNetworkToolbox)` 
 
 ## Documentation
 
-| Category                                                     | Description                                       |
-|--------------------------------------------------------------|---------------------------------------------------|
-| [Neural Network](doc/README.md)                              | Activations, Layers, Losses, Model                |
+| Category                        | Description                        |
+|---------------------------------|------------------------------------|
+| [Neural Network](doc/README.md) | Activations, Layers, Losses, Model |
 
 Each category page lists its algorithms with a brief description and links to the detailed
 documentation.

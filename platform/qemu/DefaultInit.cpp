@@ -82,4 +82,39 @@ extern "C"
     {
         return -1;
     }
+
+    [[gnu::weak]] wint_t fgetwc(FILE*)
+    {
+        return WEOF;
+    }
+
+    [[gnu::weak]] wint_t getwc(FILE*)
+    {
+        return WEOF;
+    }
+
+    [[gnu::weak]] wint_t getwchar()
+    {
+        return WEOF;
+    }
+
+    [[gnu::weak]] wint_t ungetwc(wint_t, FILE*)
+    {
+        return WEOF;
+    }
+
+    [[gnu::weak]] wint_t fputwc(wchar_t, FILE*)
+    {
+        return WEOF;
+    }
+
+    [[gnu::weak]] wint_t putwc(wchar_t, FILE*)
+    {
+        return WEOF;
+    }
+
+    [[gnu::weak]] wint_t putwchar(wchar_t)
+    {
+        return WEOF;
+    }
 }

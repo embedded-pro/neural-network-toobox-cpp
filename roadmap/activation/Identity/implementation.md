@@ -4,7 +4,7 @@
 
 ## Data structures
 
-```
+```text
 template<typename T>                           # static_assert(std::is_floating_point_v<T>); instantiated for float
 class Identity final : public ActivationFunction<T>:
     # no members — stateless; sizeof == one vptr
@@ -13,7 +13,7 @@ class Identity final : public ActivationFunction<T>:
 
 ## Interface
 
-```
+```text
 Identity() = default
 T    Forward(T x) const                                              # f(x) = x;  hot path
 T    Backward(T x) const                                             # f'(x) = 1 (exact)
@@ -26,7 +26,7 @@ void BackwardVector(span<T> result, span<const T> preActivation,
 
 ## Algorithm (pseudocode)
 
-```
+```text
 function Forward(x):                            # OPTIMIZE_FOR_SPEED
     return x
 
@@ -48,7 +48,7 @@ function BackwardVector(result, preActivation, output, outputGradient):   # OPTI
 
 Math (per element, `a = f(z)`):
 
-```
+```text
 forward:   a_i = z_i
 Jacobian:  ∂a_i/∂z_j = δ_ij                     # J = I_N (diagonal, all ones)
 backward:  ∂L/∂z_i = Σ_j (∂L/∂a_j)(∂a_j/∂z_i) = ∂L/∂a_i

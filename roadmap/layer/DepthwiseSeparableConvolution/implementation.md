@@ -4,7 +4,7 @@
 
 ## Data structures
 
-```
+```text
 # sizes (all compile-time):
 #   H = Height, W = Width, Cin = InChannels (= Channels for the depthwise-only layer), Cout = OutChannels
 #   KH × KW = KernelHeight × KernelWidth,  SH × SW = StrideHeight × StrideWidth   (depthwise stage only)
@@ -93,7 +93,7 @@ TFLite / CMSIS-NN depthwise filter `(1, KH, KW, C)`.
 
 ## Interface
 
-```
+```text
 # DepthwiseConvolution2D<T, H, W, C, KH, KW, SH, SW>
 using KernelMatrix = math::Matrix<T, KH·KW, C>          # row p·KW + q, column c
 static constexpr std::size_t OutputHeight = Hout
@@ -131,7 +131,7 @@ static void Backward(std::span<const T> theta, std::span<const T> x, std::span<c
 
 ## Algorithm (pseudocode)
 
-```
+```text
 function DepthwiseKernel::Forward(θ, x, z):              # OPTIMIZE_FOR_SPEED; direct, no scratch
     for r in 0..Hout-1:
         for s in 0..Wout-1:
@@ -229,7 +229,7 @@ promise in-place safety, hence the separate `g1` and `δ1` buffers.
 
 Math, depthwise stage (one sample, taps `D[p,q,c]`, biases `bD[c]`, `[·]` = Iverson bracket):
 
-```
+```text
 forward:           z1[r,s,c] = bD[c] + Σ_{p=0}^{KH−1} Σ_{q=0}^{KW−1} D[p,q,c] · x[r·SH + p, s·SW + q, c]
                    a1[r,s,c] = f1(z1[r,s,c])                       (per-channel cross-correlation, no flip)
 activation VJP:    δ1 = J_f1(z1)ᵀ g1;  element-wise f1 ⇒ δ1[r,s,c] = f1'(z1[r,s,c]) · g1[r,s,c]
@@ -245,7 +245,7 @@ For `DepthwiseConvolution2D` alone: `g1 = g`, `f1 = f`, `y = a1`.
 
 Math, pointwise stage (weights `V[o,c]`, biases `bP[o]`, upstream `g = ∂L/∂y`):
 
-```
+```text
 forward:           z2[r,s,o] = bP[o] + Σ_{c=0}^{Cin−1} V[o,c] · a1[r,s,c]
                    y[r,s,o]  = f2(z2[r,s,o])
 activation VJP:    δ2[r,s,o] = f2'(z2[r,s,o]) · g[r,s,o]

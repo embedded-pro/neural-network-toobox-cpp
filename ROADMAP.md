@@ -40,7 +40,7 @@ layer with forward/backward, four losses ([MSE](neural_network/losses/MeanSquare
 >
 > **N8** (trainable-layer interface), **N9** (per-sample loss contract) and **N16** (mini-batch training
 > step, replacing `Model::Train`) lift this limitation.
-
+>
 > **Inference-path limits.**
 > - A parameter-free layer cannot be implemented, because `Matrix<T,0,1>` fails its positive-dimension
 >   `static_assert` (N8 adds the zero-parameter specialisation).
@@ -134,7 +134,11 @@ with per-channel scales, not `Q15`/`Q31` (see *Deferred*).
 - *Algorithm / paper:* R. David et al., "TensorFlow Lite Micro," *MLSys*, 2021; L. Lai, N. Suda, V. Chandra, "CMSIS-NN," arXiv:1801.06601, 2018.
 - *Reuses / builds on:* N8; `math::Matrix` constexpr constructor.
 
-**N11. [1D convolution](roadmap/layer/Convolution1D/implementation.md).** Multi-channel cross-correlation with valid padding and stride S. Output length is `⌊(L − K)/S⌋ + 1` and there are `K·C_in·C_out + C_out` parameters. It defines the channels-last flat `Matrix<T, L·C, 1>` layout shared by all spatial layers, so Flatten is not needed. It has an optional causal streaming mode with a `(K−1)·C_in` ring buffer.
+**N11. [1D convolution](roadmap/layer/Convolution1D/implementation.md).** Multi-channel
+cross-correlation with valid padding and stride S. Output length is `⌊(L − K)/S⌋ + 1` and there are
+`K·C_in·C_out + C_out` parameters. It defines the channels-last flat `Matrix<T, L·C, 1>` layout
+shared by all spatial layers, so Flatten is not needed. It has an optional causal streaming mode
+with a `(K−1)·C_in` ring buffer.
 - *Algorithm / paper:* S. Kiranyaz et al., "1D convolutional neural networks and applications: A survey," *Mech. Syst. Signal Process.* 151, 2021; Y. LeCun et al., *Proc. IEEE* 86(11), 1998.
 - *Reuses / builds on:* N8, N10. It does not reuse `analysis::LinearConvolution`, which computes a full-length, single-channel convolution on BoundedVector I/O.
 

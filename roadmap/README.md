@@ -9,7 +9,7 @@ Deploy one with [DEPLOYMENT.md](DEPLOYMENT.md).
 
 The tree mirrors the `neural_network/` layout. Each algorithm gets its own folder with **three files**:
 
-```
+```text
 roadmap/<domain>/<AlgorithmName>/
 ├── implementation.md   # data structures, interface, algorithm pseudocode, complexity, float notes, deployment
 ├── tests.md            # GoogleTest test plan in pseudocode (TEST_F on float, StrictMock, no heap)

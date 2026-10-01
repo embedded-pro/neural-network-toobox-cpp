@@ -4,7 +4,7 @@
 
 ## Data structures
 
-```
+```text
 # sizes (all compile-time):
 #   X = InputSize (features per time step), H = HiddenSize, K = BpttWindow (truncation depth, K ≥ 1)
 #   P = H·X + H·H + H
@@ -54,7 +54,7 @@ class FlashElmanRnn final : public InferenceLayer<T, X, H>,  # N8 inference base
 
 Class diagram (N8/N10 hierarchy, extended):
 
-```
+```text
 InferenceLayer<T, In, Out>        Forward, Output
  ├─ FlashElmanRnn<T, X, H>        (+ StatefulLayer<T, H>)                   ← inference only, weights in flash
  └─ Layer<T, In, Out, P>          + Backward, Parameters, SetParameters, ParameterGradients, ZeroGradients
@@ -64,7 +64,7 @@ StatefulLayer<T, S>               ResetState, State, SetState               ← 
 
 ## Interface
 
-```
+```text
 # StatefulLayer<T, S>  (neural_network/layer/StatefulLayer.hpp)
 virtual ~StatefulLayer() = default
 virtual void               ResetState() = 0                          # state = 0; starts a new sequence
@@ -106,14 +106,14 @@ void ResetState()                                                               
 
 `detail` helper in `Model.hpp`:
 
-```
+```text
 template<typename L> concept StatefulLayerType =
     requires { L::StateSize; } && std::is_base_of_v<StatefulLayer<typename L::ValueType, L::StateSize>, L>
 ```
 
 ## Algorithm (pseudocode)
 
-```
+```text
 function ElmanRnn(Wx, Wh):
     for i in 0..H-1:
         for j in 0..X-1:  parameters[i·X + j]         = Wx.at(i, j)
@@ -182,7 +182,7 @@ function Model::ResetState():                    # fold over index_sequence, no 
 
 Math (one sequence after `ResetState`/`SetState` at step `t₀`, state `h_{t₀}` given; steps `s = t₀+1, …, t`):
 
-```
+```text
 forward:          z_s = W_x x_s + W_h h_{s−1} + b,     h_s = tanh(z_s)            (h_{t₀} = 0 after ResetState)
 loss injection:   Backward(g) after Forward(x_t) receives g = ∂L_t/∂h_t (direct dependence of the step-t loss)
 local error:      δ_t = g ⊙ (1 − h_t²)                                            (tanh' = 1 − tanh²)

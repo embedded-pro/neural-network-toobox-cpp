@@ -4,7 +4,7 @@
 
 ## Fixture
 
-```
+```text
 class TestHuberLoss : public ::testing::Test:
     static constexpr std::size_t size = 4
     using Vector = neural_network::HuberLoss<float, size>::Vector
@@ -22,7 +22,7 @@ class TestHuberLoss : public ::testing::Test:
 
 ## Test cases (Arrange / Act / Assert)
 
-```
+```text
 CostIsMeanHuberPlusRegularization:
     Arrange: EXPECT_CALL(regularization, Calculate(_)).WillOnce(Return(0.1f))
     Act:     cost = loss.Cost(predictions)
@@ -76,18 +76,18 @@ LargeOutlierKeepsCostFiniteAndGradientBoundedByDelta:
 Computed by [`reference.py`](reference.py) (numpy `float32`, same branch-free formula and FD
 step as the helper; the quadratic/linear piecewise form in `float64` agrees on every cost):
 
-| Quantity                                                  | Value                                                         |
-|-----------------------------------------------------------|---------------------------------------------------------------|
-| residuals `e = ŷ − y`                                     | `(0.5, -0.5, 2.0, -3.0)`                                      |
-| `ρ_1.5(e)`                                                | `(0.125, 0.125, 1.875, 3.375)`                                |
-| `Cost`, δ = 1.5, `R = 0.1`                                | `1.375 + 0.1 = 1.475`                                         |
-| `Gradient`, δ = 1.5, `∇R = (0.01, 0.02, 0.03, 0.04)`      | `(0.125, -0.125, 0.375, -0.375) + ∇R = (0.135, -0.105, 0.405, -0.335)` |
-| FD at `predictions`, δ = 1.5                              | `(0.1250505, -0.1250505, 0.3750324, -0.3750324)` (max err `5.1e-5`)    |
-| boundary `e = (1.5, 0, 0, 0)`: cost / analytic / FD       | `0.28125` / `(0.375, 0, 0, 0)` / `(0.3749281, 0, 0, 0)` (err `7.2e-5`) |
-| `MSE` / `MAE` at `predictions`                            | `3.375` / `1.5`                                               |
-| Huber δ = 10: cost / gradient                             | `1.6875` / `(0.125, -0.125, 0.5, -0.75)` (FD max err `5.4e-5`) |
-| Huber δ = 0.25: cost / gradient                           | `0.34375` / `(0.0625, -0.0625, 0.0625, -0.0625)` (FD max err `4.5e-6`) |
-| outlier `e₀ = 1e20`, δ = 1.5: cost / gradient             | `3.75e19` / `(0.375, 0, 0, 0)`; float32 MSE on the same input = `inf`  |
+| Quantity                                             | Value                                                                  |
+|------------------------------------------------------|------------------------------------------------------------------------|
+| residuals `e = ŷ − y`                                | `(0.5, -0.5, 2.0, -3.0)`                                               |
+| `ρ_1.5(e)`                                           | `(0.125, 0.125, 1.875, 3.375)`                                         |
+| `Cost`, δ = 1.5, `R = 0.1`                           | `1.375 + 0.1 = 1.475`                                                  |
+| `Gradient`, δ = 1.5, `∇R = (0.01, 0.02, 0.03, 0.04)` | `(0.125, -0.125, 0.375, -0.375) + ∇R = (0.135, -0.105, 0.405, -0.335)` |
+| FD at `predictions`, δ = 1.5                         | `(0.1250505, -0.1250505, 0.3750324, -0.3750324)` (max err `5.1e-5`)    |
+| boundary `e = (1.5, 0, 0, 0)`: cost / analytic / FD  | `0.28125` / `(0.375, 0, 0, 0)` / `(0.3749281, 0, 0, 0)` (err `7.2e-5`) |
+| `MSE` / `MAE` at `predictions`                       | `3.375` / `1.5`                                                        |
+| Huber δ = 10: cost / gradient                        | `1.6875` / `(0.125, -0.125, 0.5, -0.75)` (FD max err `5.4e-5`)         |
+| Huber δ = 0.25: cost / gradient                      | `0.34375` / `(0.0625, -0.0625, 0.0625, -0.0625)` (FD max err `4.5e-6`) |
+| outlier `e₀ = 1e20`, δ = 1.5: cost / gradient        | `3.75e19` / `(0.375, 0, 0, 0)`; float32 MSE on the same input = `inf`  |
 
 All FD errors are far below `math::Tolerance<float>() = 1e-3`; the analytic FD truncation error at the
 seam `|e| = δ` is `h/(4N) = 6.25e-5`.

@@ -4,7 +4,7 @@
 
 ## Fixture
 
-```
+```text
 # anonymous namespace
 using HiddenLayer    = neural_network::Dense<float, 2, 3>
 using OutputLayer    = neural_network::Dense<float, 3, 1>
@@ -43,7 +43,7 @@ class TestWeightExport : public ::testing::Test:
 
 ## Test cases (Arrange / Act / Assert)
 
-```
+```text
 LayoutConstantsAreFixedAtCompileTime:
     Assert: static_assert(Blob::ParameterCount == 13 && Blob::Size == 76)
             static_assert(Blob::PayloadOffset<0> == 20 && Blob::PayloadOffset<1> == 56)
@@ -118,7 +118,7 @@ by the `type_identity_t` signature and is not a runtime test.
 The C++ side cannot see framework tensors, so the conversion rules are tested in Python. Each case is one
 `unittest.TestCase` method. Tolerance is `1e-6` absolute unless stated.
 
-```
+```text
 test_keras_dense_kernel_is_transposed:
     kernel (2×3) = [[0.5, 1.5, -0.5], [-1.0, 0.25, 0.75]],  bias = (0.1, -0.2, 0.05)
     ⇒ θ = (0.5, -1.0, 1.5, 0.25, -0.5, 0.75, 0.1, -0.2, 0.05)                  # float32-equal
@@ -180,24 +180,24 @@ cross-checked in float32. A C++ prototype of `WeightBlob` against the current `D
 `Tanh` and emil `infra::Crc32` (`proto.cpp`, GCC 13 and Clang 18) reproduced the golden bytes from `Save`,
 every `Validate` status below, the unaligned `Decode`, the zero-copy view and the forward value.
 
-| Quantity                                                  | Value                                                         |
-|-----------------------------------------------------------|---------------------------------------------------------------|
-| Fixture `θ` (float32 literals)                            | `0.5, -1.0, 1.5, 0.25, -0.5, 0.75, 0.100000001, -0.200000003, 0.0500000007` / `1.0, -0.5, 2.0, -0.300000012` |
-| Descriptor, `LayoutHash`                                  | `[2, 2, 3, 9, 3, 1, 4]` → `0x81EF2FF9`                        |
-| Same-size other shape `1→2→3`                             | `[2, 1, 2, 4, 2, 3, 9]` → `0x4805B488`, `Size = 76`           |
-| FNV-1a-32 check vector                                    | `"a"` → `0xE40C292C`                                          |
-| `Size`, payload offsets, CRC offset                       | `76`, `20` / `56`, `72`                                       |
-| Header bytes 0–19                                         | `4E 4E 57 42 01 00 01 00 F9 2F EF 81 02 00 00 00 0D 00 00 00` |
-| Payload bytes 20–71                                       | `00 00 00 3F 00 00 80 BF 00 00 C0 3F 00 00 80 3E 00 00 00 BF 00 00 40 3F CD CC CC 3D CD CC 4C BE CD CC 4C 3D 00 00 80 3F 00 00 00 BF 00 00 00 40 9A 99 99 BE` |
-| CRC-32 bytes 72–75                                        | `EB 03 B4 18` (`0x18B403EB`; `zlib.crc32` and `infra::Crc32` agree; `"123456789"` → `0xCBF43926`) |
-| NaN variant (bytes 20–23 `00 00 C0 7F`) valid CRC         | `0x057E2501` → bytes `01 25 7E 05`                            |
-| Hidden `z`, `a` (LeakyReLU 0.1) at `x = (2, 0.5)`         | `(0.6, 2.925, -0.575)`, `(0.6, 2.925, -0.0575)`              |
-| Output `z`, `y = tanh(z)`                                 | `-1.2775`, `-0.8558174` (float64 `-0.855817404`)              |
-| BN fold (pre-activation) `a`, `b`                         | `(2.395214352, 0.249968756, 6.629935441)`, `(-0.858085741, -0.799937512, 3.314967721)` |
-| BN fold output at `x = (2, 0.5)`                          | `(0.579042874, -0.068778902, -0.497245153)`; float32 folded `(0.5790428, -0.0687789, -0.49724483)` |
-| BN fold (post-activation) `W₂'`, `c₂'`, `z₂`              | `(2.39521432, -0.124984376, 13.2598705)`, `5.87181854`, `6.180925191` |
-| Conv1D `θ_W` (Keras and PyTorch)                          | `(1, 3, 5, 7, 2, 4, 6, 8)`; output `[[14.5, 17], [5.75, 8]]`  |
-| LSTM fused `θ`, GRU `θ`                                   | `(1..8, 1.1, 1.2, 1.3, 1.4)`, `(0.2, 0.1, 0.3, 0.5, 0.4, 0.6, 2, 1, 3, 5, 4, 6)` |
+| Quantity                                          | Value                                                                                                                                                         |
+|---------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Fixture `θ` (float32 literals)                    | `0.5, -1.0, 1.5, 0.25, -0.5, 0.75, 0.100000001, -0.200000003, 0.0500000007` / `1.0, -0.5, 2.0, -0.300000012`                                                  |
+| Descriptor, `LayoutHash`                          | `[2, 2, 3, 9, 3, 1, 4]` → `0x81EF2FF9`                                                                                                                        |
+| Same-size other shape `1→2→3`                     | `[2, 1, 2, 4, 2, 3, 9]` → `0x4805B488`, `Size = 76`                                                                                                           |
+| FNV-1a-32 check vector                            | `"a"` → `0xE40C292C`                                                                                                                                          |
+| `Size`, payload offsets, CRC offset               | `76`, `20` / `56`, `72`                                                                                                                                       |
+| Header bytes 0–19                                 | `4E 4E 57 42 01 00 01 00 F9 2F EF 81 02 00 00 00 0D 00 00 00`                                                                                                 |
+| Payload bytes 20–71                               | `00 00 00 3F 00 00 80 BF 00 00 C0 3F 00 00 80 3E 00 00 00 BF 00 00 40 3F CD CC CC 3D CD CC 4C BE CD CC 4C 3D 00 00 80 3F 00 00 00 BF 00 00 00 40 9A 99 99 BE` |
+| CRC-32 bytes 72–75                                | `EB 03 B4 18` (`0x18B403EB`; `zlib.crc32` and `infra::Crc32` agree; `"123456789"` → `0xCBF43926`)                                                             |
+| NaN variant (bytes 20–23 `00 00 C0 7F`) valid CRC | `0x057E2501` → bytes `01 25 7E 05`                                                                                                                            |
+| Hidden `z`, `a` (LeakyReLU 0.1) at `x = (2, 0.5)` | `(0.6, 2.925, -0.575)`, `(0.6, 2.925, -0.0575)`                                                                                                               |
+| Output `z`, `y = tanh(z)`                         | `-1.2775`, `-0.8558174` (float64 `-0.855817404`)                                                                                                              |
+| BN fold (pre-activation) `a`, `b`                 | `(2.395214352, 0.249968756, 6.629935441)`, `(-0.858085741, -0.799937512, 3.314967721)`                                                                        |
+| BN fold output at `x = (2, 0.5)`                  | `(0.579042874, -0.068778902, -0.497245153)`; float32 folded `(0.5790428, -0.0687789, -0.49724483)`                                                            |
+| BN fold (post-activation) `W₂'`, `c₂'`, `z₂`      | `(2.39521432, -0.124984376, 13.2598705)`, `5.87181854`, `6.180925191`                                                                                         |
+| Conv1D `θ_W` (Keras and PyTorch)                  | `(1, 3, 5, 7, 2, 4, 6, 8)`; output `[[14.5, 17], [5.75, 8]]`                                                                                                  |
+| LSTM fused `θ`, GRU `θ`                           | `(1..8, 1.1, 1.2, 1.3, 1.4)`, `(0.2, 0.1, 0.3, 0.5, 0.4, 0.6, 2, 1, 3, 5, 4, 6)`                                                                              |
 
 ## Edge cases
 

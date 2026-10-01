@@ -4,7 +4,7 @@
 
 ## Fixtures
 
-```
+```text
 class TestConvolution2D : public ::testing::Test:
     using Convolution     = neural_network::Convolution2D<float, 5, 4, 2, 2, 2, 3, 2, 1>
                             # H=5, W=4, Cin=2, Cout=2, KH=2, KW=3, SH=2, SW=1 ⇒ Hout=2 (row 4 dropped), Wout=2 (columns overlap), P=26
@@ -64,7 +64,7 @@ class TestPooling2D : public ::testing::Test:
 
 `TestConvolution2D` (`neural_network/layer/test/TestConvolution2D.cpp`):
 
-```
+```text
 SizesFollowValidStridedWindowCount:
     Assert: Convolution::InputSize == 40, OutputSize == 8, ParameterSize == 26
             Convolution::OutputHeight == 2, Convolution::OutputWidth == 2
@@ -140,7 +140,7 @@ BackwardAccumulatesAcrossSamplesUntilZeroGradients:
 
 `TestPooling2D` (`neural_network/layer/test/TestPooling2D.cpp`):
 
-```
+```text
 OutputSizeFollowsValidPaddingFormula:
     Assert: MaxNonOverlapping::OutputHeight == 2, ::OutputWidth == 2, ::OutputSize == 8
             MaxOverlapping::OutputHeight == 2, ::OutputWidth == 2
@@ -201,7 +201,7 @@ in `neural_network/model/test/TestModel.cpp` (the layer test target does not lin
 It exercises `Model` with a 2D convolution, a parameter-free 2D pooling layer and the backward chain
 through both:
 
-```
+```text
 Convolution2DAndGlobalAveragePoolingFeedDenseAndBackpropagate:
     Arrange: Model<float, 40, 1,
                    Convolution2D<float, 5, 4, 2, 2, 2, 3, 2, 1>,          # 40 → 8
@@ -229,30 +229,34 @@ Convolution2DAndGlobalAveragePoolingFeedDenseAndBackpropagate:
 Computed by [`reference.py`](reference.py) (run `python3 reference.py`) with float32
 rounding at every operation and the same central-difference step as the tests (`h = 1e-3`):
 
-| Quantity                                                               | Value                                                                  |
-|------------------------------------------------------------------------|------------------------------------------------------------------------|
-| `(Hout, Wout)` for `(H, W, KH, KW, SH, SW)` = (5,4,2,3,2,1) / (5,4,2,3,1,2) / (28,28,3,3,2,2) / (4,3,4,3,1,1) / (4,3,1,1,1,1) | `(2,2) / (4,1) / (13,13) / (1,1) / (4,3)` |
-| Pre-activation `z`, fixture `θ`, `x`                                   | `(2.05, -0.6, -0.725, 0.8875, 1.375, 0.375, 0.8, -1.175)` (float64 agrees) |
-| `z` with biases 0 (constructor state)                                  | `(1.95, -0.4, -0.825, 1.0875, 1.275, 0.575, 0.7, -0.975)`             |
-| Forward, LeakyReLU(0.1)                                                | `(2.05, -0.06, -0.0725, 0.8875, 1.375, 0.375, 0.8, -0.1175)`          |
-| Wrong-layout `z`: flipped kernel / channels-first kernel / swapped strides | `(0.675, -0.275, 1.5, -1.525, -1.4, 0.825, 0.525, 1.4375)` / `(0.975, -0.8, 1.225, -1.3875, -0.625, 1.9125, -0.05, -0.6875)` / `(2.05, -0.6, -1.475, 1.4, 1.375, 0.375, -1.025, 0.1375)` |
-| Height-one conv on the N11 fixture, LeakyReLU                          | `z = (1.025, -1.05, 0.375, 0.55)`, `y = (1.025, -0.105, 0.375, 0.55)`  |
-| Forward, Tanh                                                          | `(0.9673949, -0.5370496, -0.6199968, 0.7101567, 0.8798267, 0.3583574, 0.6640368, -0.8258684)` |
-| `δ = (1 − y²) ⊙ g`                                                     | `(0.0513176, -0.9250511, 0.2462416, 0.2974065, -0.1129525, 0.217895, 0.5590552, -0.238456)` |
-| `∂L/∂x` analytic                                                       | see `BackwardInputGradientMatchesAnalyticAndFiniteDifference`; finite difference max err `1.5e-4` |
-| `∂L/∂θ` analytic                                                       | see `BackwardParameterGradientsMatchAnalyticAndFiniteDifference`; finite difference max err `1.6e-4` |
-| `x2` / `z` for `x2`                                                    | `(-0.5, 0.2, -0.2, 0.5, 0.1, -0.3, 0.4, 0, -0.4, 0.3, …)` period 11 / `(-0.02, 0.085, -0.42, 0.48, -0.25, 0.715, 0.23, -0.65)` |
-| `∂L/∂θ` for `(x2, g2)`                                                 | `(-0.162005, 0.08757342, -0.3234491, 0.2216778, 0.1413881, -0.2696344, -0.2158197, 1.053119, -0.3772638, -0.162005, 0.08757342, -0.3234491, -0.4040094, -0.1640598, 0.07966122, 0.4176485, -0.3252834, -0.08156233, -0.2427859, -0.179027, 0.2408848, -0.4040094, -0.1640598, 0.07966122, -0.5381472, 1.612236)` |
-| Accumulated `G(x,g) + G(x2,g2)`                                        | see `BackwardAccumulatesAcrossSamplesUntilZeroGradients`; FD max err `2.0e-4` |
-| Max 2×2 / stride 2×2: forward, argmax flat indices                     | `(0.5, 2, 1.25, 1.5, 2, 1, 0.5, 1.5)`, `(0, 9, 14, 5, 18, 17, 20, 23)` |
-| Max 2×3 / stride 2×1: forward, argmax flat indices                     | `(0.75, 2, 1.25, 1.5, 2, 1, 2, 1.5)`, `(12, 9, 14, 5, 18, 17, 18, 23)`; min window margin `0.25` |
-| … backward, `g = (0.8, -1.3, 0.4, 0.25, -0.6, 1.1, 0.5, -0.9)`         | nonzero: `[5] 0.25, [9] -1.3, [12] 0.8, [14] 0.4, [17] 1.1, [18] -0.1, [23] -0.9`; FD max err `9.0e-5` |
-| Tie `2×4×1`, `x = (-0.3, 0.7, 0.2, 0.2, 0.7, 0.1, -0.5, 0.2)`, `g = (1, 2)` | forward `(0.7, 0.2)`, argmax `(1, 2)`, backward `(0, 1, 2, 0, 0, 0, 0, 0)` |
-| Average 2×3 / stride 2×1 forward                                       | `(-0.08333334, 0.5416667, 0.2083333, 0.375, 0.5416667, -0.125, 0.125, 0.2083333)` |
-| … backward                                                             | see `AveragePoolingBackward…`; FD max err `6.3e-5`                     |
-| Global average forward / backward (`g = (0.8, -1.3)`)                  | `(0.175, 0.1875)` / `(0.04, -0.065)` per position; FD max err `1.6e-5` |
-| Model `Conv2D(LeakyReLU) → GAP → Dense(tanh)`, `W = (0.5, -0.25)`, `b = 0.1` | pooled `(1.038125, 0.27125)`, `z = 0.55125`, `y = 0.5014566`; `∂L/∂pooled = (0.3742707, -0.1871353)` |
-| Model `Backward(1)`                                                    | see the integration case; FD max err `4.2e-5`; min `|z|` of the conv layer `0.375` ≫ h (no LeakyReLU kink crossed) |
+| Quantity                                                                                                                      | Value                                                                                                                                                                                    |
+|-------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `(Hout, Wout)` for `(H, W, KH, KW, SH, SW)` = (5,4,2,3,2,1) / (5,4,2,3,1,2) / (28,28,3,3,2,2) / (4,3,4,3,1,1) / (4,3,1,1,1,1) | `(2,2) / (4,1) / (13,13) / (1,1) / (4,3)`                                                                                                                                                |
+| Pre-activation `z`, fixture `θ`, `x`                                                                                          | `(2.05, -0.6, -0.725, 0.8875, 1.375, 0.375, 0.8, -1.175)` (float64 agrees)                                                                                                               |
+| `z` with biases 0 (constructor state)                                                                                         | `(1.95, -0.4, -0.825, 1.0875, 1.275, 0.575, 0.7, -0.975)`                                                                                                                                |
+| Forward, LeakyReLU(0.1)                                                                                                       | `(2.05, -0.06, -0.0725, 0.8875, 1.375, 0.375, 0.8, -0.1175)`                                                                                                                             |
+| Wrong-layout `z`: flipped kernel / channels-first kernel / swapped strides                                                    | `(0.675, -0.275, 1.5, -1.525, -1.4, 0.825, 0.525, 1.4375)` / `(0.975, -0.8, 1.225, -1.3875, -0.625, 1.9125, -0.05, -0.6875)` / `(2.05, -0.6, -1.475, 1.4, 1.375, 0.375, -1.025, 0.1375)` |
+| Height-one conv on the N11 fixture, LeakyReLU                                                                                 | `z = (1.025, -1.05, 0.375, 0.55)`, `y = (1.025, -0.105, 0.375, 0.55)`                                                                                                                    |
+| Forward, Tanh                                                                                                                 | `(0.9673949, -0.5370496, -0.6199968, 0.7101567, 0.8798267, 0.3583574, 0.6640368, -0.8258684)`                                                                                            |
+| `δ = (1 − y²) ⊙ g`                                                                                                            | `(0.0513176, -0.9250511, 0.2462416, 0.2974065, -0.1129525, 0.217895, 0.5590552, -0.238456)`                                                                                              |
+| `∂L/∂x` analytic                                                                                                              | see `BackwardInputGradientMatchesAnalyticAndFiniteDifference`; finite difference max err `1.5e-4`                                                                                        |
+| `∂L/∂θ` analytic                                                                                                              | see `BackwardParameterGradientsMatchAnalyticAndFiniteDifference`; finite difference max err `1.6e-4`                                                                                     |
+| `x2` / `z` for `x2`                                                                                                           | `(-0.5, 0.2, -0.2, 0.5, 0.1, -0.3, 0.4, 0, -0.4, 0.3, …)` period 11 / `(-0.02, 0.085, -0.42, 0.48, -0.25, 0.715, 0.23, -0.65)`                                                           |
+| `∂L/∂θ` for `(x2, g2)`                                                                                                        | *V1* (below)                                                                                                                                                                             |
+| Accumulated `G(x,g) + G(x2,g2)`                                                                                               | see `BackwardAccumulatesAcrossSamplesUntilZeroGradients`; FD max err `2.0e-4`                                                                                                            |
+| Max 2×2 / stride 2×2: forward, argmax flat indices                                                                            | `(0.5, 2, 1.25, 1.5, 2, 1, 0.5, 1.5)`, `(0, 9, 14, 5, 18, 17, 20, 23)`                                                                                                                   |
+| Max 2×3 / stride 2×1: forward, argmax flat indices                                                                            | `(0.75, 2, 1.25, 1.5, 2, 1, 2, 1.5)`, `(12, 9, 14, 5, 18, 17, 18, 23)`; min window margin `0.25`                                                                                         |
+| … backward, `g = (0.8, -1.3, 0.4, 0.25, -0.6, 1.1, 0.5, -0.9)`                                                                | nonzero: `[5] 0.25, [9] -1.3, [12] 0.8, [14] 0.4, [17] 1.1, [18] -0.1, [23] -0.9`; FD max err `9.0e-5`                                                                                   |
+| Tie `2×4×1`, `x = (-0.3, 0.7, 0.2, 0.2, 0.7, 0.1, -0.5, 0.2)`, `g = (1, 2)`                                                   | forward `(0.7, 0.2)`, argmax `(1, 2)`, backward `(0, 1, 2, 0, 0, 0, 0, 0)`                                                                                                               |
+| Average 2×3 / stride 2×1 forward                                                                                              | `(-0.08333334, 0.5416667, 0.2083333, 0.375, 0.5416667, -0.125, 0.125, 0.2083333)`                                                                                                        |
+| … backward                                                                                                                    | see `AveragePoolingBackward…`; FD max err `6.3e-5`                                                                                                                                       |
+| Global average forward / backward (`g = (0.8, -1.3)`)                                                                         | `(0.175, 0.1875)` / `(0.04, -0.065)` per position; FD max err `1.6e-5`                                                                                                                   |
+| Model `Conv2D(LeakyReLU) → GAP → Dense(tanh)`, `W = (0.5, -0.25)`, `b = 0.1`                                                  | pooled `(1.038125, 0.27125)`, `z = 0.55125`, `y = 0.5014566`; `∂L/∂pooled = (0.3742707, -0.1871353)`                                                                                     |
+| Model `Backward(1)`                                                                                                           | see the integration case; FD max err `4.2e-5`; min `\|z\|` of the conv layer `0.375` ≫ h (no LeakyReLU kink crossed)                                                                     |
+
+Long reference vectors for the table above:
+
+- *V1*: `(-0.162005, 0.08757342, -0.3234491, 0.2216778, 0.1413881, -0.2696344, -0.2158197, 1.053119, -0.3772638, -0.162005, 0.08757342, -0.3234491, -0.4040094, -0.1640598, 0.07966122, 0.4176485, -0.3252834, -0.08156233, -0.2427859, -0.179027, 0.2408848, -0.4040094, -0.1640598, 0.07966122, -0.5381472, 1.612236)`
 
 ## Edge cases
 

@@ -4,7 +4,7 @@
 
 ## Fixture
 
-```
+```text
 class TestExponentialLinearUnit : public ::testing::Test:
     neural_network::ExponentialLinearUnit<float> elu                                                   # α = 1, λ = 1
     neural_network::ExponentialLinearUnit<float> selu{ neural_network::ExponentialLinearUnit<float>::Selu() }
@@ -17,7 +17,7 @@ class TestExponentialLinearUnit : public ::testing::Test:
 
 ## Test cases (Arrange / Act / Assert)
 
-```
+```text
 EluForwardIsLinearForPositiveAndExponentialForNonPositive:
     Act:    elu.Forward(x) for x ∈ {-3.0, -1.0, -0.5, 0.0, 2.0}
     Assert: EXPECT_NEAR(.., {-0.950213, -0.6321206, -0.3934693, 0.0, 2.0}, Tolerance)
@@ -79,24 +79,24 @@ so it would fail for a wrong constant pair.
 Computed by [`reference.py`](reference.py) (float32 emulation of the
 pseudocode and of `ActivationFiniteDifference.hpp`, cross-checked against double `expm1`/`exp`):
 
-| Quantity                                                    | Value                                                           |
-|-------------------------------------------------------------|-----------------------------------------------------------------|
-| float32 SELU constants `α₀₁`, `λ₀₁`, `λα`                   | `1.6732632`, `1.0507010`, `1.7580993`                           |
-| `elu.Forward` at `{-3, -1, -0.5, 0, 2}`                     | `{-0.950213, -0.6321206, -0.3934693, 0, 2}`                     |
-| `selu.ForwardVector` at `{-2, -0.5, 0, 0.7, 1.5}`           | `{-1.520167, -0.6917582, 0, 0.7354907, 1.576051}`               |
-| `elu.Backward` at `{-2, -0.5, 0, 1.5}`                      | `{0.1353353, 0.6065307, 1, 1}`                                  |
-| `elu` scalar FD at `{-2, -0.5, 0.7}`                        | `{0.1353323, 0.6065071, 0.9999871}` (max err `2.4e-5`)          |
-| `elu` scalar FD at `0`                                      | `0.9997552` (err `2.4e-4`, from the `f''` jump; < `1e-3`)       |
-| `selu.Backward` at `{-2, -0.5, 0, 0.5}`                     | `{0.2379329, 1.066341, 1.758099, 1.050701}`                     |
-| `selu` scalar FD at `{-2, -0.5, 0.7}`                       | `{0.2379417, 1.066297, 1.050681}` (max err `4.4e-5`)            |
-| `elu` `BackwardVector` analytic / FD                        | `{0.04060058, -0.7278368, 0.8, -0.4}` / `{0.04062056, -0.7278025, 0.8000135, -0.4000067}` (max diff `3.4e-5`) |
-| `selu` `BackwardVector` analytic / FD                       | `{0.07137984, -1.279609, 0.8405609, -0.4202804}` / `{0.07137656, -1.279563, 0.8405446, -0.4203319}` (max diff `5.1e-5`) |
-| `Forward(-100)` ELU / SELU                                  | `-1` / `-1.7580993`                                             |
-| `Forward(1e30)` ELU / SELU                                  | `1e30` / `1.050701e30`                                          |
-| `BackwardVector` at `-100` (reused output)                  | `0` exactly (ELU and SELU)                                      |
-| SELU moments, closed form (double)                          | mean `1.7e-16`, second moment `1 − 2e-16`                       |
-| SELU moments, float32 quadrature as specified               | mean `-1.2e-6`, second moment `0.9999996`                       |
-| ELU moments, same quadrature                                | mean `0.1605203`, second moment `0.6449451`                     |
+| Quantity                                          | Value                                                                                                                   |
+|---------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|
+| float32 SELU constants `α₀₁`, `λ₀₁`, `λα`         | `1.6732632`, `1.0507010`, `1.7580993`                                                                                   |
+| `elu.Forward` at `{-3, -1, -0.5, 0, 2}`           | `{-0.950213, -0.6321206, -0.3934693, 0, 2}`                                                                             |
+| `selu.ForwardVector` at `{-2, -0.5, 0, 0.7, 1.5}` | `{-1.520167, -0.6917582, 0, 0.7354907, 1.576051}`                                                                       |
+| `elu.Backward` at `{-2, -0.5, 0, 1.5}`            | `{0.1353353, 0.6065307, 1, 1}`                                                                                          |
+| `elu` scalar FD at `{-2, -0.5, 0.7}`              | `{0.1353323, 0.6065071, 0.9999871}` (max err `2.4e-5`)                                                                  |
+| `elu` scalar FD at `0`                            | `0.9997552` (err `2.4e-4`, from the `f''` jump; < `1e-3`)                                                               |
+| `selu.Backward` at `{-2, -0.5, 0, 0.5}`           | `{0.2379329, 1.066341, 1.758099, 1.050701}`                                                                             |
+| `selu` scalar FD at `{-2, -0.5, 0.7}`             | `{0.2379417, 1.066297, 1.050681}` (max err `4.4e-5`)                                                                    |
+| `elu` `BackwardVector` analytic / FD              | `{0.04060058, -0.7278368, 0.8, -0.4}` / `{0.04062056, -0.7278025, 0.8000135, -0.4000067}` (max diff `3.4e-5`)           |
+| `selu` `BackwardVector` analytic / FD             | `{0.07137984, -1.279609, 0.8405609, -0.4202804}` / `{0.07137656, -1.279563, 0.8405446, -0.4203319}` (max diff `5.1e-5`) |
+| `Forward(-100)` ELU / SELU                        | `-1` / `-1.7580993`                                                                                                     |
+| `Forward(1e30)` ELU / SELU                        | `1e30` / `1.050701e30`                                                                                                  |
+| `BackwardVector` at `-100` (reused output)        | `0` exactly (ELU and SELU)                                                                                              |
+| SELU moments, closed form (double)                | mean `1.7e-16`, second moment `1 − 2e-16`                                                                               |
+| SELU moments, float32 quadrature as specified     | mean `-1.2e-6`, second moment `0.9999996`                                                                               |
+| ELU moments, same quadrature                      | mean `0.1605203`, second moment `0.6449451`                                                                             |
 
 ## Edge cases
 

@@ -4,7 +4,7 @@
 
 ## Fixture
 
-```
+```text
 class TestIdentity : public ::testing::Test:
     neural_network::Identity<float> activation
 # each case below is a TEST_F(TestIdentity, <name>)
@@ -15,7 +15,7 @@ class TestIdentity : public ::testing::Test:
 
 ## Test cases (Arrange / Act / Assert)
 
-```
+```text
 ForwardReturnsInputUnchanged:
     Act:    Forward(x) for x ∈ {-2.5, 0.0, 3.75, 1e30}
     Assert: EXPECT_FLOAT_EQ(Forward(x), x)             # bit-exact, no clamp at large |x|
@@ -42,7 +42,7 @@ BackwardVectorPassesUpstreamThroughAndMatchesFiniteDifference:
 Integration case, deployed as `TEST_F(TestDense, IdentityActivationEmitsRawAffineOutput)` in
 `neural_network/layer/test/TestDense.cpp` (the activation test target does not link `neural_network.layer`):
 
-```
+```text
 IdentityActivationEmitsRawAffineOutput:
     Arrange: Dense<float,3,2> layer{ weights, identity }
              weights = {{0.1, -0.2, 0.3}, {0.4, 0.5, -0.6}}
@@ -56,15 +56,15 @@ IdentityActivationEmitsRawAffineOutput:
 
 Computed by [`reference.py`](reference.py) (float32-rounded, same step as the helper):
 
-| Quantity                                         | Value                                                     |
-|--------------------------------------------------|-----------------------------------------------------------|
-| `Forward(x)` for `{-2.5, 0, 3.75, 1e30}`         | `{-2.5, 0, 3.75, 1e30}` (bit-exact)                       |
-| `Backward(x)` for `{-1e30, 0, 7.5}`              | `1, 1, 1`                                                 |
-| scalar FD at `{-2, 0, 0.7}`                      | `0.9999871, 1.0, 0.9999871` (max err `1.3e-5` < `1e-3`)   |
-| `BackwardVector` analytic                        | `{0.3, -1.2, 0.8, -0.4}`                                  |
-| `BackwardVector` FD                              | `{0.2999902, -1.1999607, 0.8000135, -0.4000067}` (max err `3.9e-5`) |
-| Dense + Identity output, `x = (1,2,3)`, `b = (0.2,-0.1)` | `(0.8, -0.5)`                                     |
-| Dense + Identity input gradient, `g = (0.8,-1.3)`        | `(-0.44, -0.81, 1.02)` (FD agrees)                |
+| Quantity                                                 | Value                                                               |
+|----------------------------------------------------------|---------------------------------------------------------------------|
+| `Forward(x)` for `{-2.5, 0, 3.75, 1e30}`                 | `{-2.5, 0, 3.75, 1e30}` (bit-exact)                                 |
+| `Backward(x)` for `{-1e30, 0, 7.5}`                      | `1, 1, 1`                                                           |
+| scalar FD at `{-2, 0, 0.7}`                              | `0.9999871, 1.0, 0.9999871` (max err `1.3e-5` < `1e-3`)             |
+| `BackwardVector` analytic                                | `{0.3, -1.2, 0.8, -0.4}`                                            |
+| `BackwardVector` FD                                      | `{0.2999902, -1.1999607, 0.8000135, -0.4000067}` (max err `3.9e-5`) |
+| Dense + Identity output, `x = (1,2,3)`, `b = (0.2,-0.1)` | `(0.8, -0.5)`                                                       |
+| Dense + Identity input gradient, `g = (0.8,-1.3)`        | `(-0.44, -0.81, 1.02)` (FD agrees)                                  |
 
 ## Edge cases
 

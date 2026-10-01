@@ -4,7 +4,7 @@
 
 ## Data structures
 
-```
+```text
 template<typename T>                                   # static_assert(std::is_floating_point_v<T>); instantiated for float
 class AccuracyCounter:
     std::uint32_t correct = 0                          # samples with actual == predicted
@@ -22,7 +22,7 @@ class ConfusionMatrix:                                 # static_assert(NumberOfC
 Convention (Sokolova & Lapalme; also scikit-learn `confusion_matrix`): **row = actual class,
 column = predicted class**. For class `k`:
 
-```
+```text
 TP_k = C[k][k]
 FN_k = Σ_{j≠k} C[k][j]          support_k   = Σ_j C[k][j] = TP_k + FN_k     (row sum)
 FP_k = Σ_{i≠k} C[i][k]          predicted_k = Σ_i C[i][k] = TP_k + FP_k     (column sum)
@@ -35,7 +35,7 @@ floating-point/`QNumber` container.
 
 ## Interface
 
-```
+```text
 # free functions
 template<typename T, std::size_t NumberOfClasses>
 std::size_t ArgMax(const math::Vector<T, NumberOfClasses>& scores)   # lowest index of the largest score; hot path
@@ -71,7 +71,7 @@ ratios are `std::optional` (no exceptions, no NaN).
 
 Typical use with the existing `Model` (its `Forward` returns `math::Vector<T, OutputSize>`):
 
-```
+```text
 ConfusionMatrix<float, K> validation{}
 for (input, label) in validation set:
     validation.AddScores(label, model.Forward(input))
@@ -80,7 +80,7 @@ accuracy = validation.Accuracy().value_or(0)
 
 ## Algorithm (pseudocode)
 
-```
+```text
 function ArgMax(scores):                           # OPTIMIZE_FOR_SPEED
     best = 0
     for i in 1..K-1:
@@ -159,7 +159,7 @@ function MacroF1():
 
 Math:
 
-```
+```text
 Accuracy          = Σ_k TP_k / Σ_{a,p} C[a][p]
 Precision_k       = TP_k / (TP_k + FP_k)
 Recall_k          = TP_k / (TP_k + FN_k)

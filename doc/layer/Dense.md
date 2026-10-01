@@ -89,7 +89,11 @@ In the flat parameter layout, $\nabla\theta = [0, 0, 0, -0.4, -0.2, 0.4, 0, -0.4
 ## Pitfalls & Edge Cases
 
 - **Dimension mismatch.** In a multi-layer network, the output size of layer $\ell$ must equal the input size of layer $\ell+1$. This library enforces this at compile time.
-- **Weight initialization.** The caller supplies the initial weights. Zero or identical weights make all neurons compute the same thing (symmetry problem). For ReLU layers use He initialization, $W_{ij} \sim \mathcal{N}(0,\, 2/n_{\text{in}})$ — variance $2/n_{\text{in}}$, standard deviation $\sqrt{2/n_{\text{in}}}$, with $n_{\text{in}} = n$ the fan-in. For Sigmoid/Tanh use Glorot, $\operatorname{Var}(W_{ij}) = 2/(n_{\text{in}} + n_{\text{out}})$.
+- **Weight initialization.** The caller supplies the initial weights. Zero or identical weights make
+  all neurons compute the same thing (symmetry problem). For ReLU layers use He initialization,
+  $W_{ij} \sim \mathcal{N}(0,\, 2/n_{\text{in}})$ — variance $2/n_{\text{in}}$, standard deviation
+  $\sqrt{2/n_{\text{in}}}$, with $n_{\text{in}} = n$ the fan-in. For Sigmoid/Tanh use Glorot,
+  $\operatorname{Var}(W_{ij}) = 2/(n_{\text{in}} + n_{\text{out}})$.
 - **Backward before forward.** The backward pass uses the caches of the most recent forward pass; calling it first is a precondition violation.
 - **Per-sample gradients.** Each backward pass overwrites the parameter gradients. Mini-batch training must sum them across samples itself; accumulation and gradient export are roadmap N8 and N16.
 - **Softmax in a hidden or output layer.** Supported through its Jacobian-vector product, but do not feed a Softmax output into categorical cross-entropy, which expects logits (see [Loss Functions](../losses/Loss.md#categorical-cross-entropy)).

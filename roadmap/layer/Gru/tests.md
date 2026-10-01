@@ -4,7 +4,7 @@
 
 ## Fixture
 
-```
+```text
 # anonymous namespace, next to the fixture
 inline constexpr math::Vector<float, 63> flashTheta{
     0.5, -0.3,  0.2, 0.8,  -0.6, 0.1,                                          # W_x, r rows (3×2)
@@ -62,7 +62,7 @@ class TestGru : public ::testing::Test:
 
 ## Test cases (Arrange / Act / Assert)
 
-```
+```text
 SizesAndConstructorParameterLayout:
     Arrange: const Cell layer{ inputWeights, recurrentWeights }
     Assert:  Cell::InputSize == 2, Cell::OutputSize == 3, Cell::ParameterSize == 63, Cell::StateSize == 3, Cell::Window == 4
@@ -194,7 +194,7 @@ Integration case, deployed as `TEST_F(TestModel, GruFeedsDenseHeadAndResetStateR
 `neural_network/model/test/TestModel.cpp` (the layer test target does not link `neural_network.model`). It is
 the only check that `Gru` satisfies `detail::StatefulLayerType` and composes through `make_layer`:
 
-```
+```text
 GruFeedsDenseHeadAndResetStateRestartsSequence:
     Arrange: Model<float, 2, 1, Gru<float, 2, 3, 4>, Dense<float, 3, 1>> model{
                  make_layer<Gru<float, 2, 3, 4>>(inputWeights, recurrentWeights),
@@ -215,21 +215,21 @@ independent vectorised float64 implementation of the PyTorch `nn.GRU` equations 
 float64 central differences (`h = 1e-6`) match the float32 analytic full-BPTT gradient to `5.6e-8`, which
 validates the backward formulas separately from the loop code.
 
-| Quantity                                                    | Value                                                                  |
-|-------------------------------------------------------------|------------------------------------------------------------------------|
-| Step 1 from zero state `r / z / n / u`                      | `(0.672607, 0.4329071, 0.3798936)` / `(0.5249792, 0.4378235, 0.6456563)` / `(0.8621812, -0.6270753, 0.2335957)` / `(0.3, -0.2, 0.1)` |
-| Step 2 `r / z / n / u`                                      | `(0.5391194, 0.6976209, 0.4393775)` / `(0.6158159, 0.5834555, 0.5306733)` / `(0.241803, 0.3275908, 0.3180211)` / `(0.6245151, -0.2865066, -0.02402499)` |
-| `h₁ / h₂ / h₃` from zero state                              | `(0.409554, -0.352527, 0.08277316)` / `(0.3451068, -0.06922767, 0.1931813)` / `(-0.09023917, 0.177579, 0.007645406)` |
-| Wrong variants (float64): `b_h^n` folded `h₁`; Cho reset-before `h₂`; Chung `z` swap `h₁` | `(0.4205605, -0.388503, 0.1032248)`; `(0.4068705, -0.1208201, 0.2075254)`; `(0.4526272, -0.2745483, 0.1508225)` |
-| `SetState(s0)` then `x₁`                                    | `(0.7213282, -0.5190974, 0.6911989)`                                    |
-| `G` after `SetState(s0)`, `x₁`, `Backward(g)`               | as listed in the test case; FD max err `8.6e-5`                         |
-| Same, if the two earlier steps had been kept (wrong)        | `G[0..3] = (0.01513864, 0.01510562, 0.03294799, -0.001631974)`, `G[18] = 0.0112968` |
-| `∂L/∂x₃` analytic / FD                                      | `(0.576035, -0.06134456)` / `(0.5760491, -0.06137788)` (max err `3.3e-5`) |
-| `G`, full BPTT (K = 4, 3 steps, loss at step 3)             | as listed; FD max err `9.6e-5`                                          |
-| `G`, truncated (K = 2, same sequence)                       | as listed; FD from frozen `h₁` max err `6.6e-5`; differs from full BPTT at every index outside `18..44` (max `0.152` at `k = 14`) |
-| `G`, many-to-many (`perStep`, K = 4)                        | as listed; FD max err `1.2e-4`                                          |
-| Model head `c + W h_t` / `tanh`, t = 1, 2, 3                 | `0.5271451 / 0.4831958`, `0.3251384 / 0.3141457`, `-0.05887189 / -0.05880397` |
-| Sizes                                                       | fixture `P = 63`, 199 floats; `Gru<float, 3, 16, 8>`: `P = 1008`, 2 699 floats, `Forward` 912 MACs, full `Backward` 12 816 MACs |
+| Quantity                                                                                  | Value                                                                                                                                                   |
+|-------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Step 1 from zero state `r / z / n / u`                                                    | `(0.672607, 0.4329071, 0.3798936)` / `(0.5249792, 0.4378235, 0.6456563)` / `(0.8621812, -0.6270753, 0.2335957)` / `(0.3, -0.2, 0.1)`                    |
+| Step 2 `r / z / n / u`                                                                    | `(0.5391194, 0.6976209, 0.4393775)` / `(0.6158159, 0.5834555, 0.5306733)` / `(0.241803, 0.3275908, 0.3180211)` / `(0.6245151, -0.2865066, -0.02402499)` |
+| `h₁ / h₂ / h₃` from zero state                                                            | `(0.409554, -0.352527, 0.08277316)` / `(0.3451068, -0.06922767, 0.1931813)` / `(-0.09023917, 0.177579, 0.007645406)`                                    |
+| Wrong variants (float64): `b_h^n` folded `h₁`; Cho reset-before `h₂`; Chung `z` swap `h₁` | `(0.4205605, -0.388503, 0.1032248)`; `(0.4068705, -0.1208201, 0.2075254)`; `(0.4526272, -0.2745483, 0.1508225)`                                         |
+| `SetState(s0)` then `x₁`                                                                  | `(0.7213282, -0.5190974, 0.6911989)`                                                                                                                    |
+| `G` after `SetState(s0)`, `x₁`, `Backward(g)`                                             | as listed in the test case; FD max err `8.6e-5`                                                                                                         |
+| Same, if the two earlier steps had been kept (wrong)                                      | `G[0..3] = (0.01513864, 0.01510562, 0.03294799, -0.001631974)`, `G[18] = 0.0112968`                                                                     |
+| `∂L/∂x₃` analytic / FD                                                                    | `(0.576035, -0.06134456)` / `(0.5760491, -0.06137788)` (max err `3.3e-5`)                                                                               |
+| `G`, full BPTT (K = 4, 3 steps, loss at step 3)                                           | as listed; FD max err `9.6e-5`                                                                                                                          |
+| `G`, truncated (K = 2, same sequence)                                                     | as listed; FD from frozen `h₁` max err `6.6e-5`; differs from full BPTT at every index outside `18..44` (max `0.152` at `k = 14`)                       |
+| `G`, many-to-many (`perStep`, K = 4)                                                      | as listed; FD max err `1.2e-4`                                                                                                                          |
+| Model head `c + W h_t` / `tanh`, t = 1, 2, 3                                              | `0.5271451 / 0.4831958`, `0.3251384 / 0.3141457`, `-0.05887189 / -0.05880397`                                                                           |
+| Sizes                                                                                     | fixture `P = 63`, 199 floats; `Gru<float, 3, 16, 8>`: `P = 1008`, 2 699 floats, `Forward` 912 MACs, full `Backward` 12 816 MACs                         |
 
 ## Edge cases
 

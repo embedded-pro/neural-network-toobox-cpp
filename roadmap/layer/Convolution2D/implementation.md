@@ -4,7 +4,7 @@
 
 ## Data structures
 
-```
+```text
 # sizes (all compile-time):
 #   H = Height, W = Width, Cin = InChannels, Cout = OutChannels
 #   KH × KW = KernelHeight × KernelWidth,  SH × SW = StrideHeight × StrideWidth
@@ -69,7 +69,7 @@ using GlobalAveragePooling2D = AveragePooling2D<T, Height, Width, Channels, Heig
 
 ## Interface
 
-```
+```text
 # Convolution2D<T, H, W, Cin, Cout, KH, KW, SH, SW>
 using KernelMatrix = math::Matrix<T, Cout, KH·KW·Cin>   # row o = filter o, column (p·KW + q)·Cin + c
 static constexpr std::size_t OutputHeight = Hout
@@ -99,7 +99,7 @@ const OutputVector& Output() const override
 
 ## Algorithm (pseudocode)
 
-```
+```text
 function Convolution2D(kernels, activation):
     for o in 0..Cout-1:
         for j in 0..KH·KW·Cin-1:  parameters[o·KH·KW·Cin + j] = kernels.at(o, j)
@@ -196,7 +196,7 @@ function AveragePooling2D::Backward(g):         # OPTIMIZE_FOR_SPEED
 Math, convolution (one sample, filters `F[o,p,q,c]`, biases `b[o]`, upstream `g = ∂L/∂y`,
 `[·]` = Iverson bracket):
 
-```
+```text
 forward:           z[r,s,o] = b[o] + Σ_{p=0}^{KH−1} Σ_{q=0}^{KW−1} Σ_{c=0}^{Cin−1} F[o,p,q,c] · x[r·SH + p, s·SW + q, c]
                    y[r,s,o] = f(z[r,s,o])                                       (cross-correlation, kernel not flipped)
 activation VJP:    δ = J_f(z)ᵀ g;  element-wise f ⇒ δ[r,s,o] = f'(z[r,s,o]) · g[r,s,o]
@@ -212,7 +212,7 @@ accumulation:      G ← G + ∇_θ L_s per Backward (N8); N16 divides by the ba
 
 Math, pooling (window `Ω(r,s) = {(r·SH + p, s·SW + q) : p < PH, q < PW}`, `K = PH·PW`):
 
-```
+```text
 max forward:        y(r,s,c) = max_{(i,j) ∈ Ω(r,s)} x(i,j,c),   a(r,s,c) = first argmax in row-major (p, q) order
 max Jacobian:       ∂y(r,s,c)/∂x(i,j,c') = [(i,j) = a(r,s,c)] · [c' = c]          (where the maximum is unique)
 max backward:       ∂L/∂x(i,j,c) = Σ_{(r,s) : a(r,s,c) = (i,j)} g(r,s,c)

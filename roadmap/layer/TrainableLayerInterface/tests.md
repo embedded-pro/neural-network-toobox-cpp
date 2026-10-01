@@ -4,7 +4,7 @@
 
 ## Fixture
 
-```
+```text
 class TestTrainableLayerInterface : public ::testing::Test:
     using DenseLayer      = neural_network::Dense<float, 3, 2>
     using InputVector     = DenseLayer::InputVector
@@ -47,7 +47,7 @@ class TestTrainableLayerInterface : public ::testing::Test:
 
 ## Test cases (Arrange / Act / Assert)
 
-```
+```text
 ParameterGradientsStartAtZeroAndForwardLeavesThemUntouched:
     Arrange: layer.SetParameters(theta)
     Act:     layer.Forward(x1)
@@ -111,7 +111,7 @@ Integration cases, deployed as `TEST_F(TestModel, …)` in `neural_network/model
 They reuse the existing `TestModel` fixture: `Dense<2,3>` (LeakyReLU 0.1, `W₁ = {{0.5, -1}, {1.5, 0.25}, {-0.5, 0.75}}`)
 → `Dense<3,1>` (tanh, `W₂ = {{1, -0.5, 2}}`), zero biases, `input = (2, 0.5)`, output `-0.8298019`.
 
-```
+```text
 GradientsConcatenateLayerGradientsAndMatchFiniteDifference:
     Arrange: θ = model.GetParameters()
              numeric[k] = (Out(θ + h e_k) − Out(θ − h e_k)) / (2h),  Out(θ) = SetParameters(θ); Forward(input)[0]
@@ -134,7 +134,7 @@ ZeroGradientsClearsEveryLayer:
 Conditional case, only if the optional compile-time activation from `implementation.md` is deployed
 (it goes in `TestDense.cpp`):
 
-```
+```text
 ConcreteActivationTemplateMatchesInterfaceActivation:
     Arrange: Dense<float, 3, 2, Tanh<float>> byValue{ weights, Tanh<float>{} };  byValue.SetParameters(theta)
              layer.SetParameters(theta)
@@ -149,25 +149,25 @@ Computed by [`reference.py`](reference.py), with float32 rounding at every
 operation and the same central-difference step (`h = 1e-3`) as the tests. The closed forms were
 cross-checked in float64.
 
-| Quantity                                                               | Value                                                                                           |
-|------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------|
-| Sample 1: `z₁`, `a₁ = tanh(z₁)`                                        | `(0.7, -0.99)`, `(0.6043678, -0.7573623)`                                                       |
-| Sample 1: `δ₁ = (1 − a₁²) ⊙ g₁`                                        | `(0.5077917, -0.554323)`                                                                        |
-| Sample 1: `∇θ` analytic                                                | `(0.1523375, -0.3554542, 0.5585709, -0.1662969, 0.3880261, -0.6097553, 0.5077917, -0.554323)`    |
-| Sample 1: `∇θ` finite difference                                       | `(0.1523495, -0.3554225, 0.5585551, -0.1662969, 0.3880262, -0.6097555, 0.507772, -0.5543232)`, max err `3.2e-5` |
-| Sample 1: `∂L/∂x = Wᵀδ₁` (analytic / FD)                               | `(-0.17095, -0.3787199, 0.4849313)` / max err `7.2e-5`                                          |
-| Sample 2: `z₂`, `a₂`                                                   | `(0.8, -0.5)`, `(0.6640368, -0.4621173)`                                                        |
-| Sample 2: `δ₂`                                                         | `(-0.2795275, 0.1966119)`                                                                       |
-| Sample 2: `∇θ` analytic                                                | `(-0.2795275, -0.5590551, -0.8385826, 0.1966119, 0.3932238, 0.5898358, -0.2795275, 0.1966119)`   |
-| Sample 2: `∇θ` finite difference                                       | `(-0.2795309, -0.5590618, -0.8385777, 0.1966059, 0.3932267, 0.5898178, -0.2795309, 0.1966059)`, max err `1.8e-5` |
-| Sample 2: `∂L/∂x = Wᵀδ₂` (analytic / FD)                               | `(0.05069201, 0.1542115, -0.2018254)` / `(0.05069375, 0.1542121, -0.2018213)`                   |
-| Accumulated `G = ∇θ₁ + ∇θ₂`                                            | `(-0.12719, -0.9145093, -0.2800118, 0.030315, 0.7812499, -0.01991957, 0.2282642, -0.3577111)` (float32 sum exact to the last bit) |
-| Default `θ` (zero biases), `x₂`: `z`, `tanh(z)`                        | `(0.6, -0.4)`, `(0.5370496, -0.3799491)`                                                        |
-| Model: hidden `z`, LeakyReLU `a`, output `z`, `y`                      | `(0.5, 3.125, -0.625)`, `(0.5, 3.125, -0.0625)`, `-1.1875`, `-0.8298019`                        |
-| Model: `δ_out = 1 − y²`, `W₂ᵀδ_out`, `δ_hidden`                        | `0.3114288`, `(0.3114288, -0.1557144, 0.6228576)`, `(0.3114288, -0.1557144, 0.06228576)`        |
-| Model `Gradients()` analytic                                           | `(0.6228576, 0.1557144, -0.3114288, -0.0778572, 0.1245715, 0.03114288, 0.3114288, -0.1557144, 0.06228576, 0.1557144, 0.973215, -0.0194643, 0.3114288)` |
-| Model `Gradients()` finite difference                                  | `(0.6228387, 0.1556873, -0.3114343, -0.07784367, 0.1245439, 0.03117323, 0.3114045, -0.1556873, 0.06228685, 0.1556873, 0.9731948, -0.01943111, 0.3114045)`, max err `3.3e-5` |
-| Model input gradient (already asserted by the existing FD case)        | `(-0.1090001, -0.303643)`                                                                       |
+| Quantity                                                        | Value                                                                                                                                                                       |
+|-----------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Sample 1: `z₁`, `a₁ = tanh(z₁)`                                 | `(0.7, -0.99)`, `(0.6043678, -0.7573623)`                                                                                                                                   |
+| Sample 1: `δ₁ = (1 − a₁²) ⊙ g₁`                                 | `(0.5077917, -0.554323)`                                                                                                                                                    |
+| Sample 1: `∇θ` analytic                                         | `(0.1523375, -0.3554542, 0.5585709, -0.1662969, 0.3880261, -0.6097553, 0.5077917, -0.554323)`                                                                               |
+| Sample 1: `∇θ` finite difference                                | `(0.1523495, -0.3554225, 0.5585551, -0.1662969, 0.3880262, -0.6097555, 0.507772, -0.5543232)`, max err `3.2e-5`                                                             |
+| Sample 1: `∂L/∂x = Wᵀδ₁` (analytic / FD)                        | `(-0.17095, -0.3787199, 0.4849313)` / max err `7.2e-5`                                                                                                                      |
+| Sample 2: `z₂`, `a₂`                                            | `(0.8, -0.5)`, `(0.6640368, -0.4621173)`                                                                                                                                    |
+| Sample 2: `δ₂`                                                  | `(-0.2795275, 0.1966119)`                                                                                                                                                   |
+| Sample 2: `∇θ` analytic                                         | `(-0.2795275, -0.5590551, -0.8385826, 0.1966119, 0.3932238, 0.5898358, -0.2795275, 0.1966119)`                                                                              |
+| Sample 2: `∇θ` finite difference                                | `(-0.2795309, -0.5590618, -0.8385777, 0.1966059, 0.3932267, 0.5898178, -0.2795309, 0.1966059)`, max err `1.8e-5`                                                            |
+| Sample 2: `∂L/∂x = Wᵀδ₂` (analytic / FD)                        | `(0.05069201, 0.1542115, -0.2018254)` / `(0.05069375, 0.1542121, -0.2018213)`                                                                                               |
+| Accumulated `G = ∇θ₁ + ∇θ₂`                                     | `(-0.12719, -0.9145093, -0.2800118, 0.030315, 0.7812499, -0.01991957, 0.2282642, -0.3577111)` (float32 sum exact to the last bit)                                           |
+| Default `θ` (zero biases), `x₂`: `z`, `tanh(z)`                 | `(0.6, -0.4)`, `(0.5370496, -0.3799491)`                                                                                                                                    |
+| Model: hidden `z`, LeakyReLU `a`, output `z`, `y`               | `(0.5, 3.125, -0.625)`, `(0.5, 3.125, -0.0625)`, `-1.1875`, `-0.8298019`                                                                                                    |
+| Model: `δ_out = 1 − y²`, `W₂ᵀδ_out`, `δ_hidden`                 | `0.3114288`, `(0.3114288, -0.1557144, 0.6228576)`, `(0.3114288, -0.1557144, 0.06228576)`                                                                                    |
+| Model `Gradients()` analytic                                    | `(0.6228576, 0.1557144, -0.3114288, -0.0778572, 0.1245715, 0.03114288, 0.3114288, -0.1557144, 0.06228576, 0.1557144, 0.973215, -0.0194643, 0.3114288)`                      |
+| Model `Gradients()` finite difference                           | `(0.6228387, 0.1556873, -0.3114343, -0.07784367, 0.1245439, 0.03117323, 0.3114045, -0.1556873, 0.06228685, 0.1556873, 0.9731948, -0.01943111, 0.3114045)`, max err `3.3e-5` |
+| Model input gradient (already asserted by the existing FD case) | `(-0.1090001, -0.303643)`                                                                                                                                                   |
 
 ## Edge cases
 

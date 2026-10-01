@@ -4,7 +4,7 @@
 
 ## Data structures
 
-```
+```text
 # sizes (all compile-time):
 #   X = InputSize, H = HiddenSize, K = BpttWindow (truncation depth, K ≥ 1)
 #   gate order q ∈ {r = 0, z = 1, n = 2} (PyTorch order); gate row ρ = q·H + i, i ∈ [0, H)
@@ -57,7 +57,7 @@ class FlashGru final : public InferenceLayer<T, X, H>,       # N8 inference base
 
 Class diagram (N8/N10/N17 hierarchy, extended):
 
-```
+```text
 InferenceLayer<T, In, Out>        Forward, Output
  ├─ FlashGru<T, X, H>             (+ StatefulLayer<T, H>)                   ← inference only, weights in flash
  └─ Layer<T, In, Out, P>          + Backward, Parameters, SetParameters, ParameterGradients, ZeroGradients
@@ -67,7 +67,7 @@ StatefulLayer<T, S>               ResetState, State, SetState               ← 
 
 ## Interface
 
-```
+```text
 # Gru<T, X, H, K>
 using InputWeightMatrix     = math::Matrix<T, 3H, X>     # rows (r; z; n), PyTorch weight_ih_l0 shape
 using RecurrentWeightMatrix = math::Matrix<T, 3H, H>     # rows (r; z; n), PyTorch weight_hh_l0 shape
@@ -102,7 +102,7 @@ and `FlashGru` through `StateSize` and the `StatefulLayer` base.
 
 ## Algorithm (pseudocode)
 
-```
+```text
 # index helpers (inline): Wx(ρ, j) = parameters[ρ·X + j]          Wh(ρ, k) = parameters[3H·X + ρ·H + k]
 #                         Bx(ρ)    = parameters[3H·X + 3H·H + ρ]  Bh(ρ)    = parameters[3H·X + 3H·H + 3H + ρ]
 #                         GWx, GWh, GBx, GBh: the same offsets into parameterGradients
@@ -188,7 +188,7 @@ function FlashGru::SetState(s):    output = s
 
 Math (one sequence after `ResetState`/`SetState` at step `t₀`; `W^q` = the `H` rows of gate `q`; `σ` logistic):
 
-```
+```text
 forward:     a_r = W_x^r x_s + b_x^r + W_h^r h_{s−1} + b_h^r,       r_s = σ(a_r)
              a_z = W_x^z x_s + b_x^z + W_h^z h_{s−1} + b_h^z,       z_s = σ(a_z)
              u_s = W_h^n h_{s−1} + b_h^n

@@ -4,7 +4,7 @@
 
 ## Data structures
 
-```
+```text
 template<typename T, std::size_t InputSize_, std::size_t OutputSize_>
 class InferenceLayer:                                   # static_assert(std::is_floating_point_v<T>); pure interface, no state
     using ValueType    = T
@@ -36,7 +36,7 @@ class Dense : public Layer<T, InputSize, OutputSize, InputSize·OutputSize + Out
 
 Class diagram:
 
-```
+```text
 InferenceLayer<T, In, Out>            Forward, Output                      ← N10 inference-only layers stop here
  ├─ Layer<T, In, Out, 0>              + Backward                           ← N12 pooling, activation-only layers
  └─ Layer<T, In, Out, P>  (P > 0)     + Backward (accumulating),
@@ -46,7 +46,7 @@ InferenceLayer<T, In, Out>            Forward, Output                      ← N
 
 ## Interface
 
-```
+```text
 # InferenceLayer<T, In, Out>
 virtual ~InferenceLayer() = default
 virtual void                Forward(const InputVector& input) = 0                  # hot path
@@ -77,7 +77,7 @@ void            ZeroGradients()                         # every layer with Param
 
 ## Algorithm (pseudocode)
 
-```
+```text
 function Dense::Backward(g):                    # OPTIMIZE_FOR_SPEED; g = ∂L/∂a, size Out
     really_assert(forwardDone)
     δ = zeros(Out)
@@ -120,7 +120,7 @@ function Model::Backward(g):                    # unchanged code; each layer now
 
 Math (one sample `s`, upstream `g = ∂L_s/∂a`):
 
-```
+```text
 forward:          z = W x + b,   a = f(z)                                       (unchanged)
 activation VJP:   δ = ∂L_s/∂z = J_f(z)ᵀ g
                     element-wise f:  δ_i = f'(z_i) g_i
@@ -148,7 +148,7 @@ makes one virtual `ForwardVector`/`BackwardVector` call that the compiler cannot
 activation that relies on the base-class vector loops also pays one virtual `Forward`/`Backward` per
 element. Both go against "no virtual calls in real-time paths". The optional extension:
 
-```
+```text
 template<typename T, std::size_t In, std::size_t Out, typename Activation = ActivationFunction<T>>
 class Dense:
     Activation-is-abstract ?  const Activation& activation    # today's behaviour (default argument)

@@ -4,7 +4,7 @@
 
 ## Data structures
 
-```
+```text
 # Layout (shared with N11): a sequence of Length positions × Channels channels is stored channels-last
 # in one flat math::Vector<T, Length·Channels>:   x(t, c) = x[t·Channels + c]
 # Valid padding only:   OutputLength = ⌊(Length − PoolSize) / Stride⌋ + 1
@@ -36,7 +36,7 @@ using GlobalAveragePooling1D = AveragePooling1D<T, Length, Channels, Length, 1>
 
 Compile-time guards (every class):
 
-```
+```text
 static_assert(std::is_floating_point_v<T>, "<Name> requires a floating-point type")
 static_assert(Length > 0 && Channels > 0)
 static_assert(PoolSize > 0 && Stride > 0)
@@ -45,7 +45,7 @@ static_assert(PoolSize <= Length, "pooling window longer than the sequence")
 
 ## Interface
 
-```
+```text
 static constexpr std::size_t OutputLength = (Length − PoolSize) / Stride + 1
 
 MaxPooling1D()                                  # default-constructible, no arguments
@@ -60,7 +60,7 @@ const OutputVector& Output() const override
 
 ## Algorithm (pseudocode)
 
-```
+```text
 function MaxPooling1D::Forward(x):             # OPTIMIZE_FOR_SPEED
     for o in 0..Lₒ-1:
         first = o·S·C
@@ -106,7 +106,7 @@ function Output(): return output
 
 Math (window `o`, channel `c`, upstream `g = ∂L/∂y`, `W(o) = {o·S, …, o·S + K − 1}`):
 
-```
+```text
 max forward:        y(o, c) = max_{t ∈ W(o)} x(t, c),       a(o, c) = first argmax
 max Jacobian:       ∂y(o, c)/∂x(t, c') = [t = a(o, c)] · [c' = c]      (where the maximum is unique)
 max backward:       ∂L/∂x(t, c) = Σ_{o : a(o, c) = t} g(o, c)

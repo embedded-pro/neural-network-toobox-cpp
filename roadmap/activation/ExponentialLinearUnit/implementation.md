@@ -4,7 +4,7 @@
 
 ## Data structures
 
-```
+```text
 template<typename T>                           # static_assert(std::is_floating_point_v<T>); instantiated for float
 class ExponentialLinearUnit final : public ActivationFunction<T>:
     static constexpr T defaultAlpha{ 1 }                                           # plain ELU
@@ -21,7 +21,7 @@ the product `λα` is ever used.
 
 ## Interface
 
-```
+```text
 explicit ExponentialLinearUnit(T alpha = defaultAlpha, T scale = T{1})   # really_assert(alpha > 0 and scale > 0)
 static ExponentialLinearUnit Selu()                                      # returns ExponentialLinearUnit{ seluAlpha, seluScale }
 T    Forward(T x) const                                                  # hot path
@@ -35,7 +35,7 @@ void BackwardVector(span<T> result, span<const T> preActivation,
 
 ## Algorithm (pseudocode)
 
-```
+```text
 constructor(alpha, scale):
     really_assert(alpha > 0 and scale > 0)
     this.scale       = scale
@@ -70,7 +70,7 @@ function BackwardVector(result, preActivation, output, outputGradient):   # OPTI
 
 Math (per element, `a = f(z)`, `λ > 0`, `α > 0`):
 
-```
+```text
 forward:   f(z) = λ z                 z > 0
            f(z) = λ α (eᶻ − 1)        z ≤ 0
 derivative:
@@ -89,7 +89,7 @@ at z = 0:  f(0) = 0; one-sided slopes λα (left) and λ (right)
 SELU constants: `(α₀₁, λ₀₁)` is the unique pair for which `z ~ N(0, 1)` gives `E[f(z)] = 0` and
 `E[f(z)²] = 1`. Closed forms (with `Φ` the standard normal CDF):
 
-```
+```text
 E[f(z)]  = λ [ 1/√(2π) + α (e^{1/2} Φ(−1) − 1/2) ]                               = 0
 E[f(z)²] = λ² [ 1/2 + α² (e² Φ(−2) − 2 e^{1/2} Φ(−1) + 1/2) ]                     = 1
 ```

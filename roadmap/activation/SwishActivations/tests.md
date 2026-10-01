@@ -4,7 +4,7 @@
 
 ## Fixture
 
-```
+```text
 class TestSiLU : public ::testing::Test:
     neural_network::SiLU<float> activation
 class TestHardSigmoid : public ::testing::Test:
@@ -21,7 +21,7 @@ class TestHardSwish : public ::testing::Test:
 
 ## Test cases (Arrange / Act / Assert)
 
-```
+```text
 # ---------------- TestSiLU ----------------
 ForwardMatchesReferenceValues:
     Act:    Forward(x) for x ∈ {-2.0, 0.0, 1.0, 3.0}
@@ -102,27 +102,27 @@ Computed by [`reference.py`](reference.py) (numpy `float32`, same operation orde
 the pseudocode and the same `h = 1e-3` step and float accumulation as `ActivationFiniteDifference.hpp`;
 float64 cross-check agrees to 7 significant digits):
 
-| Quantity                                             | Value                                                          |
-|------------------------------------------------------|----------------------------------------------------------------|
-| SiLU `Forward` `{-2, 0, 1, 3}`                       | `{-0.2384058, 0, 0.7310586, 2.857722}`                         |
-| SiLU `Backward` `{0, 2, -2}`                         | `{0.5, 1.090784, -0.09078425}`                                 |
-| SiLU stationary point `z*`, `f(z*)`                  | `-1.278464543`, `-0.278464543` (`= z* + 1`), `f'(z*) ≈ 0`      |
-| SiLU scalar FD `{-3, -0.5, 1, 4}` analytic           | `{-0.0881041, 0.2600388, 0.9276705, 1.052665}`                 |
-| SiLU scalar FD `{-3, -0.5, 1, 4}` numeric            | `{-0.08811056, 0.2600327, 0.9276866, 1.052499}` (max err `1.7e-4`) |
-| SiLU `BackwardVector` analytic                       | `{-0.02643123, -0.3120466, 0.7421364, -0.4210659}`             |
-| SiLU `BackwardVector` FD                             | `{-0.02640486, -0.3120303, 0.7421374, -0.4210472}` (max err `2.6e-5`) |
-| SiLU at `±1e30`                                      | `f = 1e30, f' = 1`;  `f = -0, f' = -0` (no NaN)                |
-| SiLU `f'` at `1e8`: chosen form / output-reuse form  | `1` / `0` (cancellation)                                       |
-| Hard-Sigmoid `Forward` `{-4,-3,-1.5,0,1.5,3,4}`      | `{0, 0, 0.25, 0.5, 0.75, 1, 1}`                                |
-| Hard-Sigmoid `Backward` `{-4,-3,0,2.9,3,4}`          | `{0, 0, 0.1666667, 0.1666667, 0, 0}`                           |
-| Hard-Sigmoid scalar FD `{-2,0,1,2.5}`                | max err `1.8e-5`                                               |
-| Hard-Sigmoid `BackwardVector` analytic / FD          | `{0, -0.2, 0.1333333, 0}` / `{0, -0.2000034, 0.1333207, 0}` (max err `1.3e-5`) |
-| Hard-Swish `Forward` `{-4,-3,-1.5,0,1,3,5}`          | `{0, 0, -0.375, 0, 0.6666667, 3, 5}`                           |
-| Hard-Swish `Backward` `{-4,-3,-1.5,0,1,3,5}`         | `{0, 0, 0, 0.5, 0.8333334, 1, 1}`                              |
-| Hard-Swish scalar FD `{-2,-0.5,1,2.5}` analytic      | `{-0.1666667, 0.3333333, 0.8333334, 1.333333}`                 |
-| Hard-Swish scalar FD `{-2,-0.5,1,2.5}` numeric       | `{-0.1666546, 0.3333389, 0.8333325, 1.333237}` (max err `9.7e-5`) |
-| Hard-Swish `BackwardVector` analytic                 | `{0, -0.2, 0.5866667, -0.4}`                                   |
-| Hard-Swish `BackwardVector` FD                       | `{0, -0.2000034, 0.5866885, -0.4000067}` (max err `2.2e-5`)    |
+| Quantity                                            | Value                                                                          |
+|-----------------------------------------------------|--------------------------------------------------------------------------------|
+| SiLU `Forward` `{-2, 0, 1, 3}`                      | `{-0.2384058, 0, 0.7310586, 2.857722}`                                         |
+| SiLU `Backward` `{0, 2, -2}`                        | `{0.5, 1.090784, -0.09078425}`                                                 |
+| SiLU stationary point `z*`, `f(z*)`                 | `-1.278464543`, `-0.278464543` (`= z* + 1`), `f'(z*) ≈ 0`                      |
+| SiLU scalar FD `{-3, -0.5, 1, 4}` analytic          | `{-0.0881041, 0.2600388, 0.9276705, 1.052665}`                                 |
+| SiLU scalar FD `{-3, -0.5, 1, 4}` numeric           | `{-0.08811056, 0.2600327, 0.9276866, 1.052499}` (max err `1.7e-4`)             |
+| SiLU `BackwardVector` analytic                      | `{-0.02643123, -0.3120466, 0.7421364, -0.4210659}`                             |
+| SiLU `BackwardVector` FD                            | `{-0.02640486, -0.3120303, 0.7421374, -0.4210472}` (max err `2.6e-5`)          |
+| SiLU at `±1e30`                                     | `f = 1e30, f' = 1`;  `f = -0, f' = -0` (no NaN)                                |
+| SiLU `f'` at `1e8`: chosen form / output-reuse form | `1` / `0` (cancellation)                                                       |
+| Hard-Sigmoid `Forward` `{-4,-3,-1.5,0,1.5,3,4}`     | `{0, 0, 0.25, 0.5, 0.75, 1, 1}`                                                |
+| Hard-Sigmoid `Backward` `{-4,-3,0,2.9,3,4}`         | `{0, 0, 0.1666667, 0.1666667, 0, 0}`                                           |
+| Hard-Sigmoid scalar FD `{-2,0,1,2.5}`               | max err `1.8e-5`                                                               |
+| Hard-Sigmoid `BackwardVector` analytic / FD         | `{0, -0.2, 0.1333333, 0}` / `{0, -0.2000034, 0.1333207, 0}` (max err `1.3e-5`) |
+| Hard-Swish `Forward` `{-4,-3,-1.5,0,1,3,5}`         | `{0, 0, -0.375, 0, 0.6666667, 3, 5}`                                           |
+| Hard-Swish `Backward` `{-4,-3,-1.5,0,1,3,5}`        | `{0, 0, 0, 0.5, 0.8333334, 1, 1}`                                              |
+| Hard-Swish scalar FD `{-2,-0.5,1,2.5}` analytic     | `{-0.1666667, 0.3333333, 0.8333334, 1.333333}`                                 |
+| Hard-Swish scalar FD `{-2,-0.5,1,2.5}` numeric      | `{-0.1666546, 0.3333389, 0.8333325, 1.333237}` (max err `9.7e-5`)              |
+| Hard-Swish `BackwardVector` analytic                | `{0, -0.2, 0.5866667, -0.4}`                                                   |
+| Hard-Swish `BackwardVector` FD                      | `{0, -0.2000034, 0.5866885, -0.4000067}` (max err `2.2e-5`)                    |
 
 ## Edge cases
 

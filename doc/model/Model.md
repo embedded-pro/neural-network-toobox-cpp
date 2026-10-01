@@ -53,7 +53,12 @@ The training step takes an optimizer, an objective $J: \mathbb{R}^P \to \mathbb{
 
 $$\theta^* = \operatorname{Optimize}(J, \theta_0) \approx \arg\min_\theta J(\theta), \qquad \text{then load } \theta^* \text{ into the layers}$$
 
-It does **not** iterate over a dataset and does not call the forward or backward pass: the objective must itself encode whatever it measures about $\theta$ (for example a user-written empirical risk). If a per-sample [loss](../losses/Loss.md) is passed as $J$, its argument is $\theta$ and its target is a parameter vector — it regresses the parameters onto that target. End-to-end back-propagation training — per-sample loss on $\hat{y}$ (N9), exported parameter gradients (N8) and a mini-batch gradient step (N16) — is on the roadmap.
+It does **not** iterate over a dataset and does not call the forward or backward pass: the objective
+must itself encode whatever it measures about $\theta$ (for example a user-written empirical risk).
+If a per-sample [loss](../losses/Loss.md) is passed as $J$, its argument is $\theta$ and its target
+is a parameter vector — it regresses the parameters onto that target. End-to-end back-propagation
+training — per-sample loss on $\hat{y}$ (N9), exported parameter gradients (N8) and a mini-batch
+gradient step (N16) — is on the roadmap.
 
 ```mermaid
 graph LR

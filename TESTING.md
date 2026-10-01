@@ -28,18 +28,18 @@ Canonical rules still apply ([AGENTS.md](AGENTS.md), [testing.instructions.md](.
 
 ## Metric types (the vocabulary)
 
-| #  | Metric type                   | What it asserts                                              | Typical assertion                                                       |
-|----|-------------------------------|--------------------------------------------------------------|-------------------------------------------------------------------------|
-| M1 | **Numerical accuracy**        | output matches a closed-form / reference value               | `EXPECT_NEAR(out, ref, tol)`; ULP error for math funcs                  |
-| M5 | **Convergence**               | iterative process reaches the answer                         | iterations-to-tolerance; monotonic objective/residual; contraction rate |
-| M6 | **Boundary / edge**           | zero, saturation, extreme magnitude, min sizes               | clamp limits; zero-in→zero-out; no NaN/Inf at extremes                  |
-| M7 | **Invariants & conservation** | energy/Parseval, norm, probability mass, orthogonality       | Parseval residual; ‖q‖=1; Σsoftmax=1; energy drift bound                |
+| #  | Metric type                   | What it asserts                                        | Typical assertion                                                       |
+|----|-------------------------------|--------------------------------------------------------|-------------------------------------------------------------------------|
+| M1 | **Numerical accuracy**        | output matches a closed-form / reference value         | `EXPECT_NEAR(out, ref, tol)`; ULP error for math funcs                  |
+| M5 | **Convergence**               | iterative process reaches the answer                   | iterations-to-tolerance; monotonic objective/residual; contraction rate |
+| M6 | **Boundary / edge**           | zero, saturation, extreme magnitude, min sizes         | clamp limits; zero-in→zero-out; no NaN/Inf at extremes                  |
+| M7 | **Invariants & conservation** | energy/Parseval, norm, probability mass, orthogonality | Parseval residual; ‖q‖=1; Σsoftmax=1; energy drift bound                |
 
 ## Family → metric-type matrix
 
-| Family          | M1 | M5 | M6 | M7 |
-|-----------------|:--:|:--:|:--:|:--:|
-| Neural network  | ●  | ○  | ●  | ●  |
+| Family         | M1 | M5 | M6 | M7 |
+|----------------|:--:|:--:|:--:|:--:|
+| Neural network | ●  | ○  | ●  | ●  |
 
 ● primary   ○ situational
 

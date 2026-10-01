@@ -4,7 +4,7 @@
 
 ## Data structures
 
-```
+```text
 enum class TrainingStatus : std::uint8_t:
     Accumulating         # sample added, batch not full yet: θ unchanged
     Stepped              # θ updated with the unclipped mean gradient
@@ -57,7 +57,7 @@ storage size.
 
 ## Interface
 
-```
+```text
 MiniBatchTraining(ModelType& model, const LossType& loss, const TrainingConfiguration<T>& configuration)
     # really_assert(η > 0, λ ≥ 0, ηλ < 1, !c || *c > 0); calls model.ZeroGradients() (discard stale G)
 
@@ -76,7 +76,7 @@ private: StepResult<T> Step();  void Finish()           # shared by Accumulate (
 
 Additions to `Model<T, In, Out, Layers...>` (small, made by this item):
 
-```
+```text
 using ValueType = T
 static constexpr std::size_t NumberOfLayers = sizeof...(Layers)
 template<std::size_t I> auto&       LayerAt()           # std::get<I>(layers)
@@ -89,7 +89,7 @@ template<std::size_t I> const auto& LayerAt() const
 
 ## Algorithm (pseudocode)
 
-```
+```text
 function Accumulate(x, y):                          # OPTIMIZE_FOR_SPEED
     ŷ = model.Forward(x)
     lossSum += loss.Cost(ŷ, y)
@@ -152,7 +152,7 @@ Mini-batch `S` of `k` samples (`k = B`, or `1 ≤ k < B` for the flushed remaind
 `L_s(θ) = L(f(x_s; θ), y_s)` from N9, trainable index set `𝒯` (union of the slices of the trainable
 layers), `P_𝒯 = |𝒯|`:
 
-```
+```text
 objective:    J_S(θ) = (1/k) Σ_{s∈S} L_s(θ) + (λ/2) Σ_{j∈𝒯} θ_j²
 
 per sample:   ∇_θ L_s = J_f(x_s; θ)ᵀ · ∇_ŷ L(ŷ_s, y_s)              # reverse mode: Model::Backward(loss.Gradient(ŷ, y))

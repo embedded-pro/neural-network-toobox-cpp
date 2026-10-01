@@ -4,7 +4,7 @@
 
 ## Fixture
 
-```
+```text
 # anonymous namespace, next to the fixture
 inline constexpr math::Vector<float, 72> flashTheta{
     0.5, -0.3,  0.2, 0.8,  -0.6, 0.1,                                          # W_x, i rows (3×2)
@@ -65,7 +65,7 @@ class TestLstm : public ::testing::Test:
 
 ## Test cases (Arrange / Act / Assert)
 
-```
+```text
 SizesAndConstructorParameterLayout:
     Arrange: const Cell layer{ inputWeights, recurrentWeights }
     Assert:  Cell::InputSize == 2, Cell::OutputSize == 3, Cell::ParameterSize == 72, Cell::StateSize == 6, Cell::Window == 4
@@ -202,7 +202,7 @@ Integration case, deployed as `TEST_F(TestModel, LstmFeedsDenseHeadAndResetState
 the only check that `Lstm` satisfies `detail::StatefulLayerType` with `StateSize = 2H ≠ OutputSize` and composes
 through `make_layer`:
 
-```
+```text
 LstmFeedsDenseHeadAndResetStateRestartsSequence:
     Arrange: Model<float, 2, 1, Lstm<float, 2, 3, 4>, Dense<float, 3, 1>> model{
                  make_layer<Lstm<float, 2, 3, 4>>(inputWeights, recurrentWeights),
@@ -223,23 +223,23 @@ independent vectorised float64 implementation of the PyTorch `nn.LSTM` equations
 its float64 central differences (`h = 1e-6`) match the float32 analytic full-BPTT gradient to `3.6e-8`, which
 validates the backward formulas separately from the loop code.
 
-| Quantity                                                    | Value                                                                  |
-|-------------------------------------------------------------|------------------------------------------------------------------------|
-| Step 1 from zero state `i / f / g / o / tanh c`             | `(0.6681878, 0.4255575, 0.3893608)` / `(0.7502601, 0.5866176, 0.8754467)` / `(0.800499, -0.5716699, 0.1973753)` / `(0.4255575, 0.6570104, 0.5124974)` / `(0.4891054, -0.2385899, 0.07669927)` |
-| Step 2 `i / f / g / o / tanh c`                             | `(0.5063269, 0.6789148, 0.4908337)` / `(0.8121682, 0.744136, 0.8008826)` / `(0.07005261, 0.468652, 0.2766023)` / `(0.5292336, 0.4102466, 0.7310809)` / `(0.4381064, 0.1362892, 0.1947923)` |
-| `h₁ / h₂ / h₃` from zero state                              | `(0.2081424, -0.1567561, 0.03930818)` / `(0.2318606, 0.05591217, 0.1424089)` / `(0.06464752, 0.1338311, 0.03905582)` |
-| `c₁ / c₂ / c₃` from zero state                              | `(0.5348837, -0.2432784, 0.07685021)` / `(0.469885, 0.1371425, 0.1973137)` / `(0.10765, 0.4606013, 0.06119258)` |
-| Wrong variants (float64): TF1 gate order `h₁`; `h = o ⊙ c` `h₁`; runtime `forget_bias + 1` `h₂` | `(0.2081424, 0.09341199, 0.1831705)`; `(0.2276237, -0.1598365, 0.03938553)`; `(0.2562376, 0.04178735, 0.1486312)` |
-| `SetState(s0)` then `x₁`: `h / c`                           | `(0.3297209, -0.4262803, 0.4227171)` / `(0.8967717, -0.6707456, 1.303751)` |
-| `G` after `SetState(s0)`, `x₁`, `Backward(g)`               | as listed in the test case; FD max err `6.0e-5`                         |
-| Same, if `SetState` kept the ring (wrong)                   | `G[0..3] = (0.04331828, -0.01935135, 0.1352927, -0.1032396)`, `G[24] = 0.0139984` |
-| `∂L/∂x₃` analytic / FD                                      | `(0.1518109, 0.01044414)` / `(0.1518056, 0.01042336)` (max err `2.1e-5`) |
-| `G`, full BPTT (K = 4, 3 steps, loss at step 3)             | as listed; FD max err `3.4e-5`                                          |
-| `G` bias block without the `dc ⊙ f` recursion (wrong)       | `(-0.05734612, -0.04865977, 0.0003882156, 0.03897631, -0.009358516, 0.01502259, 0.1129978, -0.07221705, 0.262667, 0.01734284, -0.1097729, 0.01359868)` |
-| `G`, truncated (K = 2, same sequence)                       | as listed; FD from frozen `(h₁; c₁)` max err `3.0e-5`; equal to full BPTT exactly at `k ∈ 6..11, 24..59, 63..65`; max difference `0.129` at `k = 16` |
-| `G`, many-to-many (`perStep`, K = 4)                        | as listed; FD max err `4.0e-5`                                          |
-| Model head `c + W h_t` / `tanh`, t = 1, 2, 3                 | `0.3008479 / 0.2920884`, `0.1820875 / 0.1801014`, `0.03998841 / 0.03996711` |
-| Sizes                                                       | fixture `P = 72`, 247 floats; `Lstm<float, 3, 16, 8>`: `P = 1280`, 3 531 floats, `Forward` 1 216 MACs, full `Backward` 17 088 MACs |
+| Quantity                                                                                        | Value                                                                                                                                                                                         |
+|-------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Step 1 from zero state `i / f / g / o / tanh c`                                                 | `(0.6681878, 0.4255575, 0.3893608)` / `(0.7502601, 0.5866176, 0.8754467)` / `(0.800499, -0.5716699, 0.1973753)` / `(0.4255575, 0.6570104, 0.5124974)` / `(0.4891054, -0.2385899, 0.07669927)` |
+| Step 2 `i / f / g / o / tanh c`                                                                 | `(0.5063269, 0.6789148, 0.4908337)` / `(0.8121682, 0.744136, 0.8008826)` / `(0.07005261, 0.468652, 0.2766023)` / `(0.5292336, 0.4102466, 0.7310809)` / `(0.4381064, 0.1362892, 0.1947923)`    |
+| `h₁ / h₂ / h₃` from zero state                                                                  | `(0.2081424, -0.1567561, 0.03930818)` / `(0.2318606, 0.05591217, 0.1424089)` / `(0.06464752, 0.1338311, 0.03905582)`                                                                          |
+| `c₁ / c₂ / c₃` from zero state                                                                  | `(0.5348837, -0.2432784, 0.07685021)` / `(0.469885, 0.1371425, 0.1973137)` / `(0.10765, 0.4606013, 0.06119258)`                                                                               |
+| Wrong variants (float64): TF1 gate order `h₁`; `h = o ⊙ c` `h₁`; runtime `forget_bias + 1` `h₂` | `(0.2081424, 0.09341199, 0.1831705)`; `(0.2276237, -0.1598365, 0.03938553)`; `(0.2562376, 0.04178735, 0.1486312)`                                                                             |
+| `SetState(s0)` then `x₁`: `h / c`                                                               | `(0.3297209, -0.4262803, 0.4227171)` / `(0.8967717, -0.6707456, 1.303751)`                                                                                                                    |
+| `G` after `SetState(s0)`, `x₁`, `Backward(g)`                                                   | as listed in the test case; FD max err `6.0e-5`                                                                                                                                               |
+| Same, if `SetState` kept the ring (wrong)                                                       | `G[0..3] = (0.04331828, -0.01935135, 0.1352927, -0.1032396)`, `G[24] = 0.0139984`                                                                                                             |
+| `∂L/∂x₃` analytic / FD                                                                          | `(0.1518109, 0.01044414)` / `(0.1518056, 0.01042336)` (max err `2.1e-5`)                                                                                                                      |
+| `G`, full BPTT (K = 4, 3 steps, loss at step 3)                                                 | as listed; FD max err `3.4e-5`                                                                                                                                                                |
+| `G` bias block without the `dc ⊙ f` recursion (wrong)                                           | `(-0.05734612, -0.04865977, 0.0003882156, 0.03897631, -0.009358516, 0.01502259, 0.1129978, -0.07221705, 0.262667, 0.01734284, -0.1097729, 0.01359868)`                                        |
+| `G`, truncated (K = 2, same sequence)                                                           | as listed; FD from frozen `(h₁; c₁)` max err `3.0e-5`; equal to full BPTT exactly at `k ∈ 6..11, 24..59, 63..65`; max difference `0.129` at `k = 16`                                          |
+| `G`, many-to-many (`perStep`, K = 4)                                                            | as listed; FD max err `4.0e-5`                                                                                                                                                                |
+| Model head `c + W h_t` / `tanh`, t = 1, 2, 3                                                    | `0.3008479 / 0.2920884`, `0.1820875 / 0.1801014`, `0.03998841 / 0.03996711`                                                                                                                   |
+| Sizes                                                                                           | fixture `P = 72`, 247 floats; `Lstm<float, 3, 16, 8>`: `P = 1280`, 3 531 floats, `Forward` 1 216 MACs, full `Backward` 17 088 MACs                                                            |
 
 ## Edge cases
 

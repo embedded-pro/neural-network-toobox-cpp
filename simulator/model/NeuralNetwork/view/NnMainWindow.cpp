@@ -106,9 +106,8 @@ namespace simulator::model::nn::view
         lossView->update();
         predictionView->update();
 
-        shell.SetStatus(QString("Training complete: %1 epochs, final MSE = %2")
-                            .arg(config.nn.epochs)
-                            .arg(static_cast<double>(result.finalLoss), 0, 'g', 6)
-                            .toStdString());
+        const auto finalLoss{ static_cast<double>(result.finalLoss) };
+        const auto status{ QString("Training complete: %1 epochs, final MSE = %2").arg(config.nn.epochs).arg(finalLoss, 0, 'g', 6) };
+        shell.SetStatus(status.toStdString());
     }
 }

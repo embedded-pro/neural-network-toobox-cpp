@@ -4,7 +4,7 @@
 
 ## Fixture
 
-```
+```text
 class TestWeightInitialization : public ::testing::Test:
     using Generator   = neural_network::Xorshift32<float>
     using Scaling     = neural_network::VarianceScaling<float>
@@ -32,7 +32,7 @@ class TestWeightInitialization : public ::testing::Test:
 
 ## Test cases (Arrange / Act / Assert)
 
-```
+```text
 NextFollowsXorshift32RecurrenceFromScrambledSeed:
     Arrange: Generator one{ 1 };  Generator two{ 2 }
     Act:     three Next() from each
@@ -112,24 +112,24 @@ every operation (`struct` round-trip), implements `fmix32` + xorshift32 on maske
 cross-checks both primitives against published values: raw xorshift32 from state 1 gives `270369`,
 and `fmix32(1) = 0x514E28B7`.
 
-| Quantity                                                        | Value                                                                  |
-|-----------------------------------------------------------------|------------------------------------------------------------------------|
-| Raw xorshift32 from state 1 / state 2 (why seeds are scrambled) | `270369, 67634689, 2647435461` / `540738 = 2 × 270369`                 |
-| `fmix32(1)`, `fmix32(2)`, `fmix32(0)`                           | `1364076727`, `821347078`, `0`                                         |
-| `Next()` ×3, seed 1                                             | `524866043, 2877414208, 2380002740`                                    |
-| `Next()` ×3, seed 2                                             | `3122577100, 3576040911, 2271418240`                                   |
-| `Next()` ×3, seed 0 (state `2463534242`)                        | `723471715, 2497366906, 2064144800`                                    |
-| `UnitFromBits` at `0 / 0x80000000 / 0xFFFFFFFF`                 | `0 / 0.5 / 0.99999994`                                                 |
-| `PositiveUnitFromBits` at `0 / 0xFFFFFFFF`                      | `5.9604645e-8 / 1.0`                                                   |
-| Uniform stream, seed 42, 65536 draws (float sums)               | mean `0.49975556`, var `0.08276457`, min `1.26e-5`, max `0.9999964`; std errors `1.13e-3` / `2.9e-4` |
-| Normal stream, seed 42, 65536 draws (float sums)                | mean `−0.0010543`, `E[z²] 0.99526995`, `E[z⁴] 2.9921978`, max `|z| 4.6837535`; std errors `3.9e-3` / `5.5e-3` / `3.8e-2` |
-| Box–Muller cap `√(−2 ln 2⁻²⁴)`                                  | `5.7681075` (tail mass beyond it `8.0e-9`)                             |
-| First two `Normal()`, seed 1                                    | `u1 = 0.1222049`, `u2 = 0.66995019` → `z = −0.98834670, −0.79064822`   |
-| σ / L, fanIn 4, fanOut 2: Glorot, He, LeCun                     | `0.57735026 / 1.0`, `0.70710677 / 1.2247449`, `0.5 / 0.8660254`        |
-| σ, `HeNormal(0.1)`; σ, custom `FanOut`                          | `0.70359755`; `0.70710677`                                             |
-| `HeNormal` `Weights<2, 4>()`, seed 1 (= `0.70710677 · z`)       | `−0.69886667, −0.55907273, −0.30341968, 0.38391611, −0.68643242, 0.17152607, 0.79724646, −1.43270266` |
-| `GlorotUniform` `Weights<2, 4>()`, seed 1 (= `2u − 1`, `L = 1`) | `−0.75559032, 0.33990037, 0.10827506, 0.24061728, 0.81145370, −0.08537471, −0.27581966, −0.62438822` |
-| `GlorotUniform`, seed 7: draws 0–1 / draws 8–9                  | `0.11884129, −0.17977190` / `−0.07675266, 0.60809577`                  |
+| Quantity                                                        | Value                                                                                                                      |
+|-----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------|
+| Raw xorshift32 from state 1 / state 2 (why seeds are scrambled) | `270369, 67634689, 2647435461` / `540738 = 2 × 270369`                                                                     |
+| `fmix32(1)`, `fmix32(2)`, `fmix32(0)`                           | `1364076727`, `821347078`, `0`                                                                                             |
+| `Next()` ×3, seed 1                                             | `524866043, 2877414208, 2380002740`                                                                                        |
+| `Next()` ×3, seed 2                                             | `3122577100, 3576040911, 2271418240`                                                                                       |
+| `Next()` ×3, seed 0 (state `2463534242`)                        | `723471715, 2497366906, 2064144800`                                                                                        |
+| `UnitFromBits` at `0 / 0x80000000 / 0xFFFFFFFF`                 | `0 / 0.5 / 0.99999994`                                                                                                     |
+| `PositiveUnitFromBits` at `0 / 0xFFFFFFFF`                      | `5.9604645e-8 / 1.0`                                                                                                       |
+| Uniform stream, seed 42, 65536 draws (float sums)               | mean `0.49975556`, var `0.08276457`, min `1.26e-5`, max `0.9999964`; std errors `1.13e-3` / `2.9e-4`                       |
+| Normal stream, seed 42, 65536 draws (float sums)                | mean `−0.0010543`, `E[z²] 0.99526995`, `E[z⁴] 2.9921978`, max `\|z\| 4.6837535`; std errors `3.9e-3` / `5.5e-3` / `3.8e-2` |
+| Box–Muller cap `√(−2 ln 2⁻²⁴)`                                  | `5.7681075` (tail mass beyond it `8.0e-9`)                                                                                 |
+| First two `Normal()`, seed 1                                    | `u1 = 0.1222049`, `u2 = 0.66995019` → `z = −0.98834670, −0.79064822`                                                       |
+| σ / L, fanIn 4, fanOut 2: Glorot, He, LeCun                     | `0.57735026 / 1.0`, `0.70710677 / 1.2247449`, `0.5 / 0.8660254`                                                            |
+| σ, `HeNormal(0.1)`; σ, custom `FanOut`                          | `0.70359755`; `0.70710677`                                                                                                 |
+| `HeNormal` `Weights<2, 4>()`, seed 1 (= `0.70710677 · z`)       | `−0.69886667, −0.55907273, −0.30341968, 0.38391611, −0.68643242, 0.17152607, 0.79724646, −1.43270266`                      |
+| `GlorotUniform` `Weights<2, 4>()`, seed 1 (= `2u − 1`, `L = 1`) | `−0.75559032, 0.33990037, 0.10827506, 0.24061728, 0.81145370, −0.08537471, −0.27581966, −0.62438822`                       |
+| `GlorotUniform`, seed 7: draws 0–1 / draws 8–9                  | `0.11884129, −0.17977190` / `−0.07675266, 0.60809577`                                                                      |
 
 Tolerances in the two stream cases are about 4–5 standard errors of the theoretical moment, so they
 test the distribution, not just a regression value. The measured values sit within 2 standard errors

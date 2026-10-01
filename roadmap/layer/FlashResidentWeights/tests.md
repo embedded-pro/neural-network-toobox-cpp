@@ -4,7 +4,7 @@
 
 ## Fixture
 
-```
+```text
 # anonymous namespace, next to the fixture
 inline constexpr math::Vector<float, 8> flashTheta{ 0.1, -0.2, 0.3, 0.4, 0.5, -0.6, 0.2, -0.1 }   # W row-major, b = (0.2, -0.1)
 inline constexpr float flashRegion[8]{ 0.1, -0.2, 0.3, 0.4, 0.5, -0.6, 0.2, -0.1 }                # raw region, same values
@@ -37,7 +37,7 @@ class TestFlashResidentWeights : public ::testing::Test:
 
 ## Test cases (Arrange / Act / Assert)
 
-```
+```text
 ForwardPassesAffinePreActivationToActivationOnce:
     Arrange: FlashLayer layer{ flashTheta, activationMock }
              EXPECT_CALL(activationMock, ForwardVector(_, _)).WillOnce(Invoke([&](span<float> out, span<const float> in):
@@ -87,7 +87,7 @@ Integration cases, deployed as `TEST_F(TestModel, …)` in `neural_network/model
 fixture: LeakyReLU 0.1 hidden, tanh output, `input = (2, 0.5)`, output `-0.8298019`. The fixture's
 weight matrices become flat constants:
 
-```
+```text
 inline constexpr math::Vector<float, 9> hiddenTheta{ 0.5, -1.0, 1.5, 0.25, -0.5, 0.75, 0.0, 0.0, 0.0 }   # W₁ row-major, b₁ = 0
 inline constexpr math::Vector<float, 4> outputTheta{ 1.0, -0.5, 2.0, 0.0 }                              # W₂, b₂ = 0
 template<typename M> concept ModelHasBackward      = requires(M& m, const typename M::OutputVector& g) { m.Backward(g); }
@@ -124,18 +124,18 @@ reproduced by a C++ prototype of `FlashDense` built against the current `Dense.h
 `LeakyReLU` and `Softmax` (`proto.cpp`), and the mock and span cases were run as gtest cases
 (`mocktest.cpp`, 2/2 passed).
 
-| Quantity                                                   | Value                                                         |
-|------------------------------------------------------------|---------------------------------------------------------------|
-| `z = W x1 + b`, `x1 = (0.3, -0.7, 1.1)`                    | `(0.7, -0.99)`                                                |
-| `tanh(z)` (FlashDense and Dense, equal)                    | `(0.6043678, -0.7573623)`; float64 `(0.60436778, -0.75736232)` |
-| `z = W x2 + b`, `x2 = (1, 2, 3)`                           | `(0.8, -0.5)`                                                 |
-| `softmax(0.8, -0.5)`                                       | `(0.785835, 0.214165)`, sum `1.0`; float64 `(0.78583498, 0.21416502)` |
-| `LeakyReLU₀.₁(0.8, -0.5)`                                  | `(0.8, -0.05)`                                                |
-| Model hidden `z`, `a` (LeakyReLU 0.1)                      | `(0.5, 3.125, -0.625)`, `(0.5, 3.125, -0.0625)`               |
-| Model output `z`, `y = tanh(z)`                            | `-1.1875`, `-0.8298019` (float64 `-0.82980191`)               |
-| Mixed model after `SetParameters(0.5, 0.5, 0.5, 0.1)`      | `z = 1.88125`, `y = 0.9546031` (float64 `0.95460316`)         |
-| `sizeof(FlashDense<float, 64, 64>)` on x86-64              | `280 B` (abstract reference or `Tanh` by value)               |
-| `sizeof(Dense<float, 64, 64>)` on x86-64                   | `34 328 B`                                                    |
+| Quantity                                              | Value                                                                 |
+|-------------------------------------------------------|-----------------------------------------------------------------------|
+| `z = W x1 + b`, `x1 = (0.3, -0.7, 1.1)`               | `(0.7, -0.99)`                                                        |
+| `tanh(z)` (FlashDense and Dense, equal)               | `(0.6043678, -0.7573623)`; float64 `(0.60436778, -0.75736232)`        |
+| `z = W x2 + b`, `x2 = (1, 2, 3)`                      | `(0.8, -0.5)`                                                         |
+| `softmax(0.8, -0.5)`                                  | `(0.785835, 0.214165)`, sum `1.0`; float64 `(0.78583498, 0.21416502)` |
+| `LeakyReLU₀.₁(0.8, -0.5)`                             | `(0.8, -0.05)`                                                        |
+| Model hidden `z`, `a` (LeakyReLU 0.1)                 | `(0.5, 3.125, -0.625)`, `(0.5, 3.125, -0.0625)`                       |
+| Model output `z`, `y = tanh(z)`                       | `-1.1875`, `-0.8298019` (float64 `-0.82980191`)                       |
+| Mixed model after `SetParameters(0.5, 0.5, 0.5, 0.1)` | `z = 1.88125`, `y = 0.9546031` (float64 `0.95460316`)                 |
+| `sizeof(FlashDense<float, 64, 64>)` on x86-64         | `280 B` (abstract reference or `Tanh` by value)                       |
+| `sizeof(Dense<float, 64, 64>)` on x86-64              | `34 328 B`                                                            |
 
 ## Edge cases
 

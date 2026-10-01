@@ -4,7 +4,7 @@
 
 ## Fixture
 
-```
+```text
 class TestClassificationMetrics : public ::testing::Test:
     static constexpr std::size_t classes = 4
     static constexpr std::size_t samples = 10
@@ -43,7 +43,7 @@ makes `Accuracy`, `BalancedAccuracy` and `MacroF1` all differ.
 
 ## Test cases (Arrange / Act / Assert)
 
-```
+```text
 ArgMaxReturnsLowestIndexOfLargestScore:
     Act/Assert: EXPECT_EQ(ArgMax<float, 4>(v), index) for
         ( 2.0,  0.1, -1.0,  0.0) → 0      # first element is the max
@@ -109,20 +109,20 @@ Computed by [`reference.py`](reference.py) (numpy `float32` scores, exact
 `accuracy_score`, `precision_score`/`recall_score`/`f1_score(average=None)`, `balanced_accuracy_score`
 and `f1_score(average="macro")`):
 
-| Quantity                                   | Value                                                             |
-|--------------------------------------------|-------------------------------------------------------------------|
-| predictions (lowest-index argmax)          | `(0, 1, 2, 0, 3, 0, 1, 2, 0, 1)` = `numpy.argmax`                 |
-| confusion `C` (rows actual, cols predicted)| `[[2,0,0,0],[2,2,0,0],[0,1,2,1],[0,0,0,0]]`                       |
-| support / predicted per class              | `(2, 4, 4, 0)` / `(4, 3, 2, 1)`                                   |
-| accuracy                                   | `6/10 = 0.6` (`float32`: `0.6000000238`)                          |
-| precision                                  | `(1/2, 2/3, 1, 0)`                                                |
-| recall                                     | `(1, 1/2, 1/2, undefined)`                                        |
-| F1 = `2TP/(support + predicted)`           | `(2/3, 4/7, 2/3, 0)`; equals `2PR/(P+R)` for classes 0–2          |
-| balanced accuracy                          | `2/3 = 0.6666667` (sklearn drops class 3, warns)                  |
-| macro F1                                   | `10/21 = 0.4761905` (sklearn default labels = union ⇒ 4 classes)  |
-| argmax(softmax₃₂(z)) vs argmax(z), fixture | identical for all 10 rows                                         |
-| `ArgMax` table                             | `0, 3, 1, 1, 0, 1, 1` (in the order listed above)                 |
-| `BinaryLabel` table                        | `0, 1, 0, 0, 1, 0` (in the order listed above)                    |
+| Quantity                                    | Value                                                            |
+|---------------------------------------------|------------------------------------------------------------------|
+| predictions (lowest-index argmax)           | `(0, 1, 2, 0, 3, 0, 1, 2, 0, 1)` = `numpy.argmax`                |
+| confusion `C` (rows actual, cols predicted) | `[[2,0,0,0],[2,2,0,0],[0,1,2,1],[0,0,0,0]]`                      |
+| support / predicted per class               | `(2, 4, 4, 0)` / `(4, 3, 2, 1)`                                  |
+| accuracy                                    | `6/10 = 0.6` (`float32`: `0.6000000238`)                         |
+| precision                                   | `(1/2, 2/3, 1, 0)`                                               |
+| recall                                      | `(1, 1/2, 1/2, undefined)`                                       |
+| F1 = `2TP/(support + predicted)`            | `(2/3, 4/7, 2/3, 0)`; equals `2PR/(P+R)` for classes 0–2         |
+| balanced accuracy                           | `2/3 = 0.6666667` (sklearn drops class 3, warns)                 |
+| macro F1                                    | `10/21 = 0.4761905` (sklearn default labels = union ⇒ 4 classes) |
+| argmax(softmax₃₂(z)) vs argmax(z), fixture  | identical for all 10 rows                                        |
+| `ArgMax` table                              | `0, 3, 1, 1, 0, 1, 1` (in the order listed above)                |
+| `BinaryLabel` table                         | `0, 1, 0, 0, 1, 0` (in the order listed above)                   |
 
 ## Edge cases
 

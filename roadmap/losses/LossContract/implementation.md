@@ -4,7 +4,7 @@
 
 ## Data structures
 
-```
+```text
 template<typename T, std::size_t NumberOfFeatures, typename Target = math::Vector<T, NumberOfFeatures>>
 class Loss:                                          # replaces Loss.hpp; NOT an ObjectiveFunction any more
     static_assert(std::is_floating_point_v<T>, "Loss requires a floating-point type")
@@ -30,7 +30,7 @@ Weight decay is a property of θ, not of one sample's prediction, so it moves to
 
 ## Interface
 
-```
+```text
 # Loss<T, N, Target> — pure interface, mirrors Layer's special-member pattern
 virtual ~Loss() = default
 virtual T      Cost    (const Vector& prediction, const TargetType& target) const = 0   # hot path
@@ -60,7 +60,7 @@ Notation: `ŷ` prediction, `y` target, `N` size, `inv = 1/N` (`static constexpr`
 
 ### MSE, MAE, Huber (migrated, formulas unchanged minus the regulariser)
 
-```
+```text
 MSE:    J = inv · Σ (ŷᵢ − yᵢ)²                      ∂J/∂ŷᵢ = 2(ŷᵢ − yᵢ) · inv
 MAE:    J = inv · Σ |ŷᵢ − yᵢ|                       ∂J/∂ŷᵢ = sign(ŷᵢ − yᵢ) · inv,  sign(0) = 0
 Huber:  eᵢ = ŷᵢ − yᵢ,  cᵢ = clip(eᵢ, −δ, δ)
@@ -69,7 +69,7 @@ Huber:  eᵢ = ŷᵢ − yᵢ,  cᵢ = clip(eᵢ, −δ, δ)
 
 ### BinaryCrossEntropy — probability input (migrated)
 
-```
+```text
 p̃ᵢ = clamp(ŷᵢ, ε, 1 − ε),  ε = T{1e-7}
 J       = −inv · Σ [ yᵢ log p̃ᵢ + (1 − yᵢ) log(1 − p̃ᵢ) ]
 ∂J/∂ŷᵢ  = (p̃ᵢ − yᵢ) / (p̃ᵢ (1 − p̃ᵢ)) · inv          # evaluated at the clamped p̃ (kept for Sigmoid outputs)
@@ -79,7 +79,7 @@ J       = −inv · Σ [ yᵢ log p̃ᵢ + (1 − yᵢ) log(1 − p̃ᵢ) ]
 
 Per element with logit `z` and label `y ∈ [0, 1]` (soft labels allowed), `σ(z) = 1/(1 + e^{−z})`:
 
-```
+```text
 ℓ(z, y) = −[ y log σ(z) + (1 − y) log(1 − σ(z)) ]
         = (1 − y) z + log(1 + e^{−z})                     # log σ = −log(1+e^{−z}),  log(1−σ) = −z − log(1+e^{−z})
         = softplus(z) − y z
@@ -94,7 +94,7 @@ J        = inv · Σ ℓ(zᵢ, yᵢ)
 `max(z,0)` and `|z|` each have a kink at `z = 0`, but their combination is `softplus(z) − yz`, which is
 `C^∞`; the gradient is continuous (`½ − y` at `z = 0`).
 
-```
+```text
 function Cost(z, y):                               # OPTIMIZE_FOR_SPEED
     sum = T{0}
     for i in 0..N-1:
@@ -120,7 +120,7 @@ Chain-rule consistency with the probability form (test reference): with `p = σ(
 
 Fused softmax + cross-entropy; the model's last layer emits logits (N1 `Identity`), never a `Softmax` output.
 
-```
+```text
 m  = maxⱼ zⱼ
 eᵢ = exp(zᵢ − m)          ∈ (0, 1],  e_argmax = 1
 s  = Σ eᵢ                 ∈ [1, N]   ⇒ log s ≥ 0, never log(0)
@@ -130,7 +130,7 @@ softmaxᵢ = eᵢ / s
 
 Dense target `y` (one-hot, soft, or unnormalised), `S = Σ yᵢ`:
 
-```
+```text
 J       = S · logsumexp(z) − Σ yᵢ zᵢ = Σ yᵢ (L − (zᵢ − m))       # m cancels; no large-m cancellation
 ∂J/∂zᵢ  = S · softmaxᵢ − yᵢ
           # ∂/∂zᵢ logsumexp(z) = softmaxᵢ;  S = 1 for a normalised target ⇒ softmax − y
@@ -138,12 +138,12 @@ J       = S · logsumexp(z) − Σ yᵢ zᵢ = Σ yᵢ (L − (zᵢ − m))     
 
 Class-index target `k` (`really_assert(k < N)`), equivalent to the one-hot `y = e_k`, `S = 1`:
 
-```
+```text
 J       = L − (z_k − m) = logsumexp(z) − z_k  ≥ 0
 ∂J/∂zᵢ  = softmaxᵢ − [i == k]
 ```
 
-```
+```text
 function Cost(z, target):                          # OPTIMIZE_FOR_SPEED
     m = MaxLogit(z)
     L = math::Log(Σᵢ math::Exp(z[i] - m))
@@ -170,12 +170,12 @@ function Gradient(z, target):                      # OPTIMIZE_FOR_SPEED
 
 ## Complexity & memory
 
-| Loss                          | `Cost`                          | `Gradient`                          |
-|-------------------------------|---------------------------------|-------------------------------------|
-| MSE / MAE / Huber             | `O(N)`, no transcendental       | `O(N)`, no transcendental           |
-| BCE (probability)             | `N` clamps + `2N` log           | `N` clamps + `N` div                |
-| BCE with logits               | `N` exp + `N` log               | `N` exp + `N` div                   |
-| CCE (dense or class index)    | `N` exp + 1 log + `N`-compare max | `N` exp + 1 div + `N`-compare max |
+| Loss                       | `Cost`                            | `Gradient`                        |
+|----------------------------|-----------------------------------|-----------------------------------|
+| MSE / MAE / Huber          | `O(N)`, no transcendental         | `O(N)`, no transcendental         |
+| BCE (probability)          | `N` clamps + `2N` log             | `N` clamps + `N` div              |
+| BCE with logits            | `N` exp + `N` log                 | `N` exp + `N` div                 |
+| CCE (dense or class index) | `N` exp + 1 log + `N`-compare max | `N` exp + 1 div + `N`-compare max |
 
 - Object size: `0` data floats (one vtable pointer); Huber `1` float (`δ`). The target is no longer
   copied into the loss, saving `N` floats per loss object versus today.

@@ -4,7 +4,7 @@
 
 ## Data structures
 
-```
+```text
 template<typename T, std::size_t Size>          # static_assert(std::is_floating_point_v<T>); instantiated for float
 class FlashWeights:                              # non-owning, read-only view; reusable by N11/N17–N21
     std::span<const T, Size> values              # static extent ⇒ one pointer, no size word
@@ -28,7 +28,7 @@ class FlashDense final : public InferenceLayer<T, InputSize, OutputSize>:     # 
 
 Class diagram (N8 hierarchy, extended):
 
-```
+```text
 InferenceLayer<T, In, Out>                 Forward, Output
  ├─ FlashDense<T, In, Out, Activation>     + Parameters() → std::span<const T, In·Out+Out>   (read-only, flash)
  ├─ Layer<T, In, Out, 0>                   + Backward
@@ -38,7 +38,7 @@ InferenceLayer<T, In, Out>                 Forward, Output
 
 ## Interface
 
-```
+```text
 # FlashWeights<T, Size>
 constexpr explicit FlashWeights(const math::Vector<T, Size>& stored)   # views stored.begin() .. + Size
 FlashWeights(const math::Vector<T, Size>&&) = delete                    # a temporary would dangle
@@ -70,7 +70,7 @@ void            ZeroGradients()                         requires(FullyTrainable 
 
 `detail` helpers (replace `detail::is_layer_v`):
 
-```
+```text
 template<typename L> concept InferenceLayerType =
     std::is_base_of_v<InferenceLayer<typename L::ValueType, L::InputSize, L::OutputSize>, L>
 template<typename L> concept TrainableLayerType =
@@ -92,7 +92,7 @@ forwards both lvalues through `std::reference_wrapper` (the current `make_layer`
 
 ## Algorithm (pseudocode)
 
-```
+```text
 function FlashWeights(stored):       values = std::span<const T, Size>{ stored.begin(), Size }
 function FlashWeights(region):       values = region
 function FlashDense(weights, act):   this.weights = Weights{ weights };  activation = act;  output = 0
@@ -116,7 +116,7 @@ function Model::SetLayerParameters / GetLayerParameters:           # existing he
 
 Math (one sample):
 
-```
+```text
 forward:     z_i = b_i + Σ_{j=0}^{In−1} W_ij x_j,     a = f(z)            # identical to Dense::Forward
 layout:      θ_{i·In + j} = W_ij,   θ_{In·Out + i} = b_i                   # identical to Dense::Parameters()
 summation:   same order as Dense (bias first, then j ascending) ⇒ same rounding sequence;
@@ -128,7 +128,7 @@ immutable) and no `∂L/∂x`. If a later item (N16 freeze mask) needs to back-p
 flash layer, for example to train an input `AffineNormalization` in front of it, the vector–Jacobian
 product is
 
-```
+```text
 δ = J_f(z)ᵀ g               (element-wise: δ_i = f'(z_i) g_i; Softmax: δ = a ⊙ (g − ⟨g, a⟩))
 ∂L/∂x_j = Σ_i W_ij δ_i      (i.e. Wᵀ δ, W read from flash)
 ```

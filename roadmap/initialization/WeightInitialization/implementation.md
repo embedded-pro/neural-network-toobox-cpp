@@ -4,7 +4,7 @@
 
 ## Data structures
 
-```
+```text
 template<typename T>                           # static_assert(std::is_floating_point_v<T>); instantiated for float
 class Xorshift32:
     std::uint32_t state                        # never 0 (0 is the one fixed point of the recurrence)
@@ -28,18 +28,18 @@ class WeightInitializer:
 
 Presets (the `scale`/`mode` pairs are the standard variance-scaling table):
 
-| Preset                    | `scale`        | `mode`       | Var[w]                  | Uniform limit `L`            | Normal `σ`                |
-|---------------------------|----------------|--------------|-------------------------|------------------------------|---------------------------|
-| `GlorotUniform/Normal`    | `1`            | `FanAverage` | `2/(n_in + n_out)`      | `√(6/(n_in + n_out))`        | `√(2/(n_in + n_out))`     |
-| `HeUniform/Normal(a = 0)` | `2/(1 + a²)`   | `FanIn`      | `2/((1 + a²) n_in)`     | `√(6/((1 + a²) n_in))`       | `√(2/((1 + a²) n_in))`    |
-| `LeCunUniform/Normal`     | `1`            | `FanIn`      | `1/n_in`                | `√(3/n_in)`                  | `√(1/n_in)`               |
+| Preset                    | `scale`      | `mode`       | Var[w]              | Uniform limit `L`      | Normal `σ`             |
+|---------------------------|--------------|--------------|---------------------|------------------------|------------------------|
+| `GlorotUniform/Normal`    | `1`          | `FanAverage` | `2/(n_in + n_out)`  | `√(6/(n_in + n_out))`  | `√(2/(n_in + n_out))`  |
+| `HeUniform/Normal(a = 0)` | `2/(1 + a²)` | `FanIn`      | `2/((1 + a²) n_in)` | `√(6/((1 + a²) n_in))` | `√(2/((1 + a²) n_in))` |
+| `LeCunUniform/Normal`     | `1`          | `FanIn`      | `1/n_in`            | `√(3/n_in)`            | `√(1/n_in)`            |
 
 `a` is the LeakyReLU negative slope (`a = 0` is plain ReLU). `FanOut` is available for a custom
 `VarianceScaling` (He's backward-preserving "fan_out" mode) but no preset uses it.
 
 ## Interface
 
-```
+```text
 # Xorshift32<T>
 explicit Xorshift32(std::uint32_t seed)        # state = fmix32(seed), or defaultState when that is 0
 std::uint32_t Next()                           # Marsaglia xor32 (13, 17, 5); hot path
@@ -71,7 +71,7 @@ biases, which is the bias rule of every preset here. No `Layer` interface change
 
 ## Algorithm (pseudocode)
 
-```
+```text
 function fmix32(h):                             # MurmurHash3 finaliser: a bijection on uint32, fmix32(0) = 0
     h ^= h >> 16;  h *= 0x85EBCA6B
     h ^= h >> 13;  h *= 0xC2B2AE35
@@ -139,7 +139,7 @@ parameter gradient. The "forward/backward" content is the variance argument that
 For one Dense layer `z_k = Σ_{j=1}^{n_in} w_kj x_j` (`b = 0`), with `w` i.i.d., zero mean and
 independent of `x`:
 
-```
+```text
 forward:   Var[z_k]       = n_in  · Var[w] · E[x_j²]
 backward:  Var[∂L/∂x_j]   = n_out · Var[w] · Var[δ_k]          # ∂L/∂x_j = Σ_k w_kj δ_k,  δ = ∂L/∂z
 
@@ -157,7 +157,7 @@ SELU (N6): the self-normalising fixed point assumes ω = Σ_j w_kj ≈ 0 and τ 
 
 Distribution mapping for a target variance `v = scale / fan`:
 
-```
+```text
 Uniform:  w = L (2u − 1),  u ~ U[0, 1)           ⇒  E[w] = −L·2⁻²⁴ ≈ 0,  Var[w] = L²/3 = v   ⇔  L = √(3v)
 Normal:   w = σ z,  z = √(−2 ln u1) cos(2π u2)   ⇒  z ~ N(0, 1)  (Box & Muller 1958),  σ = √v
           with u1 ≥ 2⁻²⁴ the tail is capped at |z| ≤ √(48 ln 2) = 5.7681 (P(|z| > 5.77) ≈ 8·10⁻⁹)
