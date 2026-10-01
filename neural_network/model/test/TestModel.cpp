@@ -1,160 +1,123 @@
-#include "neural_network/layer/Layer.hpp"
+#include "neural_network/activation/LeakyReLU.hpp"
+#include "neural_network/activation/Tanh.hpp"
+#include "neural_network/layer/Dense.hpp"
+#include "neural_network/losses/Loss.hpp"
 #include "neural_network/model/Model.hpp"
-#include "gmock/gmock.h"
+#include "numerical/math/Tolerance.hpp"
+#include "numerical/optimization/Optimizer.hpp"
+#include <cstddef>
+#include <gmock/gmock.h>
 
 namespace
 {
-    template<typename QNumberTypeMock, std::size_t InputSizeMock, std::size_t OutputSizeMock, std::size_t ParameterSizeMock>
-    class LayerMock
-        : public neural_network::Layer<QNumberTypeMock, InputSizeMock, OutputSizeMock, ParameterSizeMock>
+    constexpr float finiteDifferenceStep{ 1e-3f };
+
+    template<std::size_t Size>
+    class OptimizerMock
+        : public optimization::Optimizer<float, Size>
     {
     public:
-        using BaseLayer = neural_network::Layer<QNumberTypeMock, InputSizeMock, OutputSizeMock, ParameterSizeMock>;
-        using InputVector = typename BaseLayer::InputVector;
-        using OutputVector = typename BaseLayer::OutputVector;
-        using ParameterVector = typename BaseLayer::ParameterVector;
-        using QNumberType = QNumberTypeMock;
-        static constexpr std::size_t InputSize = InputSizeMock;
-        static constexpr std::size_t OutputSize = OutputSizeMock;
-        static constexpr std::size_t ParameterSize = ParameterSizeMock;
+        using Base = optimization::Optimizer<float, Size>;
 
-        LayerMock(int mockParam = 0)
-        {
-            (void)mockParam;
-            setupDefaultBehavior();
-        }
-
-        LayerMock(const LayerMock& other)
-            : inputGradient(other.inputGradient)
-            , parameters(other.parameters)
-        {
-            setupDefaultBehavior();
-        }
-
-        LayerMock(LayerMock&& other) noexcept
-            : inputGradient(std::move(other.inputGradient))
-            , parameters(std::move(other.parameters))
-        {
-            setupDefaultBehavior();
-        }
-
-        LayerMock& operator=(const LayerMock&) = default;
-        LayerMock& operator=(LayerMock&&) = default;
-
-        MOCK_METHOD(void, Forward, (const InputVector&), (override));
-        MOCK_METHOD(InputVector&, Backward, (const OutputVector&), (override));
-        MOCK_METHOD(const OutputVector&, Output, (), (const, override));
-        MOCK_METHOD(ParameterVector&, Parameters, (), (const, override));
-        MOCK_METHOD(void, SetParameters, (const ParameterVector&), (override));
-
-    private:
-        void setupDefaultBehavior()
-        {
-            ON_CALL(*this, Forward(testing::_))
-                .WillByDefault([this](const InputVector& input)
-                    {
-                        (void)input;
-                    });
-
-            ON_CALL(*this, Backward(testing::_))
-                .WillByDefault([this](const OutputVector& output_gradient) -> InputVector&
-                    {
-                        (void)output_gradient;
-                        return inputGradient;
-                    });
-
-            ON_CALL(*this, Output())
-                .WillByDefault([this]() -> const OutputVector&
-                    {
-                        return outputValue;
-                    });
-
-            ON_CALL(*this, Parameters())
-                .WillByDefault([this]() -> ParameterVector&
-                    {
-                        return parameters;
-                    });
-
-            ON_CALL(*this, SetParameters(testing::_))
-                .WillByDefault([this](const ParameterVector& p)
-                    {
-                        parameters = p;
-                    });
-        }
-
-        InputVector inputGradient;
-        OutputVector outputValue;
-        ParameterVector parameters;
+        MOCK_METHOD(const typename Base::Result&, Minimize, (const typename Base::Vector& initialGuess, (optimization::ObjectiveFunction<float, Size> & objective)), (override));
     };
 
-    template<typename T>
+    template<std::size_t Size>
+    class LossMock
+        : public neural_network::Loss<float, Size>
+    {
+    public:
+        using Vector = typename neural_network::Loss<float, Size>::Vector;
+
+        MOCK_METHOD(float, Cost, (const Vector& parameters), (override));
+        MOCK_METHOD(Vector, Gradient, (const Vector& parameters), (override));
+    };
+
     class TestModel
         : public ::testing::Test
     {
-    public:
-        static constexpr std::size_t InputSize = 1;
-        static constexpr std::size_t HiddenSize = 4;
-        static constexpr std::size_t OutputSize = 1;
-        static constexpr std::size_t ParameterSize = 2;
+    protected:
+        using HiddenLayer = neural_network::Dense<float, 2, 3>;
+        using OutputLayer = neural_network::Dense<float, 3, 1>;
+        using ModelType = neural_network::Model<float, 2, 1, HiddenLayer, OutputLayer>;
+        using InputVector = ModelType::InputVector;
+        using OutputVector = ModelType::OutputVector;
+        using ParameterVector = ModelType::ParameterVector;
 
-        using FirstLayer = LayerMock<T, InputSize, HiddenSize, ParameterSize>;
-        using SecondLayer = LayerMock<T, HiddenSize, OutputSize, ParameterSize>;
-        using ModelType = neural_network::Model<T, InputSize, OutputSize, FirstLayer, SecondLayer>;
+        float ModelOutput(const InputVector& input)
+        {
+            return model.Forward(input)[0];
+        }
 
-        TestModel()
-            : model(neural_network::make_layer<FirstLayer>(42),
-                  neural_network::make_layer<SecondLayer>(43))
-        {}
-
-        ModelType model;
+        neural_network::LeakyReLU<float> leakyRelu{ 0.1f };
+        neural_network::Tanh<float> tanhActivation;
+        const HiddenLayer::WeightMatrix hiddenWeights{ { 0.5f, -1.0f }, { 1.5f, 0.25f }, { -0.5f, 0.75f } };
+        const OutputLayer::WeightMatrix outputWeights{ { 1.0f, -0.5f, 2.0f } };
+        ModelType model{ neural_network::make_layer<HiddenLayer>(hiddenWeights, leakyRelu), neural_network::make_layer<OutputLayer>(outputWeights, tanhActivation) };
+        const InputVector input{ 2.0f, 0.5f };
     };
-
-    using TestedTypes = ::testing::Types<float, math::Q15, math::Q31>;
-    TYPED_TEST_SUITE(TestModel, TestedTypes);
 }
 
-TYPED_TEST(TestModel, LayerConstructionWithParameters)
+TEST_F(TestModel, ForwardComposesDenseLayers)
 {
-    using FirstLayer = typename TestFixture::FirstLayer;
-    using SecondLayer = typename TestFixture::SecondLayer;
-
-    auto firstLayerParam = 100;
-    auto secondLayerParam = 200;
-
-    typename TestFixture::ModelType customModel(
-        neural_network::make_layer<FirstLayer>(firstLayerParam),
-        neural_network::make_layer<SecondLayer>(secondLayerParam));
+    EXPECT_NEAR(model.Forward(input)[0], -0.8298019f, math::Tolerance<float>());
 }
 
-TYPED_TEST(TestModel, SetParameters)
+TEST_F(TestModel, BackwardInputGradientMatchesFiniteDifference)
 {
-    using ParameterVector = math::Vector<TypeParam, TestFixture::ModelType::TotalParameters>;
+    InputVector numeric{};
+    for (std::size_t j = 0; j < InputVector::size; ++j)
+    {
+        InputVector plus{ input };
+        InputVector minus{ input };
+        plus[j] += finiteDifferenceStep;
+        minus[j] -= finiteDifferenceStep;
+        numeric[j] = (ModelOutput(plus) - ModelOutput(minus)) / (2.0f * finiteDifferenceStep);
+    }
 
-    ParameterVector parameters;
-    for (size_t i = 0; i < TestFixture::ModelType::TotalParameters; ++i)
-        parameters[i] = TypeParam(static_cast<float>(i) * 0.1f);
+    static_cast<void>(model.Forward(input));
+    const auto analytic{ model.Backward(OutputVector{ 1.0f }) };
 
-    TestFixture::model.SetParameters(parameters);
-
-    auto retrievedParams = TestFixture::model.GetParameters();
-
-    for (size_t i = 0; i < TestFixture::ModelType::TotalParameters; ++i)
-        EXPECT_EQ(math::ToFloat(retrievedParams[i]), math::ToFloat(parameters[i]));
+    for (std::size_t j = 0; j < InputVector::size; ++j)
+        EXPECT_NEAR(analytic[j], numeric[j], math::Tolerance<float>());
 }
 
-TYPED_TEST(TestModel, ConstructorVariants)
+TEST_F(TestModel, GetParametersConcatenatesLayersInOrder)
 {
-    typename TestFixture::ModelType defaultModel;
+    const ParameterVector expected{ 0.5f, -1.0f, 1.5f, 0.25f, -0.5f, 0.75f, 0.0f, 0.0f, 0.0f, 1.0f, -0.5f, 2.0f, 0.0f };
 
-    typename TestFixture::ModelType factoryModel(
-        neural_network::make_layer<typename TestFixture::FirstLayer>(1),
-        neural_network::make_layer<typename TestFixture::SecondLayer>(2));
+    const auto parameters{ model.GetParameters() };
 
-    typename TestFixture::ModelType::InputVector input;
-    auto defaultOutput = defaultModel.Forward(input);
-    auto factoryOutput = factoryModel.Forward(input);
+    for (std::size_t i = 0; i < ModelType::TotalParameters; ++i)
+        EXPECT_NEAR(parameters[i], expected[i], math::Tolerance<float>());
+}
 
-    typename TestFixture::ModelType::OutputVector outputGradient;
-    auto defaultGradient = defaultModel.Backward(outputGradient);
-    auto factoryGradient = factoryModel.Backward(outputGradient);
+TEST_F(TestModel, SetParametersRoundTripsThroughLayers)
+{
+    ParameterVector parameters{};
+    for (std::size_t i = 0; i < ModelType::TotalParameters; ++i)
+        parameters[i] = 0.1f * static_cast<float>(i) - 0.6f;
+
+    model.SetParameters(parameters);
+    const auto retrieved{ model.GetParameters() };
+
+    for (std::size_t i = 0; i < ModelType::TotalParameters; ++i)
+        EXPECT_NEAR(retrieved[i], parameters[i], math::Tolerance<float>());
+}
+
+TEST_F(TestModel, TrainAppliesOptimizerResult)
+{
+    ::testing::StrictMock<OptimizerMock<ModelType::TotalParameters>> optimizer;
+    ::testing::StrictMock<LossMock<ModelType::TotalParameters>> loss;
+    ParameterVector optimized{};
+    for (std::size_t i = 0; i < ModelType::TotalParameters; ++i)
+        optimized[i] = 0.05f * static_cast<float>(i + 1);
+    const OptimizerMock<ModelType::TotalParameters>::Result result{ optimized, 0.4f, 3 };
+    EXPECT_CALL(optimizer, Minimize(::testing::_, ::testing::Ref(loss))).WillOnce(::testing::ReturnRef(result));
+
+    model.Train(optimizer, loss, model.GetParameters());
+
+    const auto parameters{ model.GetParameters() };
+    for (std::size_t i = 0; i < ModelType::TotalParameters; ++i)
+        EXPECT_NEAR(parameters[i], optimized[i], math::Tolerance<float>());
 }

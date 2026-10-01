@@ -1,4 +1,6 @@
+#include "Semihosting.hpp"
 #include <cerrno>
+#include <cstdio>
 #include <cwchar>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -9,6 +11,8 @@ extern char _heap_end;
 
 extern "C"
 {
+    void* __dso_handle = nullptr;
+
     caddr_t _sbrk(int incr)
     {
         static char* heap = &_end;
@@ -23,13 +27,20 @@ extern "C"
         return reinterpret_cast<caddr_t>(prev);
     }
 
+    void _exit(int status)
+    {
+        platform::qemu::SemihostingExit(status);
+    }
+
     [[gnu::weak]] void Default_Handler_Forwarded()
     {
+        std::fflush(stdout);
         _exit(1);
     }
 
     void abort()
     {
+        std::fflush(stdout);
         _exit(1);
     }
 
@@ -42,34 +53,22 @@ extern "C"
     void _init()
     {}
 
+    void _fini()
+    {}
+
     void HardwareInitialization()
     {}
 
-    int _write(int, const char* ptr, int len)
-    {
-        struct
-        {
-            int handle;
-            const void* ptr;
-            unsigned len;
-        } block = { 1, ptr, static_cast<unsigned>(len) };
-
-        int result;
-        __asm volatile(
-            "mov r0, #5\n"
-            "mov r1, %[b]\n"
-            "bkpt #0xAB\n"
-            "mov %[r], r0\n"
-            : [r] "=r"(result)
-            : [b] "r"(&block)
-            : "r0", "r1", "memory");
-        return len - result;
-    }
-
     char* getcwd(char* buf, size_t size)
     {
-        if (buf && size > 0)
-            buf[0] = '\0';
+        if (buf == nullptr || size < 2)
+        {
+            errno = ERANGE;
+            return nullptr;
+        }
+
+        buf[0] = '/';
+        buf[1] = '\0';
         return buf;
     }
 
@@ -82,5 +81,40 @@ extern "C"
     int swprintf(wchar_t*, size_t, const wchar_t*, ...)
     {
         return -1;
+    }
+
+    [[gnu::weak]] wint_t fgetwc(FILE*)
+    {
+        return WEOF;
+    }
+
+    [[gnu::weak]] wint_t getwc(FILE*)
+    {
+        return WEOF;
+    }
+
+    [[gnu::weak]] wint_t getwchar()
+    {
+        return WEOF;
+    }
+
+    [[gnu::weak]] wint_t ungetwc(wint_t, FILE*)
+    {
+        return WEOF;
+    }
+
+    [[gnu::weak]] wint_t fputwc(wchar_t, FILE*)
+    {
+        return WEOF;
+    }
+
+    [[gnu::weak]] wint_t putwc(wchar_t, FILE*)
+    {
+        return WEOF;
+    }
+
+    [[gnu::weak]] wint_t putwchar(wchar_t)
+    {
+        return WEOF;
     }
 }

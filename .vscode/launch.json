@@ -2,13 +2,37 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "neural_network simulator",
+      "name": "Neural Network Simulator",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/host/simulator/NeuralNetwork/Debug/neural_network.simulator.nn",
+      "program": "${workspaceFolder}/build/host/simulator/model/NeuralNetwork/Debug/neural_network.simulator.model.neural_network",
       "args": [],
+      "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
       "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    },
+    {
+      "name": "Linux Debug",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${command:cmake.launchTargetPath}",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
       "setupCommands": [
         {
           "description": "Enable pretty-printing for gdb",

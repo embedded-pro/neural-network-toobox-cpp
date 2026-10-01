@@ -1,15 +1,12 @@
 {
+  "last-release-sha": "5a475fae8f10e8b4170fc08a733d759897866093",
   "include-component-in-tag": false,
-  "plugins": [
-    "sentence-case"
-  ],
+  "plugins": ["sentence-case"],
   "packages": {
     ".": {
       "release-type": "simple",
       "package-name": "neural-network-toolbox",
-      "extra-files": [
-        "CMakeLists.txt"
-      ],
+      "extra-files": ["CMakeLists.txt", "sonar-project.properties"],
       "changelog-sections": [
         {
           "type": "feat",

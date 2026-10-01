@@ -25,6 +25,37 @@ SECTIONS
         . = ALIGN(4);
     } > FLASH
 
+    .ARM.exidx :
+    {
+        *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+    } > FLASH
+
+    .preinit_array :
+    {
+        . = ALIGN(4);
+        PROVIDE_HIDDEN(__preinit_array_start = .);
+        KEEP(*(.preinit_array*))
+        PROVIDE_HIDDEN(__preinit_array_end = .);
+    } > FLASH
+
+    .init_array :
+    {
+        . = ALIGN(4);
+        PROVIDE_HIDDEN(__init_array_start = .);
+        KEEP(*(SORT(.init_array.*)))
+        KEEP(*(.init_array*))
+        PROVIDE_HIDDEN(__init_array_end = .);
+    } > FLASH
+
+    .fini_array :
+    {
+        . = ALIGN(4);
+        PROVIDE_HIDDEN(__fini_array_start = .);
+        KEEP(*(SORT(.fini_array.*)))
+        KEEP(*(.fini_array*))
+        PROVIDE_HIDDEN(__fini_array_end = .);
+    } > FLASH
+
     _sidata = LOADADDR(.data);
 
     .data :
@@ -45,6 +76,7 @@ SECTIONS
         . = ALIGN(4);
         _ebss = .;
         _end = .;
+        PROVIDE(end = _end);
     } > RAM
 
     .heap (NOLOAD) :
@@ -54,4 +86,6 @@ SECTIONS
         . += 256K;
         _heap_end = .;
     } > RAM
+
+    ASSERT(__init_array_end > __init_array_start, "mps2.ld: .init_array is empty, test registrations were discarded")
 }

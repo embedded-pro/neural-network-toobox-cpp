@@ -1,174 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
-  <!-- Background -->
-  <rect width="800" height="600" fill="white"/>
-  
-  <!-- Title -->
-  <text x="400" y="30" text-anchor="middle" font-family="Arial" font-size="24" font-weight="bold">Neural Network Model</text>
-  
-  <!-- Model Architecture -->
-  <g id="model-architecture">
-    <rect x="50" y="70" width="700" height="280" fill="#f9f9f9" stroke="#666" stroke-width="1"/>
-    
-    <!-- Main Title -->
-    <text x="400" y="95" text-anchor="middle" font-family="Arial" font-size="18" font-weight="bold">Model Architecture</text>
-    
-    <!-- Input Layer -->
-    <g id="input-layer">
-      <text x="100" y="125" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">Input</text>
-      <circle cx="100" cy="160" r="15" fill="#6495ED" stroke="black" stroke-width="1.5"/>
-      <circle cx="100" cy="200" r="15" fill="#6495ED" stroke="black" stroke-width="1.5"/>
-      <circle cx="100" cy="240" r="15" fill="#6495ED" stroke="black" stroke-width="1.5"/>
-      <circle cx="100" cy="280" r="15" fill="#6495ED" stroke="black" stroke-width="1.5"/>
-    </g>
-    
-    <!-- Layer 1 -->
-    <g id="layer1">
-      <rect x="150" y="120" width="140" height="180" rx="10" ry="10" fill="#e6f2ff" stroke="#0066cc" stroke-width="2"/>
-      <text x="220" y="145" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">Layer 1</text>
-      
-      <!-- Nodes in Layer 1 -->
-      <circle cx="220" cy="180" r="12" fill="#FF7F50" stroke="black" stroke-width="1.5"/>
-      <circle cx="220" cy="220" r="12" fill="#FF7F50" stroke="black" stroke-width="1.5"/>
-      <circle cx="220" cy="260" r="12" fill="#FF7F50" stroke="black" stroke-width="1.5"/>
-      
-      <!-- Layer 1 details -->
-      <text x="220" y="300" text-anchor="middle" font-family="Arial" font-size="12">Dense</text>
-    </g>
-    
-    <!-- Layer 2 -->
-    <g id="layer2">
-      <rect x="330" y="120" width="140" height="180" rx="10" ry="10" fill="#e6f2ff" stroke="#0066cc" stroke-width="2"/>
-      <text x="400" y="145" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">Layer 2</text>
-      
-      <!-- Nodes in Layer 2 -->
-      <circle cx="400" cy="190" r="12" fill="#FF7F50" stroke="black" stroke-width="1.5"/>
-      <circle cx="400" cy="230" r="12" fill="#FF7F50" stroke="black" stroke-width="1.5"/>
-      <circle cx="400" cy="270" r="12" fill="#FF7F50" stroke="black" stroke-width="1.5"/>
-      
-      <!-- Layer 2 details -->
-      <text x="400" y="300" text-anchor="middle" font-family="Arial" font-size="12">Dense</text>
-    </g>
-    
-    <!-- Layer N -->
-    <g id="layerN">
-      <rect x="510" y="120" width="140" height="180" rx="10" ry="10" fill="#e6f2ff" stroke="#0066cc" stroke-width="2"/>
-      <text x="580" y="145" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">Layer N</text>
-      
-      <!-- Nodes in Layer N -->
-      <circle cx="580" cy="190" r="12" fill="#FF7F50" stroke="black" stroke-width="1.5"/>
-      <circle cx="580" cy="230" r="12" fill="#FF7F50" stroke="black" stroke-width="1.5"/>
-      <circle cx="580" cy="270" r="12" fill="#FF7F50" stroke="black" stroke-width="1.5"/>
-      
-      <!-- Layer N details -->
-      <text x="580" y="300" text-anchor="middle" font-family="Arial" font-size="12">Dense</text>
-    </g>
-    
-    <!-- Output Layer -->
-    <g id="output-layer">
-      <text x="700" y="125" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">Output</text>
-      <circle cx="700" cy="180" r="15" fill="#90EE90" stroke="black" stroke-width="1.5"/>
-      <circle cx="700" cy="220" r="15" fill="#90EE90" stroke="black" stroke-width="1.5"/>
-      <circle cx="700" cy="260" r="15" fill="#90EE90" stroke="black" stroke-width="1.5"/>
-    </g>
-    
-    <!-- Connections -->
-    <g id="connections" stroke="#CCCCCC" stroke-width="1">
-      <!-- Input to Layer 1 -->
-      <line x1="115" y1="160" x2="150" y2="180"/>
-      <line x1="115" y1="200" x2="150" y2="200"/>
-      <line x1="115" y1="240" x2="150" y2="220"/>
-      <line x1="115" y1="280" x2="150" y2="260"/>
-      
-      <!-- Layer 1 to Layer 2 -->
-      <line x1="290" y1="180" x2="330" y2="190"/>
-      <line x1="290" y1="200" x2="330" y2="210"/>
-      <line x1="290" y1="220" x2="330" y2="230"/>
-      <line x1="290" y1="240" x2="330" y2="250"/>
-      <line x1="290" y1="260" x2="330" y2="270"/>
-      
-      <!-- Layer 2 to Layer N -->
-      <path d="M 470 210 Q 490 210, 510 210" stroke-dasharray="5,3"/>
-      
-      <!-- Layer N to Output -->
-      <line x1="650" y1="190" x2="685" y2="180"/>
-      <line x1="650" y1="230" x2="685" y2="220"/>
-      <line x1="650" y1="270" x2="685" y2="260"/>
-    </g>
-    
-    <!-- Forward arrow -->
-    <path d="M 375 95 L 425 95" stroke="#3366CC" stroke-width="2" marker-end="url(#arrowhead-blue)"/>
-    <text x="400" y="85" font-family="Arial" font-size="12" fill="#3366CC">Forward Propagation</text>
-  </g>
-  
-  <!-- Model Training Components -->
-  <g id="model-training">
-    <rect x="50" y="370" width="700" height="200" fill="#f8f8f8" stroke="#666" stroke-width="1"/>
-    
-    <!-- Section title -->
-    <text x="400" y="395" text-anchor="middle" font-family="Arial" font-size="18" font-weight="bold">Model Training</text>
-    
-    <!-- Component Blocks -->
-    <g id="components">
-      <!-- Model Parameters -->
-      <rect x="100" y="420" width="150" height="60" rx="10" ry="10" fill="#e6f9e6" stroke="#009933" stroke-width="2"/>
-      <text x="175" y="435" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">Parameters</text>
-      <text x="175" y="455" text-anchor="middle" font-family="Arial" font-size="12">GetParameters()</text>
-      <text x="175" y="470" text-anchor="middle" font-family="Arial" font-size="12">SetParameters()</text>
-      
-      <!-- Loss Function -->
-      <rect x="325" y="420" width="150" height="60" rx="10" ry="10" fill="#ffe6cc" stroke="#ff9933" stroke-width="2"/>
-      <text x="400" y="435" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">Loss Function</text>
-      <text x="400" y="455" text-anchor="middle" font-family="Arial" font-size="12">Cost()</text>
-      <text x="400" y="470" text-anchor="middle" font-family="Arial" font-size="12">Gradient()</text>
-      
-      <!-- Optimizer -->
-      <rect x="550" y="420" width="150" height="60" rx="10" ry="10" fill="#e6e6ff" stroke="#3333cc" stroke-width="2"/>
-      <text x="625" y="435" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">Optimizer</text>
-      <text x="625" y="455" text-anchor="middle" font-family="Arial" font-size="12">Minimize()</text>
-      <text x="625" y="470" text-anchor="middle" font-family="Arial" font-size="12">UpdateParameters()</text>
-      
-      <!-- Train Method -->
-      <rect x="325" y="510" width="150" height="40" rx="5" ry="5" fill="#ffd9d9" stroke="#cc3333" stroke-width="2"/>
-      <text x="400" y="535" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold">model.Train()</text>
-    </g>
-    
-    <!-- Connection Arrows -->
-    <g id="training-connections">
-      <!-- Parameters to Loss -->
-      <path d="M 250 450 L 325 450" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-      
-      <!-- Loss to Optimizer -->
-      <path d="M 475 450 L 550 450" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-      
-      <!-- Optimizer back to Parameters -->
-      <path d="M 550 470 C 500 500, 250 500, 175 480" stroke="#333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-      
-      <!-- Train connections -->
-      <path d="M 400 510 L 400 480" stroke="#cc3333" stroke-width="1.5" marker-end="url(#arrowhead-red)"/>
-      <path d="M 325 530 C 250 530, 175 530, 175 480" stroke="#cc3333" stroke-width="1.5" marker-end="url(#arrowhead-red)"/>
-      <path d="M 475 530 C 550 530, 625 530, 625 480" stroke="#cc3333" stroke-width="1.5" marker-end="url(#arrowhead-red)"/>
-    </g>
-  </g>
-  
-  <!-- Legend/Features -->
-  <g id="legend" transform="translate(50, 580)">
-    <text x="0" y="0" font-family="Arial" font-size="12" font-weight="bold">Features:</text>
-    <text x="70" y="0" font-family="Arial" font-size="12">• Variadic template layers</text>
-    <text x="250" y="0" font-family="Arial" font-size="12">• Compile-time dimension checking</text>
-    <text x="500" y="0" font-family="Arial" font-size="12">• Parameter management</text>
-    <text x="700" y="0" font-family="Arial" font-size="12">• Type safety</text>
-  </g>
-  
-  <!-- Arrowhead definitions -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 470">
+  <rect width="900" height="470" fill="white"/>
+  <text x="450" y="32" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="bold">Model: Sequential Composition of Layers</text>
   <defs>
-    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
       <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
     </marker>
-    <marker id="arrowhead-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#3366CC"/>
-    </marker>
-    <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#cc3333"/>
-    </marker>
   </defs>
+  <rect x="40" y="90" width="140" height="60" rx="8" ry="8" fill="#dbe9ff" stroke="#1E78D8" stroke-width="1.5"/>
+  <text x="110" y="114" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#000" font-weight="bold" font-style="normal">Input</text>
+  <text x="110" y="136" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#000" font-weight="normal" font-style="normal">x (n values)</text>
+  <rect x="200" y="90" width="140" height="60" rx="8" ry="8" fill="#e2f5e2" stroke="#228B22" stroke-width="1.5"/>
+  <text x="270" y="114" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#000" font-weight="bold" font-style="normal">Layer 1</text>
+  <text x="270" y="136" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#000" font-weight="normal" font-style="normal">a₁ = f₁(W₁x + b₁)</text>
+  <rect x="360" y="90" width="140" height="60" rx="8" ry="8" fill="#e2f5e2" stroke="#228B22" stroke-width="1.5"/>
+  <text x="430" y="114" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#000" font-weight="bold" font-style="normal">Layer 2</text>
+  <text x="430" y="136" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#000" font-weight="normal" font-style="normal">a₂ = f₂(W₂a₁ + b₂)</text>
+  <text x="590" y="124" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="26" fill="#000" font-weight="normal" font-style="normal">…</text>
+  <rect x="680" y="90" width="180" height="60" rx="8" ry="8" fill="#e2f5e2" stroke="#228B22" stroke-width="1.5"/>
+  <text x="770" y="114" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#000" font-weight="bold" font-style="normal">Layer L</text>
+  <text x="770" y="136" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#000" font-weight="normal" font-style="normal">ŷ = f_L(W_L a_{L−1} + b_L)</text>
+  <line x1="182" y1="112" x2="198" y2="112" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="198" y1="132" x2="182" y2="132" stroke="#C0392B" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="342" y1="112" x2="358" y2="112" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="358" y1="132" x2="342" y2="132" stroke="#C0392B" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="502" y1="112" x2="560" y2="112" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="560" y1="132" x2="502" y2="132" stroke="#C0392B" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="620" y1="112" x2="676" y2="112" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="676" y1="132" x2="620" y2="132" stroke="#C0392B" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="450" y="75" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#333" font-weight="normal" font-style="normal">forward: each layer's output is the next layer's input</text>
+  <text x="450" y="175" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#C0392B" font-weight="normal" font-style="normal">backward: each layer maps ∂L/∂a_ℓ to ∂L/∂a_{ℓ−1} and keeps its own ∂L/∂W_ℓ, ∂L/∂b_ℓ</text>
+  <rect x="40" y="210" width="820" height="70" rx="8" ry="8" fill="#fff0d9" stroke="#E08A00" stroke-width="1.5"/>
+  <text x="450" y="236" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#000" font-weight="bold" font-style="normal">Flat parameter vector θ with P entries (same order for export and import)</text>
+  <text x="450" y="260" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000" font-weight="normal" font-style="normal">θ = [ W₁ row-major, b₁, W₂ row-major, b₂, …, W_L row-major, b_L ],   P = Σ m_ℓ (n_ℓ + 1)</text>
+  <rect x="40" y="310" width="250" height="70" rx="8" ry="8" fill="#f3e3ff" stroke="#8A2BE2" stroke-width="1.5"/>
+  <text x="165" y="336" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#000" font-weight="bold" font-style="normal">Objective J(θ)</text>
+  <text x="165" y="358" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000" font-weight="normal" font-style="normal">user-supplied cost + gradient</text>
+  <rect x="330" y="310" width="250" height="70" rx="8" ry="8" fill="#f3e3ff" stroke="#8A2BE2" stroke-width="1.5"/>
+  <text x="455" y="336" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#000" font-weight="bold" font-style="normal">Optimizer</text>
+  <text x="455" y="358" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000" font-weight="normal" font-style="normal">θ* = argmin J(θ) from θ₀</text>
+  <rect x="620" y="310" width="240" height="70" rx="8" ry="8" fill="#fff0d9" stroke="#E08A00" stroke-width="1.5"/>
+  <text x="740" y="336" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#000" font-weight="bold" font-style="normal">Load θ* into the layers</text>
+  <text x="740" y="358" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000" font-weight="normal" font-style="normal">then run inference</text>
+  <line x1="292" y1="345" x2="326" y2="345" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="582" y1="345" x2="616" y2="345" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="450" y="415" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#555" font-weight="normal" font-style="normal">Today's training step optimises J over θ directly. Backpropagation-based training over a</text>
+  <text x="450" y="433" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#555" font-weight="normal" font-style="normal">dataset (per-sample loss on ŷ, exposed parameter gradients, mini-batches) is roadmap N8 / N9 / N16.</text>
 </svg>

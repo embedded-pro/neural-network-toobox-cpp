@@ -1,2 +1,2 @@
 add_subdirectory(shell)
-add_subdirectory(NeuralNetwork)
+add_subdirectory(model)

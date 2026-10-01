@@ -4,6 +4,7 @@ emil_add_test(neural_network.model_test)
 
 target_link_libraries(neural_network.model_test PUBLIC
     gmock_main
+    neural_network.activation
     neural_network.model
 )
 

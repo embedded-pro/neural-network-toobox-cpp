@@ -1,5 +1,5 @@
 ---
-description: "Refactor a pre-roadmap neural_network/ algorithm to reuse shared math/ utilities, add coverage-build infra, and simplify/dedupe tests — preserving existing Q15/Q31 support. Behavior-preserving."
+description: "Refactor a pre-roadmap neural_network/ algorithm to reuse shared math/ utilities, add coverage-build infra, and simplify/dedupe tests — float-only. Behavior-preserving."
 tools: [read, edit, search, execute, todo]
 model: "Claude Sonnet 4.6"
 handoffs:
@@ -16,9 +16,10 @@ change unless required to remove duplication.
 
 1. Read the target `.hpp`, its `test/Test*.cpp`, and `doc/<domain>/<Name>.md`.
 2. Find duplication: logic that already exists in `numerical/math/`
-   (`CompilerOptimizations.hpp`, `Tolerance.hpp`, `ComplexNumber.hpp`, `QNumber.hpp`,
-   `RecursiveBuffer.hpp`, `Statistics.hpp`, …) or scaffolding repeated across `test/` files
-   (e.g. `CalculateMagnitude`, twiddle-factor mocks — emulate `PowerDensitySpectrumTestSupport.hpp`).
+   (`CompilerOptimizations.hpp`, `Tolerance.hpp`, `Math.hpp`, `Matrix.hpp`, `Statistics.hpp`, …)
+   or scaffolding repeated across `test/` files (e.g. finite-difference gradient checks and
+   regularization mocks — emulate `neural_network/activation/test/ActivationFiniteDifference.hpp`
+   and `neural_network/losses/test/LossTestSupport.hpp`).
 3. Replace the duplicated logic with the shared utility; delete the local copy.
 4. Add coverage-build infra if missing (per `roadmap/DEPLOYMENT.md`): guarded `extern template`
    at header bottom + matching `.cpp` (`template class <Name><float, ...>;`) wired via
@@ -27,6 +28,7 @@ change unless required to remove duplication.
    optional cleanup: apply the **Tests checklist** below on every run, even when the production
    code needs no change and even when the test already builds green.
 6. Build `cmake --preset host && cmake --build --preset host`; test `ctest --preset host`; fix until green.
+   (No Qt6: use `host-single-Debug` for all three.)
 7. Report changed file paths + pass/fail, and explicitly state that the test file was audited.
 
 ## Tests checklist — apply every run
@@ -39,15 +41,14 @@ The `test/Test*.cpp` is a first-class deliverable of every modernization. Audit 
 - [ ] `EXPECT_NEAR` + `math::Tolerance<float>()` for float comparisons.
 - [ ] Anonymous-namespace fixture; macros outside; no heap; no comments.
 
-Keep `TYPED_TEST` where the algorithm is multi-type; behavior and assertions stay identical.
+Tests are `TEST_F` on `float` only — no `TYPED_TEST`, no multi-type.
 
-## Preserve types — hard rule
+## Numeric types — hard rule
 
-Keep existing `Q15`/`Q31` support and its `TYPED_TEST` where the algorithm already has it — do
-**NOT** strip multi-type. The multi-type guard
-(`static_assert(math::is_qnumber<T>::value || std::is_floating_point_v<T>, ...)`) stays for those.
-Float-only migration applies ONLY to algorithms that are already float-only; those follow
-`static_assert(std::is_floating_point_v<T>)` + `TEST_F` on `float`.
+This repository is float-only throughout: `template<typename T>` +
+`static_assert(std::is_floating_point_v<T>)`, `float` instantiations only (coverage `.cpp` and
+`extern template`), `TEST_F` on `float`. Never add or restore `Q15`/`Q31` instantiations, QNumber
+guards or multi-type tests.
 
 ## Memory — quick reference
 
@@ -61,7 +62,7 @@ Float-only migration applies ONLY to algorithms that are already float-only; tho
 ## What NOT to do
 - No behavior/API change beyond removing duplication.
 - No new abstractions except extracting one that is already repeated.
-- Don't touch unrelated algorithms; don't strip `Q15`/`Q31`.
+- Don't touch unrelated algorithms; don't add `Q15`/`Q31`.
 - No `make_unique` anywhere, including tests.
 
 **Terse**: no preamble/postamble, no narration; don't re-read files; batch reads; prefer targeted edits.

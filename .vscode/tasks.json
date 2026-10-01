@@ -3,33 +3,13 @@
   "tasks": [
     {
       "type": "cmake",
-      "label": "Linter",
-      "command": "build",
-      "targets": ["lint"],
-      "preset": "${command:cmake.activeBuildPresetName}",
-      "group": "build",
-      "problemMatcher": [],
-      "detail": "Run aggregated linters on the entire codebase"
-    },
-    {
-      "type": "cmake",
       "label": "Formatter",
       "command": "build",
-      "targets": ["clangformat_emil"],
+      "targets": ["clangformat_neural_network"],
       "preset": "${command:cmake.activeBuildPresetName}",
       "group": "build",
       "problemMatcher": [],
-      "detail": "Run formatter on entire codebase"
-    },
-    {
-      "type": "cmake",
-      "label": "Antora",
-      "command": "build",
-      "targets": ["generate_antora_docs"],
-      "preset": "${command:cmake.activeBuildPresetName}",
-      "group": "build",
-      "problemMatcher": [],
-      "detail": "Generate Antora documentation"
+      "detail": "Run formatter on the neural_network and simulator sources"
     }
   ]
 }

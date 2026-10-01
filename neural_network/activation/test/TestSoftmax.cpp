@@ -1,118 +1,58 @@
 #include "neural_network/activation/Softmax.hpp"
-#include "gmock/gmock.h"
+#include "neural_network/activation/test/ActivationFiniteDifference.hpp"
+#include "numerical/math/Tolerance.hpp"
+#include <array>
+#include <gtest/gtest.h>
 
 namespace
 {
-    template<typename T>
     class TestSoftmax
         : public ::testing::Test
     {
-    public:
-        neural_network::Softmax<T> activation;
+    protected:
+        neural_network::Softmax<float> activation;
     };
-
-    using TestedTypes = ::testing::Types<float, math::Q15, math::Q31>;
-    TYPED_TEST_SUITE(TestSoftmax, TestedTypes);
 }
 
-TYPED_TEST(TestSoftmax, ForwardZeroInput)
+TEST_F(TestSoftmax, ForwardVectorMatchesReferenceDistribution)
 {
-    EXPECT_NEAR(math::ToFloat(this->activation.Forward(TypeParam(-0.1f))), 0.905f, 0.001f);
+    const std::array<float, 3> input{ 1.0f, 2.0f, 3.0f };
+    std::array<float, 3> output{};
+
+    activation.ForwardVector(output, input);
+
+    EXPECT_NEAR(output[0], 0.0900306f, math::Tolerance<float>());
+    EXPECT_NEAR(output[1], 0.2447285f, math::Tolerance<float>());
+    EXPECT_NEAR(output[2], 0.6652410f, math::Tolerance<float>());
 }
 
-TYPED_TEST(TestSoftmax, ForwardNegativeInput)
+TEST_F(TestSoftmax, ForwardVectorIsStableForLargeLogitsAndSumsToOne)
 {
-    EXPECT_NEAR(math::ToFloat(this->activation.Forward(TypeParam(-0.5f))), 0.607f, 0.001f);
-    EXPECT_NEAR(math::ToFloat(this->activation.Forward(TypeParam(-0.9f))), 0.407f, 0.001f);
+    const std::array<float, 3> input{ 1000.0f, 0.0f, -1000.0f };
+    std::array<float, 3> output{};
+
+    activation.ForwardVector(output, input);
+
+    EXPECT_NEAR(output[0], 1.0f, math::Tolerance<float>());
+    EXPECT_NEAR(output[1], 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(output[2], 0.0f, math::Tolerance<float>());
+    EXPECT_NEAR(output[0] + output[1] + output[2], 1.0f, math::Tolerance<float>());
 }
 
-TYPED_TEST(TestSoftmax, BackwardTinyValues)
+TEST_F(TestSoftmax, BackwardVectorMatchesFiniteDifference)
 {
-    TypeParam x = TypeParam(-0.7f);
-    TypeParam y = this->activation.Forward(x);
+    const std::array<float, 3> input{ 0.5f, -1.0f, 2.0f };
+    const std::array<float, 3> upstream{ 1.0f, -2.0f, 0.5f };
 
-    EXPECT_NEAR(math::ToFloat(this->activation.Backward(x)),
-        math::ToFloat(y * (TypeParam(0.9999f) - y)), 0.001f);
+    const auto analytic{ neural_network::test_support::AnalyticGradient(activation, input, upstream) };
+    const auto numeric{ neural_network::test_support::CentralDifferenceGradient(activation, input, upstream) };
+
+    for (std::size_t i = 0; i < input.size(); ++i)
+        EXPECT_NEAR(analytic[i], numeric[i], math::Tolerance<float>());
 }
 
-TYPED_TEST(TestSoftmax, BackwardNegativeInputs)
+TEST_F(TestSoftmax, ScalarForwardIsSingleElementSoftmax)
 {
-    for (float x = -0.9f; x <= -0.5f; x += 0.1f)
-    {
-        TypeParam input = TypeParam(x);
-        TypeParam output = this->activation.Forward(input);
-        TypeParam derivative = this->activation.Backward(input);
-        TypeParam expected = output * (TypeParam(0.9999f) - output);
-
-        EXPECT_NEAR(math::ToFloat(derivative), math::ToFloat(expected), 0.001f);
-    }
-}
-
-TYPED_TEST(TestSoftmax, ComparativeTest)
-{
-    TypeParam x1 = TypeParam(-0.8f);
-    TypeParam x2 = TypeParam(-0.7f);
-    TypeParam y1 = this->activation.Forward(x1);
-    TypeParam y2 = this->activation.Forward(x2);
-
-    EXPECT_LT(math::ToFloat(y1), math::ToFloat(y2));
-}
-
-TYPED_TEST(TestSoftmax, ForwardVectorNormalizesToOne)
-{
-    if constexpr (!std::is_floating_point_v<TypeParam>)
-        GTEST_SKIP() << "Softmax vector ops exceed Q-number range";
-
-    constexpr std::size_t Size = 3;
-    TypeParam input[Size] = { TypeParam(-0.3f), TypeParam(-0.5f), TypeParam(-0.2f) };
-    TypeParam output[Size] = {};
-
-    this->activation.ForwardVector(output, input);
-
-    float sum = 0.0f;
-    for (std::size_t i = 0; i < Size; ++i)
-        sum += math::ToFloat(output[i]);
-
-    EXPECT_NEAR(sum, 1.0f, 0.01f);
-}
-
-TYPED_TEST(TestSoftmax, ForwardVectorPreservesOrdering)
-{
-    if constexpr (!std::is_floating_point_v<TypeParam>)
-        GTEST_SKIP() << "Softmax vector ops exceed Q-number range";
-
-    constexpr std::size_t Size = 3;
-    TypeParam input[Size] = { TypeParam(-0.5f), TypeParam(-0.2f), TypeParam(-0.8f) };
-    TypeParam output[Size] = {};
-
-    this->activation.ForwardVector(output, input);
-
-    EXPECT_GT(math::ToFloat(output[1]), math::ToFloat(output[0]));
-    EXPECT_GT(math::ToFloat(output[0]), math::ToFloat(output[2]));
-}
-
-TYPED_TEST(TestSoftmax, BackwardVectorProducesCorrectGradient)
-{
-    if constexpr (!std::is_floating_point_v<TypeParam>)
-        GTEST_SKIP() << "Softmax vector ops exceed Q-number range";
-
-    constexpr std::size_t Size = 3;
-    TypeParam input[Size] = { TypeParam(-0.3f), TypeParam(-0.5f), TypeParam(-0.2f) };
-    TypeParam output[Size] = {};
-    this->activation.ForwardVector(output, input);
-
-    TypeParam outputGradient[Size] = { TypeParam(0.9999f), TypeParam(0.0f), TypeParam(0.0f) };
-    TypeParam result[Size] = {};
-
-    this->activation.BackwardVector(result, input, output, outputGradient);
-
-    float dot = 0.0f;
-    for (std::size_t i = 0; i < Size; ++i)
-        dot += math::ToFloat(outputGradient[i]) * math::ToFloat(output[i]);
-
-    for (std::size_t i = 0; i < Size; ++i)
-    {
-        float expected = math::ToFloat(output[i]) * (math::ToFloat(outputGradient[i]) - dot);
-        EXPECT_NEAR(math::ToFloat(result[i]), expected, 0.01f);
-    }
+    EXPECT_FLOAT_EQ(activation.Forward(-3.0f), 1.0f);
+    EXPECT_FLOAT_EQ(activation.Backward(-3.0f), 0.0f);
 }

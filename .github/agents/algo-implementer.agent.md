@@ -17,10 +17,10 @@ Authoritative rules: `AGENTS.md`. Recipe: `roadmap/DEPLOYMENT.md`. Follow both e
 2. Produce, per `roadmap/DEPLOYMENT.md`: the `.hpp`, coverage `.cpp`, `test/Test*.cpp`,
    `doc/<domain>/<Name>.md`, and the CMake edits.
 3. Build and test; fix until green (scope to the target/test where possible).
-4. Remove the algorithm's row from `ROADMAP.md`; add it to the matching category row in
-   `README.md`'s Documentation table **and** to the algorithms table in `doc/<domain>/README.md`
-   (the booklet's ordering source). The booklet regenerates from `doc/` + these README tables in
-   CI — no manual booklet edit.
+4. Remove the algorithm's row from `ROADMAP.md`; add it to the algorithms table in
+   `doc/<domain>/README.md` (a new domain also gets a row in the `doc/README.md` category index).
+   These tables are the booklet's ordering source; the booklet regenerates in CI — no manual
+   booklet edit. `python3 scripts/validate-docs.py` must pass.
 5. Report file paths + test result. Nothing else.
 
 ## Hard rules

@@ -1,117 +1,59 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
-  <!-- Background -->
-  <rect width="800" height="600" fill="white"/>
-  
-  <!-- Title -->
-  <text x="400" y="30" text-anchor="middle" font-family="Arial" font-size="24" font-weight="bold">Activation Functions</text>
-  
-  <!-- Activation Function Graphs -->
-  <g id="coordinate-system">
-    <!-- X-axis -->
-    <line x1="50" y1="200" x2="750" y2="200" stroke="black" stroke-width="1.5"/>
-    <text x="750" y="220" font-family="Arial" font-size="14">x</text>
-    
-    <!-- Y-axis -->
-    <line x1="400" y1="50" x2="400" y2="350" stroke="black" stroke-width="1.5"/>
-    <text x="415" y="60" font-family="Arial" font-size="14">f(x)</text>
-    
-    <!-- X ticks -->
-    <line x1="250" y1="195" x2="250" y2="205" stroke="black" stroke-width="1"/>
-    <text x="250" y="220" text-anchor="middle" font-family="Arial" font-size="12">-2</text>
-    
-    <line x1="325" y1="195" x2="325" y2="205" stroke="black" stroke-width="1"/>
-    <text x="325" y="220" text-anchor="middle" font-family="Arial" font-size="12">-1</text>
-    
-    <line x1="400" y1="195" x2="400" y2="205" stroke="black" stroke-width="1"/>
-    <text x="400" y="220" text-anchor="middle" font-family="Arial" font-size="12">0</text>
-    
-    <line x1="475" y1="195" x2="475" y2="205" stroke="black" stroke-width="1"/>
-    <text x="475" y="220" text-anchor="middle" font-family="Arial" font-size="12">1</text>
-    
-    <line x1="550" y1="195" x2="550" y2="205" stroke="black" stroke-width="1"/>
-    <text x="550" y="220" text-anchor="middle" font-family="Arial" font-size="12">2</text>
-    
-    <!-- Y ticks -->
-    <line x1="395" y1="125" x2="405" y2="125" stroke="black" stroke-width="1"/>
-    <text x="385" y="130" text-anchor="end" font-family="Arial" font-size="12">1</text>
-    
-    <line x1="395" y1="275" x2="405" y2="275" stroke="black" stroke-width="1"/>
-    <text x="385" y="280" text-anchor="end" font-family="Arial" font-size="12">-1</text>
-  </g>
-  
-  <!-- Function Curves -->
-  <g id="functions">
-    <!-- ReLU -->
-    <polyline points="100,200 400,200 700,50" fill="none" stroke="#FF4500" stroke-width="3"/>
-    <text x="110" y="180" font-family="Arial" font-size="14" fill="#FF4500">ReLU</text>
-    
-    <!-- Leaky ReLU -->
-    <polyline points="100,245 400,200 700,50" fill="none" stroke="#8A2BE2" stroke-width="3"/>
-    <text x="110" y="270" font-family="Arial" font-size="14" fill="#8A2BE2">LeakyReLU</text>
-    
-    <!-- Sigmoid -->
-    <path d="M 100,275 Q 250,275 325,250 T 400,200 T 475,150 T 550,125 T 700,125" fill="none" stroke="#228B22" stroke-width="3"/>
-    <text x="620" y="145" font-family="Arial" font-size="14" fill="#228B22">Sigmoid</text>
-    
-    <!-- Tanh -->
-    <path d="M 100,275 Q 250,275 325,250 T 400,200 T 475,150 T 550,125 Q 625,125 700,125" fill="none" stroke="#1E90FF" stroke-width="3"/>
-    <text x="620" y="115" font-family="Arial" font-size="14" fill="#1E90FF">Tanh</text>
-  </g>
-  
-  <!-- Neuron Activation Illustration -->
-  <g id="neuron-activation">
-    <rect x="50" y="400" width="700" height="150" rx="10" ry="10" fill="#f8f8f8" stroke="#666" stroke-width="1"/>
-    
-    <!-- Linear Input -->
-    <circle cx="150" cy="475" r="25" fill="#d1e7ff" stroke="#0066cc" stroke-width="2"/>
-    <text x="150" y="480" text-anchor="middle" font-family="Arial" font-size="14">z</text>
-    
-    <!-- Activation Function -->
-    <rect x="250" y="450" width="100" height="50" rx="10" ry="10" fill="#ffe6cc" stroke="#ff9933" stroke-width="2"/>
-    <text x="300" y="480" text-anchor="middle" font-family="Arial" font-size="14">f(z)</text>
-    
-    <!-- Activated Output -->
-    <circle cx="450" cy="475" r="25" fill="#d8f3d8" stroke="#009900" stroke-width="2"/>
-    <text x="450" y="480" text-anchor="middle" font-family="Arial" font-size="14">a</text>
-    
-    <!-- Next Layer -->
-    <circle cx="550" cy="435" r="15" fill="#f9d6ff" stroke="#9933cc" stroke-width="1.5"/>
-    <circle cx="550" cy="475" r="15" fill="#f9d6ff" stroke="#9933cc" stroke-width="1.5"/>
-    <circle cx="550" cy="515" r="15" fill="#f9d6ff" stroke="#9933cc" stroke-width="1.5"/>
-    <text x="600" y="475" text-anchor="middle" font-family="Arial" font-size="14">Next Layer</text>
-    
-    <!-- Connecting Arrows -->
-    <g id="arrows" stroke="#333" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)">
-      <path d="M 175 475 L 250 475"/>
-      <path d="M 350 475 L 425 475"/>
-      <path d="M 475 475 L 535 435"/>
-      <path d="M 475 475 L 535 475"/>
-      <path d="M 475 475 L 535 515"/>
-    </g>
-  </g>
-  
-  <!-- Arrowhead definition -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 380">
+  <rect width="820" height="380" fill="white"/>
+  <text x="410" y="32" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="bold">Activation Functions</text>
   <defs>
-    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
       <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
     </marker>
   </defs>
-  
-  <!-- Legend -->
-  <g id="legend">
-    <rect x="600" y="260" width="150" height="130" rx="5" ry="5" fill="#f9f9f9" stroke="#666" stroke-width="1"/>
-    <text x="675" y="280" text-anchor="middle" font-family="Arial" font-size="16" font-weight="bold">Properties</text>
-    
-    <line x1="610" y1="300" x2="630" y2="300" stroke="#FF4500" stroke-width="3"/>
-    <text x="635" y="305" font-family="Arial" font-size="14">Simple</text>
-    
-    <line x1="610" y1="325" x2="630" y2="325" stroke="#8A2BE2" stroke-width="3"/>
-    <text x="635" y="330" font-family="Arial" font-size="14">No dead neurons</text>
-    
-    <line x1="610" y1="350" x2="630" y2="350" stroke="#228B22" stroke-width="3"/>
-    <text x="635" y="355" font-family="Arial" font-size="14">Bounded [0,1]</text>
-    
-    <line x1="610" y1="375" x2="630" y2="375" stroke="#1E90FF" stroke-width="3"/>
-    <text x="635" y="380" font-family="Arial" font-size="14">Zero-centered</text>
-  </g>
+  <line x1="60" y1="220" x2="540" y2="220" stroke="#000" stroke-width="1.5"/>
+  <line x1="300" y1="70" x2="300" y2="310" stroke="#000" stroke-width="1.5"/>
+  <line x1="60" y1="216" x2="60" y2="224" stroke="#000" stroke-width="1"/>
+  <text x="60" y="238" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#000" font-weight="normal" font-style="normal">-4</text>
+  <line x1="120" y1="216" x2="120" y2="224" stroke="#000" stroke-width="1"/>
+  <text x="120" y="238" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#000" font-weight="normal" font-style="normal">-3</text>
+  <line x1="180" y1="216" x2="180" y2="224" stroke="#000" stroke-width="1"/>
+  <text x="180" y="238" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#000" font-weight="normal" font-style="normal">-2</text>
+  <line x1="240" y1="216" x2="240" y2="224" stroke="#000" stroke-width="1"/>
+  <text x="240" y="238" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#000" font-weight="normal" font-style="normal">-1</text>
+  <line x1="360" y1="216" x2="360" y2="224" stroke="#000" stroke-width="1"/>
+  <text x="360" y="238" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#000" font-weight="normal" font-style="normal">1</text>
+  <line x1="420" y1="216" x2="420" y2="224" stroke="#000" stroke-width="1"/>
+  <text x="420" y="238" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#000" font-weight="normal" font-style="normal">2</text>
+  <line x1="480" y1="216" x2="480" y2="224" stroke="#000" stroke-width="1"/>
+  <text x="480" y="238" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#000" font-weight="normal" font-style="normal">3</text>
+  <line x1="540" y1="216" x2="540" y2="224" stroke="#000" stroke-width="1"/>
+  <text x="540" y="238" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#000" font-weight="normal" font-style="normal">4</text>
+  <line x1="296" y1="280" x2="304" y2="280" stroke="#000" stroke-width="1"/>
+  <text x="292" y="284" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#000" font-weight="normal" font-style="normal">-1</text>
+  <line x1="296" y1="160" x2="304" y2="160" stroke="#000" stroke-width="1"/>
+  <text x="292" y="164" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#000" font-weight="normal" font-style="normal">1</text>
+  <line x1="296" y1="100" x2="304" y2="100" stroke="#000" stroke-width="1"/>
+  <text x="292" y="104" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#000" font-weight="normal" font-style="normal">2</text>
+  <text x="540" y="212" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000" font-weight="normal" font-style="italic">z</text>
+  <text x="308" y="82" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000" font-weight="normal" font-style="italic">f(z)</text>
+  <line x1="60" y1="160" x2="540" y2="160" stroke="#bbb" stroke-width="1" stroke-dasharray="4 4"/>
+  <polyline points="60.0,220.0 61.2,220.0 62.4,220.0 63.6,220.0 64.8,220.0 66.0,220.0 67.2,220.0 68.4,220.0 69.6,220.0 70.8,220.0 72.0,220.0 73.2,220.0 74.4,220.0 75.6,220.0 76.8,220.0 78.0,220.0 79.2,220.0 80.4,220.0 81.6,220.0 82.8,220.0 84.0,220.0 85.2,220.0 86.4,220.0 87.6,220.0 88.8,220.0 90.0,220.0 91.2,220.0 92.4,220.0 93.6,220.0 94.8,220.0 96.0,220.0 97.2,220.0 98.4,220.0 99.6,220.0 100.8,220.0 102.0,220.0 103.2,220.0 104.4,220.0 105.6,220.0 106.8,220.0 108.0,220.0 109.2,220.0 110.4,220.0 111.6,220.0 112.8,220.0 114.0,220.0 115.2,220.0 116.4,220.0 117.6,220.0 118.8,220.0 120.0,220.0 121.2,220.0 122.4,220.0 123.6,220.0 124.8,220.0 126.0,220.0 127.2,220.0 128.4,220.0 129.6,220.0 130.8,220.0 132.0,220.0 133.2,220.0 134.4,220.0 135.6,220.0 136.8,220.0 138.0,220.0 139.2,220.0 140.4,220.0 141.6,220.0 142.8,220.0 144.0,220.0 145.2,220.0 146.4,220.0 147.6,220.0 148.8,220.0 150.0,220.0 151.2,220.0 152.4,220.0 153.6,220.0 154.8,220.0 156.0,220.0 157.2,220.0 158.4,220.0 159.6,220.0 160.8,220.0 162.0,220.0 163.2,220.0 164.4,220.0 165.6,220.0 166.8,220.0 168.0,220.0 169.2,220.0 170.4,220.0 171.6,220.0 172.8,220.0 174.0,220.0 175.2,220.0 176.4,220.0 177.6,220.0 178.8,220.0 180.0,220.0 181.2,220.0 182.4,220.0 183.6,220.0 184.8,220.0 186.0,220.0 187.2,220.0 188.4,220.0 189.6,220.0 190.8,220.0 192.0,220.0 193.2,220.0 194.4,220.0 195.6,220.0 196.8,220.0 198.0,220.0 199.2,220.0 200.4,220.0 201.6,220.0 202.8,220.0 204.0,220.0 205.2,220.0 206.4,220.0 207.6,220.0 208.8,220.0 210.0,220.0 211.2,220.0 212.4,220.0 213.6,220.0 214.8,220.0 216.0,220.0 217.2,220.0 218.4,220.0 219.6,220.0 220.8,220.0 222.0,220.0 223.2,220.0 224.4,220.0 225.6,220.0 226.8,220.0 228.0,220.0 229.2,220.0 230.4,220.0 231.6,220.0 232.8,220.0 234.0,220.0 235.2,220.0 236.4,220.0 237.6,220.0 238.8,220.0 240.0,220.0 241.2,220.0 242.4,220.0 243.6,220.0 244.8,220.0 246.0,220.0 247.2,220.0 248.4,220.0 249.6,220.0 250.8,220.0 252.0,220.0 253.2,220.0 254.4,220.0 255.6,220.0 256.8,220.0 258.0,220.0 259.2,220.0 260.4,220.0 261.6,220.0 262.8,220.0 264.0,220.0 265.2,220.0 266.4,220.0 267.6,220.0 268.8,220.0 270.0,220.0 271.2,220.0 272.4,220.0 273.6,220.0 274.8,220.0 276.0,220.0 277.2,220.0 278.4,220.0 279.6,220.0 280.8,220.0 282.0,220.0 283.2,220.0 284.4,220.0 285.6,220.0 286.8,220.0 288.0,220.0 289.2,220.0 290.4,220.0 291.6,220.0 292.8,220.0 294.0,220.0 295.2,220.0 296.4,220.0 297.6,220.0 298.8,220.0 300.0,220.0 301.2,218.8 302.4,217.6 303.6,216.4 304.8,215.2 306.0,214.0 307.2,212.8 308.4,211.6 309.6,210.4 310.8,209.2 312.0,208.0 313.2,206.8 314.4,205.6 315.6,204.4 316.8,203.2 318.0,202.0 319.2,200.8 320.4,199.6 321.6,198.4 322.8,197.2 324.0,196.0 325.2,194.8 326.4,193.6 327.6,192.4 328.8,191.2 330.0,190.0 331.2,188.8 332.4,187.6 333.6,186.4 334.8,185.2 336.0,184.0 337.2,182.8 338.4,181.6 339.6,180.4 340.8,179.2 342.0,178.0 343.2,176.8 344.4,175.6 345.6,174.4 346.8,173.2 348.0,172.0 349.2,170.8 350.4,169.6 351.6,168.4 352.8,167.2 354.0,166.0 355.2,164.8 356.4,163.6 357.6,162.4 358.8,161.2 360.0,160.0 361.2,158.8 362.4,157.6 363.6,156.4 364.8,155.2 366.0,154.0 367.2,152.8 368.4,151.6 369.6,150.4 370.8,149.2 372.0,148.0 373.2,146.8 374.4,145.6 375.6,144.4 376.8,143.2 378.0,142.0 379.2,140.8 380.4,139.6 381.6,138.4 382.8,137.2 384.0,136.0 385.2,134.8 386.4,133.6 387.6,132.4 388.8,131.2 390.0,130.0 391.2,128.8 392.4,127.6 393.6,126.4 394.8,125.2 396.0,124.0 397.2,122.8 398.4,121.6 399.6,120.4 400.8,119.2 402.0,118.0 403.2,116.8 404.4,115.6 405.6,114.4 406.8,113.2 408.0,112.0 409.2,110.8 410.4,109.6 411.6,108.4 412.8,107.2 414.0,106.0 415.2,104.8 416.4,103.6 417.6,102.4 418.8,101.2 420.0,100.0 421.2,98.8 422.4,97.6 423.6,96.4 424.8,95.2 426.0,94.0 427.2,92.8 428.4,91.6 429.6,90.4 430.8,89.2 432.0,88.0 433.2,86.8 434.4,85.6 435.6,84.4 436.8,83.2 438.0,82.0 439.2,80.8 440.4,79.6 441.6,78.4 442.8,77.2 444.0,76.0 445.2,74.8 446.4,73.6 447.6,72.4 448.8,71.2 450.0,70.0" fill="none" stroke="#E4572E" stroke-width="3"/>
+  <polyline points="60.0,244.0 84.0,241.6 108.0,239.2 132.0,236.8 156.0,234.4 180.0,232.0 204.0,229.6 228.0,227.2 252.0,224.8 276.0,222.4 300.0,220.0" fill="none" stroke="#8A2BE2" stroke-width="3" stroke-dasharray="8 5"/>
+  <polyline points="60.0,218.9 62.4,218.9 64.8,218.8 67.2,218.8 69.6,218.7 72.0,218.7 74.4,218.6 76.8,218.6 79.2,218.5 81.6,218.5 84.0,218.4 86.4,218.3 88.8,218.3 91.2,218.2 93.6,218.1 96.0,218.1 98.4,218.0 100.8,217.9 103.2,217.8 105.6,217.7 108.0,217.7 110.4,217.6 112.8,217.5 115.2,217.4 117.6,217.3 120.0,217.2 122.4,217.0 124.8,216.9 127.2,216.8 129.6,216.7 132.0,216.6 134.4,216.4 136.8,216.3 139.2,216.2 141.6,216.0 144.0,215.9 146.4,215.7 148.8,215.5 151.2,215.4 153.6,215.2 156.0,215.0 158.4,214.8 160.8,214.6 163.2,214.4 165.6,214.2 168.0,214.0 170.4,213.8 172.8,213.6 175.2,213.3 177.6,213.1 180.0,212.8 182.4,212.6 184.8,212.3 187.2,212.1 189.6,211.8 192.0,211.5 194.4,211.2 196.8,210.9 199.2,210.6 201.6,210.3 204.0,209.9 206.4,209.6 208.8,209.2 211.2,208.9 213.6,208.5 216.0,208.1 218.4,207.7 220.8,207.4 223.2,206.9 225.6,206.5 228.0,206.1 230.4,205.7 232.8,205.2 235.2,204.8 237.6,204.3 240.0,203.9 242.4,203.4 244.8,202.9 247.2,202.4 249.6,201.9 252.0,201.4 254.4,200.9 256.8,200.4 259.2,199.8 261.6,199.3 264.0,198.7 266.4,198.2 268.8,197.6 271.2,197.1 273.6,196.5 276.0,195.9 278.4,195.3 280.8,194.8 283.2,194.2 285.6,193.6 288.0,193.0 290.4,192.4 292.8,191.8 295.2,191.2 297.6,190.6 300.0,190.0 302.4,189.4 304.8,188.8 307.2,188.2 309.6,187.6 312.0,187.0 314.4,186.4 316.8,185.8 319.2,185.2 321.6,184.7 324.0,184.1 326.4,183.5 328.8,182.9 331.2,182.4 333.6,181.8 336.0,181.3 338.4,180.7 340.8,180.2 343.2,179.6 345.6,179.1 348.0,178.6 350.4,178.1 352.8,177.6 355.2,177.1 357.6,176.6 360.0,176.1 362.4,175.7 364.8,175.2 367.2,174.8 369.6,174.3 372.0,173.9 374.4,173.5 376.8,173.1 379.2,172.6 381.6,172.3 384.0,171.9 386.4,171.5 388.8,171.1 391.2,170.8 393.6,170.4 396.0,170.1 398.4,169.7 400.8,169.4 403.2,169.1 405.6,168.8 408.0,168.5 410.4,168.2 412.8,167.9 415.2,167.7 417.6,167.4 420.0,167.2 422.4,166.9 424.8,166.7 427.2,166.4 429.6,166.2 432.0,166.0 434.4,165.8 436.8,165.6 439.2,165.4 441.6,165.2 444.0,165.0 446.4,164.8 448.8,164.6 451.2,164.5 453.6,164.3 456.0,164.1 458.4,164.0 460.8,163.8 463.2,163.7 465.6,163.6 468.0,163.4 470.4,163.3 472.8,163.2 475.2,163.1 477.6,163.0 480.0,162.8 482.4,162.7 484.8,162.6 487.2,162.5 489.6,162.4 492.0,162.3 494.4,162.3 496.8,162.2 499.2,162.1 501.6,162.0 504.0,161.9 506.4,161.9 508.8,161.8 511.2,161.7 513.6,161.7 516.0,161.6 518.4,161.5 520.8,161.5 523.2,161.4 525.6,161.4 528.0,161.3 530.4,161.3 532.8,161.2 535.2,161.2 537.6,161.1 540.0,161.1" fill="none" stroke="#228B22" stroke-width="3"/>
+  <polyline points="60.0,280.0 62.4,280.0 64.8,280.0 67.2,279.9 69.6,279.9 72.0,279.9 74.4,279.9 76.8,279.9 79.2,279.9 81.6,279.9 84.0,279.9 86.4,279.9 88.8,279.9 91.2,279.9 93.6,279.9 96.0,279.9 98.4,279.9 100.8,279.8 103.2,279.8 105.6,279.8 108.0,279.8 110.4,279.8 112.8,279.8 115.2,279.7 117.6,279.7 120.0,279.7 122.4,279.7 124.8,279.7 127.2,279.6 129.6,279.6 132.0,279.6 134.4,279.5 136.8,279.5 139.2,279.4 141.6,279.4 144.0,279.3 146.4,279.3 148.8,279.2 151.2,279.2 153.6,279.1 156.0,279.0 158.4,278.9 160.8,278.9 163.2,278.8 165.6,278.7 168.0,278.5 170.4,278.4 172.8,278.3 175.2,278.2 177.6,278.0 180.0,277.8 182.4,277.7 184.8,277.5 187.2,277.3 189.6,277.0 192.0,276.8 194.4,276.6 196.8,276.3 199.2,276.0 201.6,275.6 204.0,275.3 206.4,274.9 208.8,274.5 211.2,274.1 213.6,273.6 216.0,273.1 218.4,272.6 220.8,272.0 223.2,271.4 225.6,270.7 228.0,270.0 230.4,269.3 232.8,268.5 235.2,267.6 237.6,266.7 240.0,265.7 242.4,264.7 244.8,263.6 247.2,262.4 249.6,261.1 252.0,259.8 254.4,258.5 256.8,257.0 259.2,255.5 261.6,253.9 264.0,252.2 266.4,250.5 268.8,248.7 271.2,246.8 273.6,244.8 276.0,242.8 278.4,240.7 280.8,238.6 283.2,236.4 285.6,234.1 288.0,231.8 290.4,229.5 292.8,227.2 295.2,224.8 297.6,222.4 300.0,220.0 302.4,217.6 304.8,215.2 307.2,212.8 309.6,210.5 312.0,208.2 314.4,205.9 316.8,203.6 319.2,201.4 321.6,199.3 324.0,197.2 326.4,195.2 328.8,193.2 331.2,191.3 333.6,189.5 336.0,187.8 338.4,186.1 340.8,184.5 343.2,183.0 345.6,181.5 348.0,180.2 350.4,178.9 352.8,177.6 355.2,176.4 357.6,175.3 360.0,174.3 362.4,173.3 364.8,172.4 367.2,171.5 369.6,170.7 372.0,170.0 374.4,169.3 376.8,168.6 379.2,168.0 381.6,167.4 384.0,166.9 386.4,166.4 388.8,165.9 391.2,165.5 393.6,165.1 396.0,164.7 398.4,164.4 400.8,164.0 403.2,163.7 405.6,163.4 408.0,163.2 410.4,163.0 412.8,162.7 415.2,162.5 417.6,162.3 420.0,162.2 422.4,162.0 424.8,161.8 427.2,161.7 429.6,161.6 432.0,161.5 434.4,161.3 436.8,161.2 439.2,161.1 441.6,161.1 444.0,161.0 446.4,160.9 448.8,160.8 451.2,160.8 453.6,160.7 456.0,160.7 458.4,160.6 460.8,160.6 463.2,160.5 465.6,160.5 468.0,160.4 470.4,160.4 472.8,160.4 475.2,160.3 477.6,160.3 480.0,160.3 482.4,160.3 484.8,160.3 487.2,160.2 489.6,160.2 492.0,160.2 494.4,160.2 496.8,160.2 499.2,160.2 501.6,160.1 504.0,160.1 506.4,160.1 508.8,160.1 511.2,160.1 513.6,160.1 516.0,160.1 518.4,160.1 520.8,160.1 523.2,160.1 525.6,160.1 528.0,160.1 530.4,160.1 532.8,160.1 535.2,160.0 537.6,160.0 540.0,160.0" fill="none" stroke="#1E78D8" stroke-width="3"/>
+  <line x1="300" y1="190" x2="306" y2="190" stroke="#228B22" stroke-width="2"/>
+  <text x="290" y="182" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#228B22" font-weight="normal" font-style="normal">σ(0) = 0.5</text>
+  <rect x="580" y="60" width="225" height="230" rx="6" ry="6" fill="#f9f9f9" stroke="#666" stroke-width="1.5"/>
+  <text x="692" y="84" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#000" font-weight="bold" font-style="normal">Legend</text>
+  <line x1="592" y1="112" x2="622" y2="112" stroke="#E4572E" stroke-width="3"/>
+  <text x="630" y="116" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000" font-weight="normal" font-style="normal">ReLU: max(0, z)</text>
+  <text x="630" y="134" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#555" font-weight="normal" font-style="normal">slope 1 for z &gt; 0, 0 otherwise</text>
+  <line x1="592" y1="157" x2="622" y2="157" stroke="#8A2BE2" stroke-width="3" stroke-dasharray="8 5"/>
+  <text x="630" y="161" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000" font-weight="normal" font-style="normal">Leaky ReLU (α = 0.1)</text>
+  <text x="630" y="179" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#555" font-weight="normal" font-style="normal">α exaggerated; default 0.01</text>
+  <line x1="592" y1="202" x2="622" y2="202" stroke="#228B22" stroke-width="3"/>
+  <text x="630" y="206" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000" font-weight="normal" font-style="normal">Sigmoid</text>
+  <text x="630" y="224" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#555" font-weight="normal" font-style="normal">range (0, 1)</text>
+  <line x1="592" y1="247" x2="622" y2="247" stroke="#1E78D8" stroke-width="3"/>
+  <text x="630" y="251" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000" font-weight="normal" font-style="normal">Tanh</text>
+  <text x="630" y="269" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#555" font-weight="normal" font-style="normal">range (−1, 1), zero-centred</text>
+  <text x="580" y="315" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#333" font-weight="normal" font-style="normal">Softmax is a vector map (not plotted):</text>
+  <text x="580" y="333" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#333" font-weight="normal" font-style="normal">its outputs are positive and sum to 1.</text>
+  <text x="60" y="360" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#555" font-weight="normal" font-style="normal">Equal scale on both axes: ReLU and the positive Leaky ReLU branch have slope 1.</text>
 </svg>

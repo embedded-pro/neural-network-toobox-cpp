@@ -2,7 +2,5 @@
 
 namespace neural_network
 {
-    template class MeanAbsoluteError<float, 2>;
-    template class MeanAbsoluteError<math::Q15, 2>;
-    template class MeanAbsoluteError<math::Q31, 2>;
+    template class MeanAbsoluteError<float, 4>;
 }

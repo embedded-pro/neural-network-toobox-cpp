@@ -1,296 +1,91 @@
-#include "neural_network/activation/ActivationFunction.hpp"
+#include "neural_network/activation/LeakyReLU.hpp"
+#include "neural_network/activation/Tanh.hpp"
 #include "neural_network/layer/Dense.hpp"
-#include "neural_network/losses/Loss.hpp"
-#include "numerical/optimization/Optimizer.hpp"
-#include "gmock/gmock.h"
+#include "numerical/math/Tolerance.hpp"
+#include <cstddef>
+#include <gtest/gtest.h>
 
 namespace
 {
-    template<typename T>
-    class ActivationMock
-        : public neural_network::ActivationFunction<T>
-    {
-    public:
-        MOCK_METHOD(T, Forward, (T x), (const, override));
-        MOCK_METHOD(T, Backward, (T x), (const, override));
-    };
+    constexpr float finiteDifferenceStep{ 1e-3f };
 
-    template<typename T, std::size_t Features>
-    class MockLoss
-        : public neural_network::Loss<T, Features>
-    {
-    public:
-        using Vector = typename neural_network::Loss<T, Features>::Vector;
-
-        MOCK_METHOD(T, Cost, (const Vector& parameters), (override));
-        MOCK_METHOD(Vector, Gradient, (const Vector& parameters), (override));
-    };
-
-    template<typename T, std::size_t Features>
-    class MockOptimizer
-        : public optimization::Optimizer<T, Features>
-    {
-    public:
-        using Result = typename optimization::Optimizer<T, Features>::Result;
-        using Vector = typename optimization::Optimizer<T, Features>::Vector;
-
-        const Result& Minimize(const Vector& initialGuess, optimization::ObjectiveFunction<T, Features>& objective) override
-        {
-            return result;
-        }
-
-        Result result{ Vector{}, T(0), 0 };
-    };
-
-    template<typename T>
     class TestDense
         : public ::testing::Test
     {
-    public:
-        static constexpr std::size_t InputSize = 3;
-        static constexpr std::size_t OutputSize = 2;
-        using WeightMatrix = math::Matrix<T, OutputSize, InputSize>;
-        using InputVector = math::Vector<T, InputSize>;
-        using OutputVector = math::Vector<T, OutputSize>;
-        using ParameterVector = math::Vector<T, (InputSize * OutputSize) + OutputSize>;
+    protected:
+        using DenseLayer = neural_network::Dense<float, 3, 2>;
+        using InputVector = DenseLayer::InputVector;
+        using OutputVector = DenseLayer::OutputVector;
+        using ParameterVector = DenseLayer::ParameterVector;
 
-        void SetUp() override
+        float ProjectedOutput(DenseLayer& layer, const InputVector& input, const OutputVector& upstream)
         {
-            for (std::size_t i = 0; i < OutputSize; ++i)
-                for (std::size_t j = 0; j < InputSize; ++j)
-                    initialWeight.at(i, j) = T(0.1f);
+            layer.Forward(input);
+            return upstream[0] * layer.Output()[0] + upstream[1] * layer.Output()[1];
         }
 
-        WeightMatrix initialWeight;
-        ActivationMock<T> activation;
+        const DenseLayer::WeightMatrix weights{ { 0.1f, -0.2f, 0.3f }, { 0.4f, 0.5f, -0.6f } };
+        const InputVector input{ 1.0f, 2.0f, 3.0f };
+        neural_network::LeakyReLU<float> leakyRelu{ 0.1f };
+        neural_network::Tanh<float> tanhActivation;
     };
-
-    using TestedTypes = ::testing::Types<float>;
-    TYPED_TEST_SUITE(TestDense, TestedTypes);
 }
 
-TYPED_TEST(TestDense, Construction)
+TEST_F(TestDense, ForwardAppliesActivationToAffineMap)
 {
-    using T = TypeParam;
-    neural_network::Dense<T, TestDense<T>::InputSize, TestDense<T>::OutputSize>
-        dense(this->initialWeight, this->activation);
+    DenseLayer layer{ weights, leakyRelu };
 
-    auto params = dense.Parameters();
+    layer.Forward(input);
 
-    std::size_t idx = 0;
-    for (std::size_t i = 0; i < TestDense<T>::OutputSize; ++i)
-    {
-        for (std::size_t j = 0; j < TestDense<T>::InputSize; ++j)
-        {
-            EXPECT_EQ(params[idx++], this->initialWeight.at(i, j));
-        }
-    }
-
-    for (std::size_t i = 0; i < TestDense<T>::OutputSize; ++i)
-    {
-        EXPECT_EQ(params[idx++], T(0.0f));
-    }
+    EXPECT_NEAR(layer.Output()[0], 0.6f, math::Tolerance<float>());
+    EXPECT_NEAR(layer.Output()[1], -0.04f, math::Tolerance<float>());
 }
 
-TYPED_TEST(TestDense, ForwardPropagation)
+TEST_F(TestDense, ParametersAreRowMajorWeightsFollowedByZeroBiases)
 {
-    using T = TypeParam;
-    using InputVector = typename TestDense<T>::InputVector;
+    const DenseLayer layer{ weights, leakyRelu };
+    const ParameterVector expected{ 0.1f, -0.2f, 0.3f, 0.4f, 0.5f, -0.6f, 0.0f, 0.0f };
 
-    neural_network::Dense<T, TestDense<T>::InputSize, TestDense<T>::OutputSize>
-        dense(this->initialWeight, this->activation);
+    const auto& parameters{ layer.Parameters() };
 
-    InputVector input;
-    input[0] = T(1.0f);
-    input[1] = T(2.0f);
-    input[2] = T(3.0f);
-
-    T expectedPreActivation = T(0.6f);
-
-    EXPECT_CALL(this->activation, Forward(expectedPreActivation))
-        .Times(TestDense<T>::OutputSize)
-        .WillRepeatedly(testing::Return(T(0.5f)));
-
-    dense.Forward(input);
-}
-
-TYPED_TEST(TestDense, BackwardPropagation)
-{
-    using T = TypeParam;
-    using InputVector = typename TestDense<T>::InputVector;
-    using OutputVector = typename TestDense<T>::OutputVector;
-
-    neural_network::Dense<T, TestDense<T>::InputSize, TestDense<T>::OutputSize>
-        dense(this->initialWeight, this->activation);
-
-    InputVector input;
-    input[0] = T(1.0f);
-    input[1] = T(2.0f);
-    input[2] = T(3.0f);
-
-    OutputVector outputGradient;
-    outputGradient[0] = T(0.5f);
-    outputGradient[1] = T(0.7f);
-
-    T expectedPreActivation = T(0.6f);
-    EXPECT_CALL(this->activation, Forward(expectedPreActivation))
-        .Times(TestDense<T>::OutputSize)
-        .WillRepeatedly(testing::Return(T(0.5f)));
-
-    dense.Forward(input);
-
-    T expectedPreActivationBackward = T(0.6f);
-    EXPECT_CALL(this->activation, Backward(expectedPreActivationBackward))
-        .Times(TestDense<T>::OutputSize)
-        .WillRepeatedly(testing::Return(T(0.4f)));
-
-    dense.Backward(outputGradient);
-}
-
-TYPED_TEST(TestDense, ParametersExtractionAndSetting)
-{
-    using T = TypeParam;
-    using ParameterVector = typename TestDense<T>::ParameterVector;
-
-    neural_network::Dense<T, TestDense<T>::InputSize, TestDense<T>::OutputSize>
-        dense(this->initialWeight, this->activation);
-
-    auto params = dense.Parameters();
-
-    ParameterVector newParams;
     for (std::size_t i = 0; i < ParameterVector::size; ++i)
-    {
-        newParams[i] = T(0.2f);
-    }
+        EXPECT_NEAR(parameters[i], expected[i], math::Tolerance<float>());
+}
 
-    dense.SetParameters(newParams);
+TEST_F(TestDense, SetParametersUsesSameLayoutForForward)
+{
+    DenseLayer layer{ weights, leakyRelu };
+    const ParameterVector newParameters{ 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 2.0f, 0.5f, -1.0f };
 
-    auto updatedParams = dense.Parameters();
+    layer.SetParameters(newParameters);
+    layer.Forward(input);
+
+    EXPECT_NEAR(layer.Output()[0], 1.5f, math::Tolerance<float>());
+    EXPECT_NEAR(layer.Output()[1], 5.0f, math::Tolerance<float>());
     for (std::size_t i = 0; i < ParameterVector::size; ++i)
-    {
-        EXPECT_EQ(updatedParams[i], newParams[i]);
-    }
+        EXPECT_NEAR(layer.Parameters()[i], newParameters[i], math::Tolerance<float>());
 }
 
-TYPED_TEST(TestDense, OptimizationWithMockedOptimizer)
+TEST_F(TestDense, BackwardInputGradientMatchesFiniteDifference)
 {
-    using T = TypeParam;
-    using ParameterVector = typename TestDense<T>::ParameterVector;
+    DenseLayer layer{ weights, tanhActivation };
+    layer.SetParameters(ParameterVector{ 0.1f, -0.2f, 0.3f, 0.4f, 0.5f, -0.6f, 0.2f, -0.1f });
+    const InputVector point{ 0.3f, -0.7f, 1.1f };
+    const OutputVector upstream{ 0.8f, -1.3f };
 
-    constexpr size_t TotalParams = (TestDense<T>::InputSize * TestDense<T>::OutputSize) + TestDense<T>::OutputSize;
-
-    neural_network::Dense<T, TestDense<T>::InputSize, TestDense<T>::OutputSize>
-        dense(this->initialWeight, this->activation);
-
-    MockOptimizer<T, TotalParams> optimizer;
-
-    auto initialParams = dense.Parameters();
-
-    ParameterVector optimizedParams;
-    for (std::size_t i = 0; i < TotalParams; ++i)
-        optimizedParams[i] = T(0.05f);
-
-    optimizer.result = typename optimization::Optimizer<T, TotalParams>::Result(
-        optimizedParams, T(0.4f), 3);
-
-    MockLoss<T, TotalParams> loss;
-    auto& result = optimizer.Minimize(initialParams, loss);
-
-    dense.SetParameters(result.parameters);
-
-    auto updatedParams = dense.Parameters();
-    for (std::size_t i = 0; i < TotalParams; ++i)
-        EXPECT_EQ(updatedParams[i], optimizedParams[i]);
-
-    EXPECT_EQ(result.iterations, 3u);
-}
-
-TYPED_TEST(TestDense, FullLayerSequence)
-{
-    using T = TypeParam;
-    using InputVector = typename TestDense<T>::InputVector;
-    using OutputVector = typename TestDense<T>::OutputVector;
-
-    neural_network::Dense<T, TestDense<T>::InputSize, TestDense<T>::OutputSize>
-        dense(this->initialWeight, this->activation);
-
-    InputVector input;
-    input[0] = T(1.0f);
-    input[1] = T(2.0f);
-    input[2] = T(3.0f);
-
-    OutputVector outputGradient;
-    outputGradient[0] = T(0.5f);
-    outputGradient[1] = T(0.7f);
-
+    InputVector numeric{};
+    for (std::size_t j = 0; j < InputVector::size; ++j)
     {
-        ::testing::InSequence seq;
-
-        EXPECT_CALL(this->activation, Forward(testing::_))
-            .WillOnce(testing::Return(T(0.5f)));
-        EXPECT_CALL(this->activation, Forward(testing::_))
-            .WillOnce(testing::Return(T(0.6f)));
-
-        EXPECT_CALL(this->activation, Backward(testing::_))
-            .WillOnce(testing::Return(T(0.3f)));
-        EXPECT_CALL(this->activation, Backward(testing::_))
-            .WillOnce(testing::Return(T(0.4f)));
+        InputVector plus{ point };
+        InputVector minus{ point };
+        plus[j] += finiteDifferenceStep;
+        minus[j] -= finiteDifferenceStep;
+        numeric[j] = (ProjectedOutput(layer, plus, upstream) - ProjectedOutput(layer, minus, upstream)) / (2.0f * finiteDifferenceStep);
     }
 
-    dense.Forward(input);
-    dense.Backward(outputGradient);
-}
+    layer.Forward(point);
+    const auto& analytic{ layer.Backward(upstream) };
 
-TYPED_TEST(TestDense, MultipleForwardBackwardPasses)
-{
-    using T = TypeParam;
-    using InputVector = typename TestDense<T>::InputVector;
-    using OutputVector = typename TestDense<T>::OutputVector;
-
-    neural_network::Dense<T, TestDense<T>::InputSize, TestDense<T>::OutputSize>
-        dense(this->initialWeight, this->activation);
-
-    InputVector input1, input2;
-    input1[0] = T(1.0f);
-    input1[1] = T(2.0f);
-    input1[2] = T(3.0f);
-    input2[0] = T(4.0f);
-    input2[1] = T(5.0f);
-    input2[2] = T(6.0f);
-
-    OutputVector outputGradient1, outputGradient2;
-    outputGradient1[0] = T(0.1f);
-    outputGradient1[1] = T(0.2f);
-    outputGradient2[0] = T(0.3f);
-    outputGradient2[1] = T(0.4f);
-
-    {
-        ::testing::InSequence seq;
-
-        EXPECT_CALL(this->activation, Forward(testing::_))
-            .WillOnce(testing::Return(T(0.5f)));
-        EXPECT_CALL(this->activation, Forward(testing::_))
-            .WillOnce(testing::Return(T(0.6f)));
-
-        EXPECT_CALL(this->activation, Backward(testing::_))
-            .WillOnce(testing::Return(T(0.3f)));
-        EXPECT_CALL(this->activation, Backward(testing::_))
-            .WillOnce(testing::Return(T(0.4f)));
-
-        EXPECT_CALL(this->activation, Forward(testing::_))
-            .WillOnce(testing::Return(T(0.7f)));
-        EXPECT_CALL(this->activation, Forward(testing::_))
-            .WillOnce(testing::Return(T(0.8f)));
-
-        EXPECT_CALL(this->activation, Backward(testing::_))
-            .WillOnce(testing::Return(T(0.5f)));
-        EXPECT_CALL(this->activation, Backward(testing::_))
-            .WillOnce(testing::Return(T(0.6f)));
-    }
-
-    dense.Forward(input1);
-    dense.Backward(outputGradient1);
-
-    dense.Forward(input2);
-    dense.Backward(outputGradient2);
+    for (std::size_t j = 0; j < InputVector::size; ++j)
+        EXPECT_NEAR(analytic[j], numeric[j], math::Tolerance<float>());
 }

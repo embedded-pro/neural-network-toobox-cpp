@@ -32,9 +32,8 @@ Triage requests and route to the right specialist. Do NOT implement or plan your
    - **modernizer** — refactor/dedupe a pre-roadmap algorithm, reuse shared utilities, simplify tests
 
 ## Context to gather
-- Module: `analysis`, `windowing`, `control_analysis`, `controllers`, `dynamics`,
-  `estimators`, `filters`, `filters::passive`, `math`, `neural_network`,
-  `optimization`, `regularization`, `solvers`
+- Module: `activation`, `layer`, `losses`, `model` (all `namespace neural_network`); shared
+  `math`, `optimization`, `regularization` come from numerical-toolbox-cpp
 - Existing patterns to follow?
 - Documentation update needed?
 

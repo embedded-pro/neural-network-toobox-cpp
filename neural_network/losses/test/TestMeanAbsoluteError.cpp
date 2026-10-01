@@ -1,109 +1,62 @@
 #include "neural_network/losses/MeanAbsoluteError.hpp"
-#include "gmock/gmock.h"
+#include "neural_network/losses/test/LossTestSupport.hpp"
+#include "numerical/math/Tolerance.hpp"
+#include <gmock/gmock.h>
 
 namespace
 {
-    template<typename QNumberType, std::size_t Size>
-    class MockRegularization
-        : public regularization::Regularization<QNumberType, Size>
-    {
-    public:
-        using Vector = typename regularization::Regularization<QNumberType, Size>::Vector;
-        MOCK_METHOD(QNumberType, Calculate, (const Vector& parameters), (const, override));
-        MOCK_METHOD(Vector, Gradient, (const Vector& parameters), (const, override));
-    };
-
-    template<typename T>
     class TestMeanAbsoluteError
         : public ::testing::Test
     {
-    public:
-        static constexpr std::size_t NumberOfFeature = 2;
-        using Vector = math::Matrix<T, NumberOfFeature, 1>;
+    protected:
+        static constexpr std::size_t size{ 4 };
+        using Vector = neural_network::MeanAbsoluteError<float, size>::Vector;
 
-        MockRegularization<T, NumberOfFeature> mockRegularization;
-        Vector target;
-        std::optional<neural_network::MeanAbsoluteError<T, NumberOfFeature>> loss;
-
-        void SetUp() override
-        {
-            target = Vector{ T(0.5f), T(-0.3f) };
-        }
+        ::testing::StrictMock<neural_network::test_support::RegularizationMock<size>> regularization;
+        const Vector target{ 0.5f, -1.0f, 2.0f, 0.0f };
+        const Vector predictions{ 1.0f, -1.5f, 2.5f, 1.0f };
+        neural_network::MeanAbsoluteError<float, size> loss{ target, regularization };
     };
-
-    using TestedTypes = ::testing::Types<float, math::Q15, math::Q31>;
-    TYPED_TEST_SUITE(TestMeanAbsoluteError, TestedTypes);
 }
 
-TYPED_TEST(TestMeanAbsoluteError, CostCallsRegularization)
+TEST_F(TestMeanAbsoluteError, CostIsMeanAbsoluteErrorPlusRegularization)
 {
-    typename TestMeanAbsoluteError<TypeParam>::Vector parameters{ TypeParam(0.7f), TypeParam(-0.1f) };
-    TypeParam regValue = TypeParam(0.1f);
+    EXPECT_CALL(regularization, Calculate(::testing::_)).WillOnce(::testing::Return(0.1f));
 
-    EXPECT_CALL(this->mockRegularization, Calculate(::testing::_))
-        .WillOnce(::testing::Return(regValue));
-
-    this->loss.emplace(this->target, this->mockRegularization);
-    TypeParam cost = this->loss->Cost(parameters);
-
-    TypeParam maeValue = TypeParam(0.0f);
-    TypeParam diff1 = parameters[0] - this->target[0];
-    TypeParam diff2 = parameters[1] - this->target[1];
-    maeValue += (diff1 < TypeParam(0.0f) ? -diff1 : diff1) + (diff2 < TypeParam(0.0f) ? -diff2 : diff2);
-
-    EXPECT_NEAR(math::ToFloat(cost), math::ToFloat(maeValue + regValue), 0.001f);
+    EXPECT_NEAR(loss.Cost(predictions), 0.725f, math::Tolerance<float>());
 }
 
-TYPED_TEST(TestMeanAbsoluteError, ZeroError)
+TEST_F(TestMeanAbsoluteError, GradientIsSignOverSizePlusRegularizationGradient)
 {
-    typename TestMeanAbsoluteError<TypeParam>::Vector parameters = this->target;
-    TypeParam regValue = TypeParam(0.0f);
+    EXPECT_CALL(regularization, Gradient(::testing::_)).WillOnce(::testing::Return(Vector{ 0.01f, 0.02f, 0.03f, 0.04f }));
 
-    EXPECT_CALL(this->mockRegularization, Calculate(::testing::_))
-        .WillOnce(::testing::Return(regValue));
+    const auto gradient{ loss.Gradient(predictions) };
 
-    this->loss.emplace(this->target, this->mockRegularization);
-    TypeParam cost = this->loss->Cost(parameters);
-
-    EXPECT_NEAR(math::ToFloat(cost), 0.0f, 0.001f);
+    EXPECT_NEAR(gradient[0], 0.26f, math::Tolerance<float>());
+    EXPECT_NEAR(gradient[1], -0.23f, math::Tolerance<float>());
+    EXPECT_NEAR(gradient[2], 0.28f, math::Tolerance<float>());
+    EXPECT_NEAR(gradient[3], 0.29f, math::Tolerance<float>());
 }
 
-TYPED_TEST(TestMeanAbsoluteError, MultipleParameters)
+TEST_F(TestMeanAbsoluteError, GradientMatchesFiniteDifferenceOfCost)
 {
-    std::array<typename TestMeanAbsoluteError<TypeParam>::Vector, 2> testParameters = {
-        typename TestMeanAbsoluteError<TypeParam>::Vector{ TypeParam(0.4f), TypeParam(-0.4f) },
-        typename TestMeanAbsoluteError<TypeParam>::Vector{ TypeParam(0.6f), TypeParam(-0.2f) }
-    };
+    EXPECT_CALL(regularization, Calculate(::testing::_)).WillRepeatedly(::testing::Return(0.0f));
+    EXPECT_CALL(regularization, Gradient(::testing::_)).WillOnce(::testing::Return(Vector{}));
 
-    TypeParam regValue = TypeParam(0.2f);
+    const auto numeric{ neural_network::test_support::CentralDifferenceGradient(loss, predictions) };
+    const auto analytic{ loss.Gradient(predictions) };
 
-    EXPECT_CALL(this->mockRegularization, Calculate(::testing::_))
-        .Times(testParameters.size())
-        .WillRepeatedly(::testing::Return(regValue));
-
-    this->loss.emplace(this->target, this->mockRegularization);
-
-    for (const auto& params : testParameters)
-    {
-        TypeParam cost = this->loss->Cost(params);
-
-        TypeParam maeValue = TypeParam(0.0f);
-        TypeParam diff1 = params[0] - this->target[0];
-        TypeParam diff2 = params[1] - this->target[1];
-        maeValue += (diff1 < TypeParam(0.0f) ? -diff1 : diff1) + (diff2 < TypeParam(0.0f) ? -diff2 : diff2);
-
-        EXPECT_NEAR(math::ToFloat(cost), math::ToFloat(maeValue + regValue), 0.001f);
-    }
+    for (std::size_t i = 0; i < size; ++i)
+        EXPECT_NEAR(analytic[i], numeric[i], math::Tolerance<float>());
 }
 
-TYPED_TEST(TestMeanAbsoluteError, GradientTest)
+TEST_F(TestMeanAbsoluteError, ZeroErrorGivesZeroCostAndZeroGradient)
 {
-    typename TestMeanAbsoluteError<TypeParam>::Vector parameters{ TypeParam(0.7f), TypeParam(-0.6f) };
-    TypeParam regValue = TypeParam(0.1f);
+    EXPECT_CALL(regularization, Calculate(::testing::_)).WillOnce(::testing::Return(0.0f));
+    EXPECT_CALL(regularization, Gradient(::testing::_)).WillOnce(::testing::Return(Vector{}));
 
-    this->loss.emplace(this->target, this->mockRegularization);
-    auto gradient = this->loss->Gradient(parameters);
-
-    EXPECT_NEAR(math::ToFloat(gradient[0]), 0.9999f, 0.01f);
-    EXPECT_NEAR(math::ToFloat(gradient[1]), -0.9999f, 0.01f);
+    EXPECT_FLOAT_EQ(loss.Cost(target), 0.0f);
+    const auto gradient{ loss.Gradient(target) };
+    for (std::size_t i = 0; i < size; ++i)
+        EXPECT_FLOAT_EQ(gradient[i], 0.0f);
 }

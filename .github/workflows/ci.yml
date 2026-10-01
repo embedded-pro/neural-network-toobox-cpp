@@ -47,6 +47,18 @@ jobs:
           buildPreset: "host-Debug-WithPackage"
           testPreset: "host"
           configurePresetAdditionalArgs: "['-DCMAKE_C_COMPILER_LAUNCHER=ccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=ccache']"
+      - name: Verify package contents
+        run: |
+          set -euo pipefail
+          archive=$(ls build/host/neural-network-toolbox-*-Linux.tar.gz)
+          echo "Inspecting $archive"
+          headers=$(tar -tzf "$archive" | grep -c 'include/neural_network/.*\.hpp' || true)
+          exports=$(tar -tzf "$archive" | grep -c 'cmake/NeuralNetworkToolbox/NeuralNetworkToolboxTargets\.cmake' || true)
+          config=$(tar -tzf "$archive" | grep -c 'cmake/NeuralNetworkToolbox/NeuralNetworkToolboxConfig\.cmake' || true)
+          echo "neural_network headers: $headers, target export: $exports, package config: $config"
+          test "$headers" -gt 10
+          test "$exports" -eq 1
+          test "$config" -eq 1
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: neural-network-toolbox
@@ -123,5 +135,5 @@ jobs:
         if: ${{ failure() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: test-logs
-          path: build/host/Testing/Temporary/
+          name: test-logs-${{ matrix.os }}
+          path: build/host-single-Debug/Testing/Temporary/

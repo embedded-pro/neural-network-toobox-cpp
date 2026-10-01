@@ -7,6 +7,7 @@ target_include_directories(neural_network.layer ${NEURAL_NETWORK_VISIBILITY}
 
 target_link_libraries(neural_network.layer ${NEURAL_NETWORK_VISIBILITY}
     infra.util
+    neural_network.activation
     numerical.math
 )
 

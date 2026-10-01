@@ -8,7 +8,6 @@ target_include_directories(neural_network.losses ${NEURAL_NETWORK_VISIBILITY}
 target_link_libraries(neural_network.losses ${NEURAL_NETWORK_VISIBILITY}
     infra.util
     numerical.math
-    neural_network.activation
     numerical.optimization
     numerical.regularization
 )

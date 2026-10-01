@@ -1,8 +1,10 @@
 if(NOT TARGET platform_qemu_startup)
     add_library(platform_qemu_startup STATIC
-        FaultHandler.cpp
-        Startup.cpp
         DefaultInit.cpp
+        FaultHandler.cpp
+        FaultHandler.hpp
+        Semihosting.hpp
+        Startup.cpp
     )
 
     set_target_properties(platform_qemu_startup PROPERTIES COMPILE_WARNING_AS_ERROR Off)
@@ -16,5 +18,14 @@ if(NOT TARGET platform_qemu_startup)
         -Wl,-u,Reset_Handler
         -Wl,-u,FaultDispatch
         -Wl,-u,main
+        -Wl,-u,_printf_float
     )
+
+    target_link_libraries(platform_qemu_startup INTERFACE
+        -lrdimon
+    )
+endif()
+
+if(NEURAL_NETWORK_TOOLBOX_BUILD_TESTS)
+    add_subdirectory(test)
 endif()

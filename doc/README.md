@@ -1,15 +1,20 @@
 # Neural Network
 
-Components for building, training, and evaluating feed-forward neural networks entirely on-device with static memory allocation.
+Components for building and evaluating feed-forward neural networks on-device with static memory
+allocation: activations, layers, losses and the sequential model.
 
-## Components
+## Categories
 
-| Component                                          | Description                                                                             |
-|----------------------------------------------------|-----------------------------------------------------------------------------------------|
-| [Neural Network Overview](NeuralNetwork.md)        | Architecture, training loop, and how the components fit together                        |
-| [Layers](layer/Layer.md)                           | Dense (fully connected) layer with forward and backward pass                            |
-| [Activation Functions](activation/Activation.md)   | Non-linear element-wise transforms: ReLU, LeakyReLU, Sigmoid, Tanh, Softmax             |
-| [Loss Functions](losses/Loss.md)                   | Objective functions: MSE, MAE, Binary Cross-Entropy, Categorical Cross-Entropy          |
-| [Model](model/Model.md)                            | Variadic-template model composing layers, optimizer, and loss into a trainable pipeline |
+| Category                                     | Description                                                           |
+|----------------------------------------------|-----------------------------------------------------------------------|
+| [Activation Functions](activation/README.md) | Non-linear transforms: ReLU, Leaky ReLU, Sigmoid, Tanh, Softmax       |
+| [Layers](layer/README.md)                    | Dense (fully connected) layer with forward and backward pass          |
+| [Loss Functions](losses/README.md)           | MSE, MAE, Binary Cross-Entropy, Categorical Cross-Entropy (on logits) |
+| [Model](model/README.md)                     | Network overview and the compile-time checked sequential model        |
 
-> **See also:** Optimization and Regularization primitives are provided by [numerical-toolbox-cpp](https://github.com/embedded-pro/numerical-toolbox-cpp) and consumed via FetchContent.
+Each category page lists its algorithms with a brief description and links to the detailed
+documentation. New algorithm docs follow [TEMPLATE.md](TEMPLATE.md).
+
+> **See also:** Optimization and Regularization primitives are provided by
+> [numerical-toolbox-cpp](https://github.com/embedded-pro/numerical-toolbox-cpp) and consumed via
+> FetchContent.

@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 470">
+  <rect width="860" height="470" fill="white"/>
+  <text x="430" y="32" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="bold">Dense Layer: Forward and Backward Pass</text>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+  </defs>
+  <text x="40" y="70" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#000" font-weight="bold" font-style="normal">Forward</text>
+  <rect x="40" y="90" width="170" height="64" rx="8" ry="8" fill="#dbe9ff" stroke="#1E78D8" stroke-width="1.5"/>
+  <text x="125" y="116" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#000" font-weight="bold" font-style="normal">Input</text>
+  <text x="125" y="138" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000" font-weight="normal" font-style="normal">a_in (n values)</text>
+  <rect x="230" y="90" width="170" height="64" rx="8" ry="8" fill="#fff0d9" stroke="#E08A00" stroke-width="1.5"/>
+  <text x="315" y="116" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#000" font-weight="bold" font-style="normal">Affine map</text>
+  <text x="315" y="138" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000" font-weight="normal" font-style="normal">z = W a_in + b</text>
+  <rect x="440" y="90" width="170" height="64" rx="8" ry="8" fill="#e2f5e2" stroke="#228B22" stroke-width="1.5"/>
+  <text x="525" y="116" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#000" font-weight="bold" font-style="normal">Activation</text>
+  <text x="525" y="138" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000" font-weight="normal" font-style="normal">a_out = f(z)</text>
+  <rect x="650" y="90" width="170" height="64" rx="8" ry="8" fill="#f3e3ff" stroke="#8A2BE2" stroke-width="1.5"/>
+  <text x="735" y="116" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#000" font-weight="bold" font-style="normal">Output</text>
+  <text x="735" y="138" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000" font-weight="normal" font-style="normal">a_out (m values)</text>
+  <line x1="210" y1="122" x2="228" y2="122" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="420" y1="122" x2="438" y2="122" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="630" y1="122" x2="648" y2="122" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="315" y="180" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#555" font-weight="normal" font-style="normal">W is m × n, b has m entries; a_in, z and a_out are cached for the backward pass</text>
+  <text x="40" y="225" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#000" font-weight="bold" font-style="normal">Backward</text>
+  <rect x="650" y="245" width="170" height="64" rx="8" ry="8" fill="#f3e3ff" stroke="#8A2BE2" stroke-width="1.5"/>
+  <text x="735" y="271" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#000" font-weight="bold" font-style="normal">Upstream gradient</text>
+  <text x="735" y="293" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000" font-weight="normal" font-style="normal">g = ∂L/∂a_out</text>
+  <rect x="360" y="245" width="250" height="64" rx="8" ry="8" fill="#e2f5e2" stroke="#228B22" stroke-width="1.5"/>
+  <text x="485" y="271" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#000" font-weight="bold" font-style="normal">δ = J_f(z)ᵀ g</text>
+  <text x="485" y="293" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000" font-weight="normal" font-style="normal">element-wise f: δᵢ = gᵢ · f′(zᵢ)</text>
+  <line x1="648" y1="277" x2="614" y2="277" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="40" y="245" width="280" height="64" rx="8" ry="8" fill="#dbe9ff" stroke="#1E78D8" stroke-width="1.5"/>
+  <text x="180" y="271" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#000" font-weight="bold" font-style="normal">To previous layer</text>
+  <text x="180" y="293" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000" font-weight="normal" font-style="normal">∂L/∂a_in = Wᵀ δ</text>
+  <line x1="358" y1="277" x2="324" y2="277" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="300" y="345" width="370" height="70" rx="8" ry="8" fill="#fff0d9" stroke="#E08A00" stroke-width="1.5"/>
+  <text x="485" y="370" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#000" font-weight="bold" font-style="normal">Parameter gradients (per sample)</text>
+  <text x="485" y="394" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000" font-weight="normal" font-style="normal">∂L/∂W = δ a_inᵀ,   ∂L/∂b = δ</text>
+  <line x1="485" y1="311" x2="485" y2="341" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="485" y="440" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#555" font-weight="normal" font-style="normal">Softmax: δᵢ = aᵢ (gᵢ − Σ_k g_k a_k), an O(m) Jacobian-vector product</text>
+</svg>

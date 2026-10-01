@@ -6,9 +6,7 @@ target_include_directories(neural_network.model ${NEURAL_NETWORK_VISIBILITY}
 )
 
 target_link_libraries(neural_network.model ${NEURAL_NETWORK_VISIBILITY}
-    infra.util
     numerical.math
-    neural_network.activation
     neural_network.layer
     neural_network.losses
     numerical.optimization
@@ -16,6 +14,10 @@ target_link_libraries(neural_network.model ${NEURAL_NETWORK_VISIBILITY}
 
 target_sources(neural_network.model PRIVATE
     Model.hpp
+)
+
+neural_network_add_coverage_sources(neural_network.model
+    Model.cpp
 )
 
 add_subdirectory(test)

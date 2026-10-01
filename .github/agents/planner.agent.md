@@ -13,7 +13,8 @@ Canonical rules: `AGENTS.md`. Produce plans only — no code edits.
 ## Workflow
 
 1. **Research**: search existing patterns (toolbox is consistent — follow them); check `CMakeLists.txt`
-   deps; find existing tests in `{module}/test/`; consult `doc/TEMPLATE.md` and `doc/{domain}/`.
+   deps; find existing tests in `neural_network/{domain}/test/`; consult `doc/TEMPLATE.md` and
+   `doc/{domain}/`.
 2. **Plan** — every plan must include:
    - **Overview**: modules/namespaces affected, files to create/modify
    - **Math**: equations, complexity, stability

@@ -4,284 +4,219 @@
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
-#include "infra/util/BoundedVector.hpp"
-#include "numerical/math/CompilerOptimizations.hpp"
+#include "neural_network/layer/Dense.hpp"
 #include "neural_network/layer/Layer.hpp"
 #include "neural_network/losses/Loss.hpp"
+#include "numerical/math/CompilerOptimizations.hpp"
+#include "numerical/math/Matrix.hpp"
 #include "numerical/optimization/Optimizer.hpp"
+#include <array>
+#include <cstddef>
 #include <functional>
 #include <tuple>
+#include <type_traits>
 #include <utility>
 
 namespace neural_network
 {
-    template<typename Layer, typename... Args>
+    template<typename LayerType, typename... Args>
     auto make_layer(Args&&... args)
     {
-        return [args = std::make_tuple(std::forward<Args>(args)...)]() mutable
+        return [arguments = std::tuple<Args...>{ std::forward<Args>(args)... }]() mutable
         {
-            return std::apply([](auto&&... params)
-                {
-                    return Layer(std::forward<decltype(params)>(params)...);
-                },
-                std::move(args));
+            return std::make_from_tuple<LayerType>(std::move(arguments));
         };
     }
 
     namespace detail
     {
-        template<typename QNumberType, typename T>
-        struct is_layer
+        template<typename T, typename L>
+        inline constexpr bool is_layer_v = std::is_base_of_v<Layer<T, L::InputSize, L::OutputSize, L::ParameterSize>, L>;
+
+        template<std::size_t InputSize, std::size_t OutputSize, typename... Layers>
+        constexpr bool LayerSizesChain()
         {
-            static constexpr bool value = std::is_base_of_v<
-                Layer<QNumberType,
-                    T::InputSize,
-                    T::OutputSize,
-                    T::ParameterSize>,
-                T>;
-        };
+            if constexpr (sizeof...(Layers) == 0)
+                return false;
+            else
+            {
+                constexpr std::array<std::size_t, sizeof...(Layers)> inputSizes{ Layers::InputSize... };
+                constexpr std::array<std::size_t, sizeof...(Layers)> outputSizes{ Layers::OutputSize... };
 
-        template<typename QNumberType, typename... Layers>
-        struct all_are_layers;
+                if (inputSizes.front() != InputSize || outputSizes.back() != OutputSize)
+                    return false;
 
-        template<typename QNumberType>
-        struct all_are_layers<QNumberType> : std::true_type
-        {};
+                for (std::size_t i = 1; i < sizeof...(Layers); ++i)
+                    if (inputSizes[i] != outputSizes[i - 1])
+                        return false;
 
-        template<typename QNumberType, typename First, typename... Rest>
-        struct all_are_layers<QNumberType, First, Rest...>
-            : std::integral_constant<bool,
-                  is_layer<QNumberType, First>::value &&
-                      all_are_layers<QNumberType, Rest...>::value>
-        {};
-
-        template<std::size_t InputSize, typename... Layers>
-        struct verify_layer_sizes;
-
-        template<std::size_t InputSize>
-        struct verify_layer_sizes<InputSize>
-        {
-            static constexpr bool value = true;
-        };
-
-        template<std::size_t InputSize, typename First, typename... Rest>
-        struct verify_layer_sizes<InputSize, First, Rest...>
-        {
-            using FirstLayer = Layer<typename First::QNumberType,
-                First::InputSize,
-                First::OutputSize,
-                First::ParameterSize>;
-
-            static constexpr bool value =
-                (InputSize == FirstLayer::InputSize) &&
-                verify_layer_sizes<FirstLayer::OutputSize, Rest...>::value;
-        };
-
-        template<typename QNumberType, typename... Layers>
-        constexpr std::size_t calculate_total_parameters()
-        {
-            return (... + Layers::ParameterSize);
+                return true;
+            }
         }
     }
 
-    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
+    template<typename T, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
     class Model
     {
-        static_assert(math::is_qnumber<QNumberType>::value || std::is_floating_point<QNumberType>::value,
-            "Model can only be instantiated with math::QNumber types or floating point types.");
-
-        static_assert(detail::all_are_layers<QNumberType, Layers...>::value,
-            "All types in Layers must derive from Layer");
-
+        static_assert(std::is_floating_point_v<T>, "Model requires a floating-point type");
         static_assert(sizeof...(Layers) > 0, "Model must have at least one layer");
-
-        static_assert(detail::verify_layer_sizes<InputSize, Layers...>::value &&
-                          std::tuple_element_t<sizeof...(Layers) - 1,
-                              std::tuple<Layers...>>::OutputSize == OutputSize,
-            "Layer sizes do not match");
+        static_assert((std::is_same_v<typename Layers::ValueType, T> && ...), "All layers must share the Model value type");
+        static_assert((detail::is_layer_v<T, Layers> && ...), "All types in Layers must derive from Layer");
+        static_assert(detail::LayerSizesChain<InputSize, OutputSize, Layers...>(), "Layer sizes do not match");
 
     public:
-        using InputVector = math::Matrix<QNumberType, InputSize, 1>;
-        using OutputVector = math::Matrix<QNumberType, OutputSize, 1>;
-        using ParameterVector = math::Vector<QNumberType, detail::calculate_total_parameters<QNumberType, Layers...>()>;
-        static constexpr std::size_t TotalParameters = detail::calculate_total_parameters<QNumberType, Layers...>();
+        static constexpr std::size_t TotalParameters = (Layers::ParameterSize + ...);
 
-        Model();
+        using InputVector = math::Vector<T, InputSize>;
+        using OutputVector = math::Vector<T, OutputSize>;
+        using ParameterVector = math::Vector<T, TotalParameters>;
 
-        template<typename... FactoryFuncs,
-            typename = std::enable_if_t<sizeof...(FactoryFuncs) == sizeof...(Layers)>>
-        Model(FactoryFuncs&&... factories)
-            : layers(std::invoke(std::forward<FactoryFuncs>(factories))...)
+        Model()
+        requires(std::is_default_constructible_v<Layers> && ...)
+        = default;
+
+        template<typename... FactoryFuncs>
+        requires(sizeof...(FactoryFuncs) == sizeof...(Layers)) && (std::is_invocable_r_v<Layers, FactoryFuncs> && ...)
+        explicit Model(FactoryFuncs&&... factories)
+            : layers{ std::invoke(std::forward<FactoryFuncs>(factories))... }
         {}
 
         OutputVector Forward(const InputVector& input);
-        InputVector Backward(const OutputVector& output_gradient);
-        void Train(optimization::Optimizer<QNumberType, TotalParameters>& optimizer, Loss<QNumberType, TotalParameters>& loss, const ParameterVector& initialParameters);
+        InputVector Backward(const OutputVector& outputGradient);
+        void Train(optimization::Optimizer<T, TotalParameters>& optimizer, Loss<T, TotalParameters>& loss, const ParameterVector& initialParameters);
         void SetParameters(const ParameterVector& parameters);
         ParameterVector GetParameters() const;
 
     private:
         template<std::size_t... Is>
-        OutputVector ForwardImpl(const InputVector& input, std::index_sequence<Is...>);
+        void ForwardImpl(const InputVector& input, std::index_sequence<Is...>);
 
-        template<std::size_t I, typename InputType>
-        void ForwardLayer(const InputType& layerInput);
+        template<std::size_t I>
+        void ForwardLayer(const InputVector& input);
 
-        template<std::size_t... Is>
-        InputVector BackwardImpl(const OutputVector& output_gradient, std::index_sequence<Is...>);
-
-        template<std::size_t I, typename GradType>
-        InputVector BackwardLayer(const GradType& gradient);
+        template<std::size_t I, typename GradientType>
+        InputVector BackwardLayer(const GradientType& gradient);
 
         template<std::size_t... Is>
         void SetParametersImpl(const ParameterVector& parameters, std::index_sequence<Is...>);
 
-        template<typename Layer>
-        void SetLayerParameters(Layer& layer, const ParameterVector& parameters, std::size_t& offset);
+        template<typename LayerType>
+        void SetLayerParameters(LayerType& layer, const ParameterVector& parameters, std::size_t& offset);
 
         template<std::size_t... Is>
         ParameterVector GetParametersImpl(std::index_sequence<Is...>) const;
 
-        template<typename Layer>
-        void GetLayerParameters(const Layer& layer, ParameterVector& parameters, std::size_t& offset) const;
+        template<typename LayerType>
+        void GetLayerParameters(const LayerType& layer, ParameterVector& parameters, std::size_t& offset) const;
 
         std::tuple<Layers...> layers;
-        InputVector currentInput;
     };
 
-    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
-    Model<QNumberType, InputSize, OutputSize, Layers...>::Model()
-        : layers(std::make_tuple(Layers()...))
-    {}
-
-    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
-    typename Model<QNumberType, InputSize, OutputSize, Layers...>::OutputVector
-        OPTIMIZE_FOR_SPEED
-        Model<QNumberType, InputSize, OutputSize, Layers...>::Forward(const InputVector& input)
+    template<typename T, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
+    OPTIMIZE_FOR_SPEED typename Model<T, InputSize, OutputSize, Layers...>::OutputVector Model<T, InputSize, OutputSize, Layers...>::Forward(const InputVector& input)
     {
-        currentInput = input;
-        return ForwardImpl(input, std::make_index_sequence<sizeof...(Layers)>{});
+        ForwardImpl(input, std::make_index_sequence<sizeof...(Layers)>{});
+        return std::get<sizeof...(Layers) - 1>(layers).Output();
     }
 
-    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
-    typename Model<QNumberType, InputSize, OutputSize, Layers...>::InputVector
-        OPTIMIZE_FOR_SPEED
-        Model<QNumberType, InputSize, OutputSize, Layers...>::Backward(const OutputVector& output_gradient)
+    template<typename T, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
+    OPTIMIZE_FOR_SPEED typename Model<T, InputSize, OutputSize, Layers...>::InputVector Model<T, InputSize, OutputSize, Layers...>::Backward(const OutputVector& outputGradient)
     {
-        return BackwardImpl(output_gradient, std::make_index_sequence<sizeof...(Layers)>{});
+        return BackwardLayer<sizeof...(Layers) - 1>(outputGradient);
     }
 
-    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
-    void Model<QNumberType, InputSize, OutputSize, Layers...>::Train(
-        optimization::Optimizer<QNumberType, TotalParameters>& optimizer,
-        Loss<QNumberType, TotalParameters>& loss,
-        const ParameterVector& initialParameters)
+    template<typename T, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
+    void Model<T, InputSize, OutputSize, Layers...>::Train(optimization::Optimizer<T, TotalParameters>& optimizer, Loss<T, TotalParameters>& loss, const ParameterVector& initialParameters)
     {
-        auto result = optimizer.Minimize(initialParameters, loss);
+        const auto& result{ optimizer.Minimize(initialParameters, loss) };
         SetParameters(result.parameters);
     }
 
-    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
-    void Model<QNumberType, InputSize, OutputSize, Layers...>::SetParameters(const ParameterVector& parameters)
+    template<typename T, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
+    void Model<T, InputSize, OutputSize, Layers...>::SetParameters(const ParameterVector& parameters)
     {
         SetParametersImpl(parameters, std::make_index_sequence<sizeof...(Layers)>{});
     }
 
-    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
-    typename Model<QNumberType, InputSize, OutputSize, Layers...>::ParameterVector
-    Model<QNumberType, InputSize, OutputSize, Layers...>::GetParameters() const
+    template<typename T, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
+    typename Model<T, InputSize, OutputSize, Layers...>::ParameterVector Model<T, InputSize, OutputSize, Layers...>::GetParameters() const
     {
         return GetParametersImpl(std::make_index_sequence<sizeof...(Layers)>{});
     }
 
-    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
+    template<typename T, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
     template<std::size_t... Is>
-    typename Model<QNumberType, InputSize, OutputSize, Layers...>::OutputVector
-    Model<QNumberType, InputSize, OutputSize, Layers...>::ForwardImpl(const InputVector& input, std::index_sequence<Is...>)
+    void Model<T, InputSize, OutputSize, Layers...>::ForwardImpl(const InputVector& input, std::index_sequence<Is...>)
     {
-        ForwardLayer<0>(input);
-        return std::get<sizeof...(Layers) - 1>(layers).Output();
+        (ForwardLayer<Is>(input), ...);
     }
 
-    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
-    template<std::size_t I, typename InputType>
-    void Model<QNumberType, InputSize, OutputSize, Layers...>::ForwardLayer(const InputType& layerInput)
+    template<typename T, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
+    template<std::size_t I>
+    void Model<T, InputSize, OutputSize, Layers...>::ForwardLayer(const InputVector& input)
     {
-        std::get<I>(layers).Forward(layerInput);
-        if constexpr (I + 1 < sizeof...(Layers))
-            ForwardLayer<I + 1>(std::get<I>(layers).Output());
-    }
-
-    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
-    template<std::size_t... Is>
-    typename Model<QNumberType, InputSize, OutputSize, Layers...>::InputVector
-    Model<QNumberType, InputSize, OutputSize, Layers...>::BackwardImpl(const OutputVector& output_gradient, std::index_sequence<Is...>)
-    {
-        return BackwardLayer<sizeof...(Layers) - 1>(output_gradient);
-    }
-
-    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
-    template<std::size_t I, typename GradType>
-    typename Model<QNumberType, InputSize, OutputSize, Layers...>::InputVector
-    Model<QNumberType, InputSize, OutputSize, Layers...>::BackwardLayer(const GradType& gradient)
-    {
-        auto& inputGrad = std::get<I>(layers).Backward(gradient);
         if constexpr (I == 0)
-            return inputGrad;
+            std::get<0>(layers).Forward(input);
         else
-            return BackwardLayer<I - 1>(inputGrad);
+            std::get<I>(layers).Forward(std::get<I - 1>(layers).Output());
     }
 
-    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
-    template<std::size_t... Is>
-    void Model<QNumberType, InputSize, OutputSize, Layers...>::SetParametersImpl(
-        const ParameterVector& parameters,
-        std::index_sequence<Is...>)
+    template<typename T, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
+    template<std::size_t I, typename GradientType>
+    typename Model<T, InputSize, OutputSize, Layers...>::InputVector Model<T, InputSize, OutputSize, Layers...>::BackwardLayer(const GradientType& gradient)
     {
-        std::size_t offset = 0;
+        const auto& inputGradient{ std::get<I>(layers).Backward(gradient) };
+
+        if constexpr (I == 0)
+            return inputGradient;
+        else
+            return BackwardLayer<I - 1>(inputGradient);
+    }
+
+    template<typename T, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
+    template<std::size_t... Is>
+    void Model<T, InputSize, OutputSize, Layers...>::SetParametersImpl(const ParameterVector& parameters, std::index_sequence<Is...>)
+    {
+        std::size_t offset{ 0 };
         (SetLayerParameters(std::get<Is>(layers), parameters, offset), ...);
     }
 
-    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
-    template<typename Layer>
-    void Model<QNumberType, InputSize, OutputSize, Layers...>::SetLayerParameters(
-        Layer& layer,
-        const ParameterVector& parameters,
-        std::size_t& offset)
+    template<typename T, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
+    template<typename LayerType>
+    void Model<T, InputSize, OutputSize, Layers...>::SetLayerParameters(LayerType& layer, const ParameterVector& parameters, std::size_t& offset)
     {
-        const std::size_t layerParameterSize = Layer::ParameterSize;
-        math::Vector<QNumberType, layerParameterSize> layerParameters;
+        typename LayerType::ParameterVector layerParameters{};
 
-        for (std::size_t i = 0; i < layerParameterSize; ++i)
+        for (std::size_t i = 0; i < LayerType::ParameterSize; ++i)
             layerParameters[i] = parameters[offset + i];
 
         layer.SetParameters(layerParameters);
-        offset += layerParameterSize;
+        offset += LayerType::ParameterSize;
     }
 
-    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
+    template<typename T, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
     template<std::size_t... Is>
-    typename Model<QNumberType, InputSize, OutputSize, Layers...>::ParameterVector
-    Model<QNumberType, InputSize, OutputSize, Layers...>::GetParametersImpl(
-        std::index_sequence<Is...>) const
+    typename Model<T, InputSize, OutputSize, Layers...>::ParameterVector Model<T, InputSize, OutputSize, Layers...>::GetParametersImpl(std::index_sequence<Is...>) const
     {
-        ParameterVector parameters;
-        std::size_t offset = 0;
-        int dummy[] = { 0, (GetLayerParameters(std::get<Is>(layers), parameters, offset), 0)... };
-        (void)dummy;
+        ParameterVector parameters{};
+        std::size_t offset{ 0 };
+        (GetLayerParameters(std::get<Is>(layers), parameters, offset), ...);
         return parameters;
     }
 
-    template<typename QNumberType, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
-    template<typename Layer>
-    void Model<QNumberType, InputSize, OutputSize, Layers...>::GetLayerParameters(
-        const Layer& layer,
-        ParameterVector& parameters,
-        std::size_t& offset) const
+    template<typename T, std::size_t InputSize, std::size_t OutputSize, typename... Layers>
+    template<typename LayerType>
+    void Model<T, InputSize, OutputSize, Layers...>::GetLayerParameters(const LayerType& layer, ParameterVector& parameters, std::size_t& offset) const
     {
-        const auto& layerParameters = layer.Parameters();
-        for (std::size_t i = 0; i < Layer::ParameterSize; ++i)
+        const auto& layerParameters{ layer.Parameters() };
+
+        for (std::size_t i = 0; i < LayerType::ParameterSize; ++i)
             parameters[offset + i] = layerParameters[i];
-        offset += Layer::ParameterSize;
+
+        offset += LayerType::ParameterSize;
     }
+
+#ifdef NEURAL_NETWORK_TOOLBOX_COVERAGE_BUILD
+    extern template class Model<float, 2, 1, Dense<float, 2, 3>, Dense<float, 3, 1>>;
+#endif
 }

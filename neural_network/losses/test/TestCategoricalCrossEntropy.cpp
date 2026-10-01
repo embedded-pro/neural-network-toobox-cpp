@@ -1,156 +1,80 @@
-#include "numerical/math/QNumber.hpp"
 #include "neural_network/losses/CategoricalCrossEntropy.hpp"
-#include "gmock/gmock.h"
+#include "neural_network/losses/test/LossTestSupport.hpp"
+#include "numerical/math/Tolerance.hpp"
+#include <gmock/gmock.h>
 
 namespace
 {
-    template<typename QNumberType, std::size_t Size>
-    class MockRegularization
-        : public regularization::Regularization<QNumberType, Size>
-    {
-    public:
-        using Vector = typename regularization::Regularization<QNumberType, Size>::Vector;
-        MOCK_METHOD(QNumberType, Calculate, (const Vector& parameters), (const, override));
-        MOCK_METHOD(Vector, Gradient, (const Vector& parameters), (const, override));
-    };
-
-    template<typename T>
     class TestCategoricalCrossEntropy
         : public ::testing::Test
     {
-    public:
-        static constexpr std::size_t NumberOfFeature = 2;
-        using Vector = math::Matrix<T, NumberOfFeature, 1>;
+    protected:
+        static constexpr std::size_t size{ 3 };
+        using Vector = neural_network::CategoricalCrossEntropy<float, size>::Vector;
 
-        MockRegularization<T, NumberOfFeature> mockRegularization;
-        Vector target;
-        std::optional<neural_network::CategoricalCrossEntropy<T, NumberOfFeature>> loss;
-
-        void SetUp() override
-        {
-            target = Vector{ T(0.8f), T(0.2f) };
-        }
+        ::testing::StrictMock<neural_network::test_support::RegularizationMock<size>> regularization;
+        const Vector oneHotTarget{ 0.0f, 1.0f, 0.0f };
+        const Vector logits{ 1.0f, 2.0f, 3.0f };
+        neural_network::CategoricalCrossEntropy<float, size> loss{ oneHotTarget, regularization };
     };
-
-    using TestedTypes = ::testing::Types<float>;
-    TYPED_TEST_SUITE(TestCategoricalCrossEntropy, TestedTypes);
 }
 
-TYPED_TEST(TestCategoricalCrossEntropy, CostCallsRegularization)
+TEST_F(TestCategoricalCrossEntropy, CostIsNegativeLogSoftmaxOfTargetPlusRegularization)
 {
-    typename TestCategoricalCrossEntropy<TypeParam>::Vector parameters{ TypeParam(0.7f), TypeParam(0.3f) };
-    TypeParam regValue = TypeParam(0.1f);
+    EXPECT_CALL(regularization, Calculate(::testing::_)).WillOnce(::testing::Return(0.1f));
 
-    EXPECT_CALL(this->mockRegularization, Calculate(::testing::_))
-        .WillOnce(::testing::Return(regValue));
-
-    this->loss.emplace(this->target, this->mockRegularization);
-    TypeParam cost = this->loss->Cost(parameters);
-
-    typename TestCategoricalCrossEntropy<TypeParam>::Vector probs;
-    TypeParam sum = TypeParam(0.0f);
-
-    for (std::size_t i = 0; i < this->NumberOfFeature; ++i)
-    {
-        probs[i] = std::exp(math::ToFloat(parameters[i]));
-        sum += probs[i];
-    }
-
-    for (std::size_t i = 0; i < this->NumberOfFeature; ++i)
-        probs[i] = probs[i] / sum;
-
-    TypeParam expectedCost = TypeParam(0.0f);
-    for (std::size_t i = 0; i < this->NumberOfFeature; ++i)
-        expectedCost += -this->target[i] * std::log(math::ToFloat(probs[i]));
-
-    EXPECT_NEAR(math::ToFloat(cost), math::ToFloat(expectedCost + regValue), 0.01f);
+    EXPECT_NEAR(loss.Cost(logits), 1.5076060f, math::Tolerance<float>());
 }
 
-TYPED_TEST(TestCategoricalCrossEntropy, PerfectPrediction)
+TEST_F(TestCategoricalCrossEntropy, GradientIsSoftmaxMinusTargetPlusRegularizationGradient)
 {
-    typename TestCategoricalCrossEntropy<TypeParam>::Vector parameters{ TypeParam(2.0f), TypeParam(-2.0f) };
-    TypeParam regValue = TypeParam(0.0f);
+    EXPECT_CALL(regularization, Gradient(::testing::_)).WillOnce(::testing::Return(Vector{ 0.01f, 0.02f, 0.03f }));
 
-    EXPECT_CALL(this->mockRegularization, Calculate(::testing::_))
-        .WillOnce(::testing::Return(regValue));
+    const auto gradient{ loss.Gradient(logits) };
 
-    this->loss.emplace(this->target, this->mockRegularization);
-    TypeParam cost = this->loss->Cost(parameters);
-
-    EXPECT_GT(math::ToFloat(cost), 0.0f);
-    EXPECT_LT(math::ToFloat(cost), 1.0f);
+    EXPECT_NEAR(gradient[0], 0.1000306f, math::Tolerance<float>());
+    EXPECT_NEAR(gradient[1], -0.7352715f, math::Tolerance<float>());
+    EXPECT_NEAR(gradient[2], 0.6952410f, math::Tolerance<float>());
 }
 
-TYPED_TEST(TestCategoricalCrossEntropy, GradientTest)
+TEST_F(TestCategoricalCrossEntropy, GradientMatchesFiniteDifferenceForUnnormalisedTarget)
 {
-    typename TestCategoricalCrossEntropy<TypeParam>::Vector parameters{ TypeParam(0.2f), TypeParam(0.5f) };
-    TypeParam regValue = TypeParam(0.1f);
+    neural_network::CategoricalCrossEntropy<float, size> softTargetLoss{ Vector{ 0.2f, 0.5f, 0.1f }, regularization };
+    const Vector point{ 0.4f, -1.2f, 2.5f };
+    EXPECT_CALL(regularization, Calculate(::testing::_)).WillRepeatedly(::testing::Return(0.0f));
+    EXPECT_CALL(regularization, Gradient(::testing::_)).WillOnce(::testing::Return(Vector{}));
 
-    typename TestCategoricalCrossEntropy<TypeParam>::Vector regGradient;
-    for (std::size_t i = 0; i < this->NumberOfFeature; ++i)
-        regGradient[i] = regValue;
+    const auto numeric{ neural_network::test_support::CentralDifferenceGradient(softTargetLoss, point) };
+    const auto analytic{ softTargetLoss.Gradient(point) };
 
-    EXPECT_CALL(this->mockRegularization, Gradient(::testing::_))
-        .WillOnce(::testing::Return(regGradient));
-
-    this->loss.emplace(this->target, this->mockRegularization);
-    auto gradient = this->loss->Gradient(parameters);
-
-    typename TestCategoricalCrossEntropy<TypeParam>::Vector probs;
-    TypeParam sum = TypeParam(0.0f);
-
-    for (std::size_t i = 0; i < this->NumberOfFeature; ++i)
-    {
-        probs[i] = std::exp(math::ToFloat(parameters[i]));
-        sum += probs[i];
-    }
-
-    for (std::size_t i = 0; i < this->NumberOfFeature; ++i)
-        probs[i] = probs[i] / sum;
-
-    // Account for limited precision in Q types
-    EXPECT_NEAR(math::ToFloat(gradient[0]), math::ToFloat(probs[0] - this->target[0] + regValue), 0.1f);
-    EXPECT_NEAR(math::ToFloat(gradient[1]), math::ToFloat(probs[1] - this->target[1] + regValue), 0.1f);
+    for (std::size_t i = 0; i < size; ++i)
+        EXPECT_NEAR(analytic[i], numeric[i], math::Tolerance<float>());
 }
 
-TYPED_TEST(TestCategoricalCrossEntropy, MultipleParameters)
+TEST_F(TestCategoricalCrossEntropy, LargeLogitsGiveFiniteCostAndGradient)
 {
-    std::array<typename TestCategoricalCrossEntropy<TypeParam>::Vector, 2> testParameters = {
-        typename TestCategoricalCrossEntropy<TypeParam>::Vector{ TypeParam(0.3f), TypeParam(0.7f) },
-        typename TestCategoricalCrossEntropy<TypeParam>::Vector{ TypeParam(0.1f), TypeParam(0.9f) }
-    };
+    const Vector largeLogits{ 1000.0f, 0.0f, -1000.0f };
+    EXPECT_CALL(regularization, Calculate(::testing::_)).WillOnce(::testing::Return(0.0f));
+    EXPECT_CALL(regularization, Gradient(::testing::_)).WillOnce(::testing::Return(Vector{}));
 
-    TypeParam regValue = TypeParam(0.2f);
+    EXPECT_NEAR(loss.Cost(largeLogits), 1000.0f, math::Tolerance<float>());
 
-    EXPECT_CALL(this->mockRegularization, Calculate(::testing::_))
-        .Times(testParameters.size())
-        .WillRepeatedly(::testing::Return(regValue));
+    const auto gradient{ loss.Gradient(largeLogits) };
+    EXPECT_NEAR(gradient[0], 1.0f, math::Tolerance<float>());
+    EXPECT_NEAR(gradient[1], -1.0f, math::Tolerance<float>());
+    EXPECT_NEAR(gradient[2], 0.0f, math::Tolerance<float>());
+}
 
-    this->loss.emplace(this->target, this->mockRegularization);
+TEST_F(TestCategoricalCrossEntropy, TiedLargeLogitsSplitProbabilityEvenly)
+{
+    const Vector tiedLogits{ 1.0e8f, 1.0e8f, -1.0e8f };
+    EXPECT_CALL(regularization, Calculate(::testing::_)).WillOnce(::testing::Return(0.0f));
+    EXPECT_CALL(regularization, Gradient(::testing::_)).WillOnce(::testing::Return(Vector{}));
 
-    for (const auto& params : testParameters)
-    {
-        TypeParam cost = this->loss->Cost(params);
+    EXPECT_NEAR(loss.Cost(tiedLogits), 0.6931472f, math::Tolerance<float>());
 
-        typename TestCategoricalCrossEntropy<TypeParam>::Vector probs;
-        TypeParam sum = TypeParam(0.0f);
-
-        for (std::size_t i = 0; i < this->NumberOfFeature; ++i)
-        {
-            probs[i] = TypeParam(std::exp(math::ToFloat(params[i])));
-            sum += probs[i];
-        }
-
-        for (std::size_t i = 0; i < this->NumberOfFeature; ++i)
-        {
-            probs[i] = probs[i] / sum;
-            probs[i] = TypeParam(std::max(std::min(math::ToFloat(probs[i]), 0.8f), 0.0001f));
-        }
-
-        TypeParam expectedCost = TypeParam(0.0f);
-        for (std::size_t i = 0; i < this->NumberOfFeature; ++i)
-            expectedCost += -this->target[i] * std::log(math::ToFloat(probs[i]));
-
-        EXPECT_NEAR(math::ToFloat(cost), math::ToFloat(expectedCost + regValue), 0.1f);
-    }
+    const auto gradient{ loss.Gradient(tiedLogits) };
+    EXPECT_NEAR(gradient[0], 0.5f, math::Tolerance<float>());
+    EXPECT_NEAR(gradient[1], -0.5f, math::Tolerance<float>());
+    EXPECT_NEAR(gradient[2], 0.0f, math::Tolerance<float>());
 }

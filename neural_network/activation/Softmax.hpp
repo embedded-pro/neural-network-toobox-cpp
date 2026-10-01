@@ -4,64 +4,64 @@
 #pragma GCC optimize("O3", "fast-math")
 #endif
 
+#include "neural_network/activation/ActivationFunction.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Math.hpp"
-#include "neural_network/activation/ActivationFunction.hpp"
-#include <span>
 
 namespace neural_network
 {
-    template<typename QNumberType>
-    class Softmax
-        : public ActivationFunction<QNumberType>
+    template<typename T>
+    class Softmax final
+        : public ActivationFunction<T>
     {
+        static_assert(std::is_floating_point_v<T>, "Softmax requires a floating-point type");
+
     public:
-        QNumberType Forward(QNumberType x) const override;
-        QNumberType Backward(QNumberType x) const override;
-        void ForwardVector(std::span<QNumberType> output, std::span<const QNumberType> input) const override;
-        void BackwardVector(std::span<QNumberType> result, std::span<const QNumberType> preActivation, std::span<const QNumberType> output, std::span<const QNumberType> outputGradient) const override;
+        T Forward(T x) const override;
+        T Backward(T x) const override;
+        void ForwardVector(std::span<T> output, std::span<const T> input) const override;
+        void BackwardVector(std::span<T> result, std::span<const T> preActivation, std::span<const T> output, std::span<const T> outputGradient) const override;
     };
 
-    template<typename QNumberType>
-    OPTIMIZE_FOR_SPEED
-        QNumberType
-        Softmax<QNumberType>::Forward(QNumberType x) const
+    template<typename T>
+    OPTIMIZE_FOR_SPEED T Softmax<T>::Forward(T) const
     {
-        return QNumberType(math::Exp(math::ToFloat(x)));
+        return T{ 1 };
     }
 
-    template<typename QNumberType>
-    OPTIMIZE_FOR_SPEED
-        QNumberType
-        Softmax<QNumberType>::Backward(QNumberType x) const
+    template<typename T>
+    OPTIMIZE_FOR_SPEED T Softmax<T>::Backward(T) const
     {
-        QNumberType y = Forward(x);
-        return y * (QNumberType(0.9999f) - y);
+        return T{ 0 };
     }
 
-    template<typename QNumberType>
-    OPTIMIZE_FOR_SPEED void Softmax<QNumberType>::ForwardVector(std::span<QNumberType> output, std::span<const QNumberType> input) const
+    template<typename T>
+    OPTIMIZE_FOR_SPEED void Softmax<T>::ForwardVector(std::span<T> output, std::span<const T> input) const
     {
-        QNumberType maxVal = input[0];
+        really_assert(!input.empty() && output.size() == input.size());
+
+        T maxValue{ input[0] };
         for (std::size_t i = 1; i < input.size(); ++i)
-            if (input[i] > maxVal)
-                maxVal = input[i];
+            if (input[i] > maxValue)
+                maxValue = input[i];
 
-        QNumberType sum = QNumberType(0.0f);
+        T sum{ 0 };
         for (std::size_t i = 0; i < output.size(); ++i)
         {
-            output[i] = QNumberType(math::Exp(math::ToFloat(input[i]) - math::ToFloat(maxVal)));
+            output[i] = math::Exp(input[i] - maxValue);
             sum += output[i];
         }
 
         for (std::size_t i = 0; i < output.size(); ++i)
-            output[i] = std::max(std::min(output[i] / sum, QNumberType(0.9999f)), QNumberType(0.0001f));
+            output[i] /= sum;
     }
 
-    template<typename QNumberType>
-    OPTIMIZE_FOR_SPEED void Softmax<QNumberType>::BackwardVector(std::span<QNumberType> result, std::span<const QNumberType> /*preActivation*/, std::span<const QNumberType> output, std::span<const QNumberType> outputGradient) const
+    template<typename T>
+    OPTIMIZE_FOR_SPEED void Softmax<T>::BackwardVector(std::span<T> result, std::span<const T> preActivation, std::span<const T> output, std::span<const T> outputGradient) const
     {
-        QNumberType dot = QNumberType(0.0f);
+        really_assert(result.size() == preActivation.size() && result.size() == output.size() && result.size() == outputGradient.size());
+
+        T dot{ 0 };
         for (std::size_t i = 0; i < result.size(); ++i)
             dot += outputGradient[i] * output[i];
 
@@ -71,7 +71,5 @@ namespace neural_network
 
 #ifdef NEURAL_NETWORK_TOOLBOX_COVERAGE_BUILD
     extern template class Softmax<float>;
-    extern template class Softmax<math::Q15>;
-    extern template class Softmax<math::Q31>;
 #endif
 }

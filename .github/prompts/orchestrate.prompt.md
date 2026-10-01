@@ -1,5 +1,5 @@
 ---
-description: "Start an orchestrated plan-execute-review workflow for a neural-network-toolbox development task. Routes through planning (Claude Opus 4.6), implementation, and code review stages with handoff buttons between each step."
+description: "Start an orchestrated plan-execute-review workflow for a neural-network-toolbox development task. Routes through planning, implementation, and code review stages with handoff buttons between each step."
 agent: "orchestrator"
 argument-hint: "Describe the algorithm, feature, bug fix, or change you want to implement"
 model: "Claude Sonnet 4.6"
