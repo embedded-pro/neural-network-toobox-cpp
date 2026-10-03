@@ -68,7 +68,7 @@ if (NEURAL_NETWORK_TOOLBOX_STANDALONE)
     endif()
 endif()
 
-project(neural-network-toolbox LANGUAGES C CXX ASM VERSION 1.0.0) # x-release-please-version
+project(neural-network-toolbox LANGUAGES C CXX ASM VERSION 1.1.0) # x-release-please-version
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
