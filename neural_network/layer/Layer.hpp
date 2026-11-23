@@ -21,8 +21,6 @@ namespace neural_network
         static constexpr std::size_t OutputSize = OutputSize_;
         static constexpr std::size_t ParameterSize = ParameterSize_;
 
-        virtual ~Layer() = default;
-
         virtual void Forward(const InputVector& input) = 0;
         virtual const InputVector& Backward(const OutputVector& outputGradient) = 0;
         virtual const OutputVector& Output() const = 0;
@@ -35,5 +33,6 @@ namespace neural_network
         Layer(Layer&&) = default;
         Layer& operator=(const Layer&) = default;
         Layer& operator=(Layer&&) = default;
+        ~Layer() = default;
     };
 }
