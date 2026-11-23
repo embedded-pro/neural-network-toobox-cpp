@@ -80,8 +80,7 @@ Scope: production code. Tests and host tools may use the heap.
 ## Domain *(repo)*
 
 - Neural-network algorithms (activations, layers, losses, model) for embedded targets. Namespace `neural_network`.
-- Source: `neural_network/<domain>/` with `<domain>` = `activation`, `layer`, `losses`, `model`. `platform/` follows
-  the same rules.
+- Source: `neural_network/<domain>/` with `<domain>` = `activation`, `layer`, `losses`, `model`.
 - `simulator/` is host-only Qt tooling. Heap, `std::string`, `QString` and exceptions caught at the UI boundary are
   allowed there; float-only does not apply. Style and test rules apply. Library code never depends on the simulator.
 - Shared primitives come from numerical-toolbox-cpp through `FetchContent`: `numerical/<domain>/...`, namespaces
