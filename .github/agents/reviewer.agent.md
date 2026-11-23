@@ -1,71 +1,34 @@
 ---
-description: "Review code changes against neural-network-toolbox standards: no heap, float-only templates, embedded pragmas, TEST_F on float, SOLID, docs. Does NOT modify files."
-tools: [read, search]
-model: "claude-sonnet-4-6"
-handoffs:
-  - label: "Fix Issues"
-    agent: executor
-    prompt: "Fix the issues identified in the review above, following all neural-network-toolbox project conventions."
-  - label: "Re-plan"
-    agent: planner
-    prompt: "Revise the implementation plan based on the review feedback above."
+description: "Review the changes on the current branch against the rules in AGENTS.md. Reports findings by severity. Does not change files."
+tools: [read, search, execute]
 ---
 
-Canonical rules: `AGENTS.md`. Review only — no file modifications.
+Review code. Do not change files. AGENTS.md is the rule set; *Exceptions* overrides a shared rule.
 
-## Workflow
+## Process
 
-1. Identify changed files; read each completely.
-2. Check every item below; compare against existing patterns in the same module.
-3. Verify mathematical correctness and doc alignment.
+1. Find the changes: `git diff --name-only $(git merge-base origin/main HEAD)`.
+2. Read AGENTS.md and each matching `.github/instructions/*.instructions.md`.
+3. Read each changed file completely. Read callers when a signature changes.
+4. Check each rule against the lines the change adds or modifies. Do not report old code the change does not touch.
+5. Confirm each finding in the code before you report it.
 
-## Output format
+## Severity
 
-### `path/to/file`
-**CRITICAL** — must fix before merge: [C1] ...
-**WARNING** — should fix: [W1] ...
-**SUGGESTION** — nice to have: [S1] ...
-**PASS**: rules verified
+| Severity   | Rule broken                                                                                                                         |
+|------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| CRITICAL   | *Memory*, *Interfaces & errors*, *Optimisation*, *Domain*; behavioural change without a documentation update; build or test failure |
+| WARNING    | *Style* except comments; *Testing*; new file not in `CMakeLists.txt`                                                                |
+| SUGGESTION | Comment rules; prose not in ASD-STE100; optimisation outside a hot path                                                             |
 
-End with totals + verdict: APPROVE / REQUEST CHANGES.
+A deviation listed in *Exceptions* is not a finding.
 
-## Checklist
+## Output
 
-**Memory (CRITICAL)**
-- [ ] No heap: `new`/`delete`/`make_unique`/`make_shared`/`std::vector`/`string`/`deque`/`list`/`map`/`set`. Tests too.
-- [ ] No recursion.
+```
+path/file.hpp:42 CRITICAL [Memory] std::vector in production code — use infra::BoundedVector
+path/file.cpp:10 WARNING [Style] header guard — use #pragma once
+```
 
-**Numeric types (CRITICAL)**
-- [ ] `template<typename T>` + `static_assert(std::is_floating_point_v<T>)`. `float` only — no Q15/Q31.
-- [ ] `std::numbers::pi_v<float>` — no hardcoded constants.
-- [ ] `extern template` guarded by `#ifdef NEURAL_NETWORK_TOOLBOX_COVERAGE_BUILD`.
-
-**Embedded optimizations (WARNING)**
-- [ ] `#pragma GCC optimize("O3","fast-math")` after `#pragma once` in algorithm headers.
-- [ ] `OPTIMIZE_FOR_SPEED` on `Forward/Backward/ForwardVector/BackwardVector/Cost/Gradient`.
-
-**Namespaces (WARNING)**
-- [ ] Everything in `namespace neural_network`; shared primitives keep `math`/`optimization`/`regularization`.
-
-**Style (WARNING)**
-- [ ] Allman braces, brace-init `{}`, PascalCase types/methods, camelCase members.
-- [ ] Functions ≤ ~30 lines. `const`-correct on all non-mutating methods. No comments except license/NOLINT.
-- [ ] SOLID: one concern per class, constructor injection, depend on abstractions, no duplicated logic.
-
-**Interfaces & errors (WARNING)**
-- [ ] `virtual ~I() = default` — never `= 0`. No exceptions — `std::optional`/status enums.
-
-**Testing (WARNING)**
-- [ ] `TEST_F` on `float` — no `TYPED_TEST`, no multi-type, never plain `TEST()`.
-- [ ] `StrictMock` only (no `NiceMock`/bare). Anonymous-namespace fixture; macros outside.
-- [ ] No redundant tests. Arrange/Act/Assert. `EXPECT_NEAR` + `math::Tolerance<float>()`.
-
-**CMake (WARNING)**
-- [ ] `neural_network_add_header_library()`, `neural_network_add_coverage_sources()`, `${NEURAL_NETWORK_VISIBILITY}`.
-- [ ] If new simulator: `.vscode/launch.json` has a `cppdbg` entry inserted before `"Linux Debug"`.
-
-**Docs (CRITICAL)**
-- [ ] `doc/{domain}/{Name}.md` updated per `doc/TEMPLATE.md`. No class names, no code examples.
-- [ ] `doc/{domain}/README.md` updated if a new algorithm was added; `python3 scripts/validate-docs.py` passes.
-
-**Terse**: report file paths + CRITICAL/WARNING counts. Don't narrate; don't re-read files.
+One line per finding: location, severity, section, problem, fix.
+Last line: `C=<n> W=<n> S=<n> — APPROVE` or `— REQUEST CHANGES` (any CRITICAL or WARNING).

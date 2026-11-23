@@ -1,7 +1,7 @@
 # Testing Strategy — Algorithm Metrics
 
 The library's test strategy: every algorithm is validated against the **mathematical invariants of
-its family**, not golden output. This is the reference for the `unit-tester` agent (and humans) when
+its family**, not golden output. This is the reference for the `unit-tester` skill (and humans) when
 writing **unit tests** for `neural_network/`. It answers one question per algorithm: *which
 mathematical properties must a correct implementation satisfy, and how do we assert them?*
 
@@ -12,8 +12,8 @@ set of **characteristic invariants** — properties that hold for any correct im
 regardless of parameters. A unit test earns its place by pinning one such invariant against a
 **known ground truth**, not by re-running the implementation and trusting its own output.
 
-Canonical rules still apply ([AGENTS.md](AGENTS.md), [testing.instructions.md](.github/instructions/testing.instructions.md)):
-`TEST_F` on `float`, one behaviour per test, no redundant cases, **no heap in tests**, assert with
+Canonical rules still apply ([AGENTS.md](AGENTS.md)):
+`TEST_F` on `float`, one behaviour per test, no redundant cases, assert with
 `EXPECT_NEAR` + `math::Tolerance<float>()` against reference values.
 
 ## How the agent uses this
