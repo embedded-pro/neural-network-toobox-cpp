@@ -1,115 +1,125 @@
-# Neural Network Toolbox — Agent Rules (canonical)
+# neural-network-toobox-cpp — Agent Rules
 
-Single source of truth for **Claude and Copilot**. `CLAUDE.md` and
-`.github/copilot-instructions.md` point here. Code-file specifics load on demand from
-`.github/instructions/`. Deployment recipe: `roadmap/DEPLOYMENT.md`.
+<!-- shared:begin 0.3.0 sha256:9aee198041110762 -->
+Canonical rules for Claude, Copilot and sub-agents. Sections marked *(shared)* come from embedded-pro/embedded-agent-kit:
+edit them there, not here. *(repo)* sections belong to this repository. *Exceptions* overrides a shared rule.
 
-Neural network algorithms library (activations, layers, losses, model) for
-resource-constrained embedded systems. Real-time, deterministic, no heap. The shared numerical
-primitives (`math`, `optimization`, `regularization`, …) are consumed from
-[numerical-toolbox-cpp](https://github.com/embedded-pro/numerical-toolbox-cpp) via `FetchContent`
-and included as `numerical/<domain>/…`.
+## Behaviour *(shared)*
 
-## Scope
+- **Be as terse as possible.** No preamble, summary or narration. Report file paths and pass/fail.
+- Everything you write — code, docs, agent files, PR text — uses the fewest words that stay unambiguous.
+- Prose (docs, comments, agent files, commit and PR text) follows ASD-STE100 Simplified Technical English:
+  one word, one meaning; active voice; one instruction per sentence; sentences ≤ 20 words (procedures) or ≤ 25 (descriptions).
+- Ambiguous request: ask. Clear request: act.
+- Do only what was asked. No unrelated refactors, no extra features.
+- Batch reads, don't re-read, prefer targeted edits.
+- Never change a shared section. Add a deviation to *Exceptions* only when the user approves it.
 
-- The rules below apply to the library (`neural_network/**`, including its tests) and to
-  `platform/**`.
-- `simulator/**` is host-only Qt tooling and is **exempt from the no-heap and float-only rules**:
-  `std::vector`, `std::string`, `QString` and other Qt/heap types are allowed there, and exceptions
-  may be used if they are caught at the UI boundary. Style, no-comments, `TEST_F` and `StrictMock`
-  rules still apply to simulator code and tests. Library code must never depend on the simulator.
+## Workflow *(shared)*
 
-## Numeric policy — FLOAT-ONLY (current)
+1. Multi-file or architectural change: update the design document first. Get approval before you write code.
+2. Read *Domain* and *Build*. Read each `.github/instructions/*.instructions.md` whose `applyTo` matches a file you change.
+3. Find the nearest existing pattern. Follow it.
+4. Per behaviour: write a failing test, write the minimum code that passes it, refactor with all tests green.
+5. Add each new file to its `CMakeLists.txt`.
+6. Update the documentation for each behavioural change.
+7. Run the *Build* commands until build and tests pass. Never disable, skip or weaken a test to get green.
+8. Non-trivial change: run the `reviewer` agent, or ask the user to run it. Fix each CRITICAL and WARNING finding.
+9. Report changed files, build pass/fail, test pass/fail.
 
-- New algorithms are **float-only**. Write generic `template<typename T>`, add
-  `static_assert(std::is_floating_point_v<T>, "...")`, and **instantiate/test `float` only**.
-- Do **NOT** implement `Q15`/`Q31` now. The generic `T` keeps a fixed-point specialisation cheap later.
-- `std::numbers::pi_v<float>` — never hardcode constants.
+## Memory *(shared)*
 
-## Memory — no heap
+Scope: production code. Tests and host tools may use the heap.
 
 - Forbidden: `new`/`delete`/`malloc`/`free`, `make_unique`/`make_shared`,
-  `std::vector`/`string`/`deque`/`list`/`map`/`set`.
+  `std::vector`/`string`/`deque`/`list`/`map`/`set`, recursion.
 - Use: `infra::BoundedVector<T>::WithMaxSize<N>`, `infra::BoundedString::WithStorage<N>`,
-  `infra::BoundedDeque<T>::WithMaxSize<N>`, `infra::BoundedList<T>::WithMaxSize<N>`,
-  `std::array<T,N>`, `std::optional<T>`. Stack/static only. No recursion. **Tests too.**
+  `infra::BoundedDeque`, `infra::BoundedList`/`IntrusiveList`, `std::array`, `std::optional`, `std::variant`.
 
-## Embedded optimizations (algorithm headers)
+## Interfaces & errors *(shared)*
 
-```cpp
-#pragma once
-#if defined(__GNUC__) || defined(__clang__)
-#pragma GCC optimize("O3", "fast-math")
-#endif
-#include "numerical/math/CompilerOptimizations.hpp"
+- No virtual destructors: each adds a deleting destructor and thunks to flash.
+  Interface = pure virtual methods + `protected: ~I() = default;` (non-virtual).
+- Public `virtual ~Base() = default;` only on a base destroyed through a base pointer:
+  `delete`/`std::unique_ptr<Base>`, `infra::PolymorphicVariant<Base, ...>`, `infra::OptionalForPolymorphicObjects<Base, ...>`.
+  Put it on that base, not on every interface.
+- Not needed for `std::variant`, `std::optional<Concrete>`, `infra::SharedPtr`: they destroy the concrete type.
+- No exceptions. `std::optional`, `bool` or status enum; `really_assert` for preconditions. Never swallow an error.
+- Constructor injection; no global state.
+
+## Optimisation *(shared)*
+
+- No `#pragma GCC optimize`, no `optimize` attribute: GCC won't inline across differing options.
+  The consumer sets flags per translation unit.
+- `OPTIMIZE_FOR_SPEED` only on hot functions defined in a header.
+- Hot paths: no heap, no virtual dispatch, no blocking.
+
+## Style *(shared)*
+
+- `.clang-format` is authoritative. Allman, 4 spaces, `{}` init.
+- PascalCase types/methods; camelCase members and enum values; lowercase namespaces.
+  No `I` prefix; implementations end in `Impl`.
+- `#pragma once` only.
+- Fixed-width integers. `const`/`constexpr`-correct. Functions ≤ 30 lines (hard limit 50).
+- Comments: non-obvious *why* only, one line. No `TODO`/`FIXME`, commented-out code, or restating the code.
+  Fix or delete a comment the change makes stale.
+
+## Testing *(shared)*
+
+- `TEST_F` for fixtures, `TYPED_TEST` for types, plain `TEST()` for stateless checks.
+- `StrictMock` only. `EXPECT_NEAR` with explicit tolerance. Fixture in an anonymous namespace, macros outside.
+- Heap allowed in tests.
+
+## Documentation *(shared)*
+
+- Update docs before or with any behavioural change.
+- One fact, one place: link, never restate.
+- Visuals: Mermaid or ASCII.
+<!-- shared:end -->
+
+## Domain *(repo)*
+
+- Neural-network algorithms (activations, layers, losses, model) for embedded targets. Namespace `neural_network`.
+- Source: `neural_network/<domain>/` with `<domain>` = `activation`, `layer`, `losses`, `model`. `platform/` follows
+  the same rules.
+- `simulator/` is host-only Qt tooling. Heap, `std::string`, `QString` and exceptions caught at the UI boundary are
+  allowed there; float-only does not apply. Style and test rules apply. Library code never depends on the simulator.
+- Shared primitives come from numerical-toolbox-cpp through `FetchContent`: `numerical/<domain>/...`, namespaces
+  `math`, `optimization`, `regularization`. A missing `<cmath>` wrapper goes into numerical-toolbox `Math.hpp`
+  first; then bump the pinned revision.
+- Float only: `template<typename T>` with `static_assert(std::is_floating_point_v<T>)`. Instantiate and test
+  `float`. No `Q15`/`Q31`. Use `std::numbers::pi_v<float>`, never a literal constant.
+- Production code calls `math::Exp`, `math::Log`, `math::Tanh`, ... from `numerical/math/Math.hpp`, never `std::`
+  cmath. `MATH_<NAME>_OVERRIDE` replaces one function at compile time. Tests call `std::` math, never `math::`.
+- `OPTIMIZE_FOR_SPEED` on `Forward`, `Backward`, `ForwardVector`, `BackwardVector`, `Cost`, `Gradient`. It expands
+  only with `NEURAL_NETWORK_TOOLBOX_ENABLE_OPTIMIZATIONS`; never add it again with `add_definitions`.
+- No virtual calls in real-time paths.
+- CMake: `neural_network_add_header_library(<target>)` with `${NEURAL_NETWORK_VISIBILITY}`. Wire each test target
+  for the QEMU presets like the existing `neural_network/<domain>/test/CMakeLists.txt`.
+- Coverage: at the header bottom, `extern template class <Name><float, ...>;` inside
+  `#ifdef NEURAL_NETWORK_TOOLBOX_COVERAGE_BUILD`. The matching `.cpp` holds `template class <Name><float, ...>;`,
+  added with `neural_network_add_coverage_sources(<target> <Name>.cpp)`.
+- Tests: `neural_network/<domain>/test/Test<Name>.cpp`, `TEST_F` on `float` only, no `TYPED_TEST`. Check each
+  analytic gradient against a central finite difference (`activation/test/ActivationFiniteDifference.hpp`,
+  `losses/test/LossTestSupport.hpp`). Select the properties from `TESTING.md`.
+- Coverage ≥ 90 % on new code. CI does not fail on it: check the SonarCloud result before merge.
+- Docs: design-first `doc/<domain>/<Name>.md` per `doc/TEMPLATE.md`: math, theory, complexity, pitfalls; no code,
+  class names or usage examples. A family may share one doc; each algorithm gets its own row, linking its anchor,
+  in `doc/<domain>/README.md`. `doc/README.md` indexes the domain READMEs.
+- Roadmap deployment: `roadmap/DEPLOYMENT.md` and the `algo-implementer` skill. Tests: the `unit-tester` skill.
+  Pre-roadmap refactors: the `modernizer` agent.
+
+## Build *(repo)*
+
+```bash
+cmake --preset host && cmake --build --preset host-Debug
+ctest --preset host
+python3 scripts/validate-docs.py
 ```
 
-`OPTIMIZE_FOR_SPEED` on hot paths (`Forward/Backward/ForwardVector/BackwardVector/Cost/Gradient`).
-Pure interfaces exempt. It expands only when `NEURAL_NETWORK_TOOLBOX_ENABLE_OPTIMIZATIONS` is on: the option
-is forwarded to `NUMERICAL_TOOLBOX_ENABLE_OPTIMIZATIONS`, and `NumericalToolbox_ENABLE_OPTIMIZATIONS` reaches
-every target as a usage requirement of `numerical.math`. Never re-add it with `add_definitions`.
+The `host` preset builds the simulator and needs Qt6. Without Qt6, use `host-single-Debug` for configure, build and
+test. Other presets: `coverage`, `qemu-cortex-m4`, `qemu-cortex-m7`.
 
-## Style
+## Exceptions *(repo)*
 
-- Allman braces, 4-space indent, `.clang-format` authoritative.
-- Brace-init `{}` everywhere. PascalCase types/methods, camelCase members, lowercase namespaces.
-- Functions ≤ ~30 lines. `const`/`constexpr`-correct. Fixed-width ints. Full descriptive names.
-- **No comments** except license headers, `NOLINT`, and a brief note on genuinely non-obvious math.
-
-## Interfaces & errors
-
-- Interfaces = pure virtual classes; `virtual ~I() = default` — **never** `= 0` destructors.
-- No exceptions. Use `std::optional<T>` or status enums. `assert`/`really_assert` for preconditions.
-- SOLID + DIP: constructor injection; depend on abstractions. RAII. No virtual calls in real-time paths.
-
-## Namespaces
-
-`neural_network`. Shared primitives keep their upstream namespaces (`math`, `optimization`,
-`regularization`, …) from numerical-toolbox.
-
-## Math functions
-
-- **Production code** calls `math::Exp`, `math::Log`, `math::Tanh`, etc. from
-  `numerical/math/Math.hpp`. Never call `std::` cmath functions directly in production.
-- If a needed `<cmath>` function is missing from `Math.hpp`, add the `constexpr` wrapper upstream in
-  numerical-toolbox-cpp first, bump the pinned revision, then use `math::FunctionName`.
-- Each function is individually overridable at compile time via `#ifndef MATH_<NAME>_OVERRIDE`
-  (e.g. `MATH_EXP_OVERRIDE`). Define the macro in CMake and supply your own template definition.
-- **Unit tests** call `std::exp`, `std::log`, `std::tanh`, etc. directly. Never use `math::` in tests.
-
-## Testing
-
-- GoogleTest. **`TEST_F` on `float`** — no `TYPED_TEST`, no multi-type. **Never plain `TEST()`**.
-- **`StrictMock` only** (no `NiceMock`/bare). Fixture + aliases in an anonymous namespace; macros outside it.
-- **No redundant tests** — implement exactly the spec's enumerated cases, one behavior per test,
-  Arrange/Act/Assert, `EXPECT_NEAR` + `math::Tolerance<float>()`. No heap.
-- **Coverage ≥ 90 %** on new code — target for every algorithm before merge. CI (`static-analysis.yml`)
-  builds the `coverage` preset, runs the tests, exports a gcovr report and uploads it to SonarCloud;
-  the SonarCloud quality gate on the pull request reports the result. The workflow step itself does
-  not fail on low coverage, so check the SonarCloud result before merging.
-
-## CMake (neural_network/ targets)
-
-- `neural_network_add_header_library(<target>)`, `neural_network_add_coverage_sources(<target> <Name>.cpp)`,
-  `${NEURAL_NETWORK_VISIBILITY}`.
-- Coverage `.cpp`: `template class <Name><float, ...>;`. `extern template` guarded by
-  `#ifdef NEURAL_NETWORK_TOOLBOX_COVERAGE_BUILD`.
-- Test executables are also wired for the QEMU presets exactly like the existing
-  `neural_network/<domain>/test/CMakeLists.txt` files.
-
-## Docs
-
-Design-first `doc/<domain>/<Name>.md` per `doc/TEMPLATE.md`. Math/theory/complexity/pitfalls —
-no code, no class names, no usage examples. Update `doc/<domain>/README.md` when adding a new algorithm.
-`doc/README.md` is the category index linking each `doc/<domain>/README.md`. A family of closely
-related algorithms may share one doc (e.g. `doc/activation/Activation.md`); each algorithm still gets
-its own row in the domain README, linking its section anchor. `python3 scripts/validate-docs.py` must
-pass.
-
-## Assistant behavior — be terse
-
-- Minimal prose. No preamble/postamble, no restating the plan, no summaries unless asked.
-- Report results as file paths + pass/fail. Don't narrate routine tool calls.
-- Don't re-read files already read; batch reads; prefer targeted edits.
-- Build: `cmake --preset host && cmake --build --preset host` · Test: `ctest --preset host`
-  (needs Qt6 for the simulator; without Qt6 use `host-single-Debug` for all three steps).
+- No plain `TEST()`: cppcheck reports `syntaxError` on it. Use `TEST_F`.

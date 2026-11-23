@@ -1,7 +1,6 @@
 ---
 description: "Refactor a pre-roadmap neural_network/ algorithm to reuse shared math/ utilities, add coverage-build infra, and simplify/dedupe tests — float-only. Behavior-preserving."
 tools: [read, edit, search, execute, todo]
-model: "Claude Sonnet 4.6"
 handoffs:
   - label: "Review Changes"
     agent: reviewer
@@ -39,7 +38,7 @@ The `test/Test*.cpp` is a first-class deliverable of every modernization. Audit 
 - [ ] Extract repeated mock-return / `WillOnce(Invoke(...))` tails into fixture helper methods.
 - [ ] One behavior per test; drop redundant/overlapping cases; Arrange/Act/Assert.
 - [ ] `EXPECT_NEAR` + `math::Tolerance<float>()` for float comparisons.
-- [ ] Anonymous-namespace fixture; macros outside; no heap; no comments.
+- [ ] Anonymous-namespace fixture; macros outside; no comments.
 
 Tests are `TEST_F` on `float` only — no `TYPED_TEST`, no multi-type.
 
@@ -50,19 +49,9 @@ This repository is float-only throughout: `template<typename T>` +
 `extern template`), `TEST_F` on `float`. Never add or restore `Q15`/`Q31` instantiations, QNumber
 guards or multi-type tests.
 
-## Memory — quick reference
-
-**Forbidden**: `new`/`delete`/`malloc`/`free`, `make_unique`/`make_shared`,
-`std::vector`/`string`/`deque`/`list`/`map`/`set`. Tests too. No recursion.
-
-**Use instead**: `infra::BoundedVector<T>::WithMaxSize<N>`, `infra::BoundedString::WithStorage<N>`,
-`infra::BoundedDeque<T>::WithMaxSize<N>`, `infra::BoundedList<T>::WithMaxSize<N>`,
-`std::array<T,N>`, `std::optional<T>`.
-
 ## What NOT to do
 - No behavior/API change beyond removing duplication.
 - No new abstractions except extracting one that is already repeated.
 - Don't touch unrelated algorithms; don't add `Q15`/`Q31`.
-- No `make_unique` anywhere, including tests.
 
 **Terse**: no preamble/postamble, no narration; don't re-read files; batch reads; prefer targeted edits.
