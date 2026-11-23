@@ -18,8 +18,6 @@ namespace neural_network
         static_assert(std::is_floating_point_v<T>, "ActivationFunction requires a floating-point type");
 
     public:
-        virtual ~ActivationFunction() = default;
-
         virtual T Forward(T x) const = 0;
         virtual T Backward(T x) const = 0;
 
@@ -30,6 +28,7 @@ namespace neural_network
         ActivationFunction() = default;
         ActivationFunction(const ActivationFunction&) = default;
         ActivationFunction& operator=(const ActivationFunction&) = default;
+        ~ActivationFunction() = default;
     };
 
     template<typename T>
