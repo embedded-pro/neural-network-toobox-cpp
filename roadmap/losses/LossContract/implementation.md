@@ -202,7 +202,7 @@ function Gradient(z, target):                      # OPTIMIZE_FOR_SPEED
   the result is correct to absolute precision.
 - `Softmax` is **not** placed before `CategoricalCrossEntropy` or `BinaryCrossEntropyWithLogits`:
   both apply the squashing internally. Pairing them applies softmax/sigmoid twice.
-- `-ffast-math` leaks into every TU that includes these headers (`#pragma GCC optimize`), so
+- A consumer may build with `-ffast-math`, so
   `std::isfinite`/`std::isnan` may fold to constants; tests use exact values or `math::IsFinite`
   (bit-based) instead.
 - Non-finite inputs (NaN, ±∞) are outside the contract, like every other component under fast-math.
@@ -229,7 +229,7 @@ function Gradient(z, target):                      # OPTIMIZE_FOR_SPEED
   `#pragma once`, `numerical/math/Matrix.hpp`, `<cstddef>`, `<type_traits>`; the interface above, and
   `extern template class Loss<float, 2>;` and `extern template class Loss<float, 2, std::size_t>;` under
   `#ifdef NEURAL_NETWORK_TOOLBOX_COVERAGE_BUILD`.
-- New loss: `neural_network/losses/BinaryCrossEntropyWithLogits.hpp` — `#pragma GCC optimize("O3","fast-math")`,
+- New loss: `neural_network/losses/BinaryCrossEntropyWithLogits.hpp` —
   `OPTIMIZE_FOR_SPEED` on `Cost`/`Gradient`, `extern template class BinaryCrossEntropyWithLogits<float, 2>;`.
 - Migrated: `MeanSquaredError.hpp`, `MeanAbsoluteError.hpp`, `BinaryCrossEntropy.hpp`,
   `CategoricalCrossEntropy.hpp` (adds the `Target` parameter and the `std::size_t` branch), `HuberLoss.hpp`

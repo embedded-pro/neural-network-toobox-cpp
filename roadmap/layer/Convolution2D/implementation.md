@@ -318,7 +318,7 @@ unique.
 ## Deployment
 
 - Header: `neural_network/layer/Convolution2D.hpp` — `#pragma once` →
-  `#pragma GCC optimize("O3","fast-math")` → includes (`neural_network/layer/TrainableLayerInterface.hpp`
+  includes (`neural_network/layer/TrainableLayerInterface.hpp`
   from N8, `neural_network/activation/ActivationFunction.hpp`, `numerical/math/Matrix.hpp`,
   `numerical/math/CompilerOptimizations.hpp`, `infra/util/ReallyAssert.hpp`). `OPTIMIZE_FOR_SPEED` on
   `Forward`/`Backward`. Under `#ifdef NEURAL_NETWORK_TOOLBOX_COVERAGE_BUILD`:

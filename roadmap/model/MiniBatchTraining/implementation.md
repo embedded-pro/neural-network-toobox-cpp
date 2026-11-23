@@ -256,7 +256,7 @@ Let `M = Σ_ℓ In_ℓ·Out_ℓ` (weights), `P = TotalParameters`, `P_𝒯` trai
 ## Deployment
 
 - Header: `neural_network/model/MiniBatchTraining.hpp` — `#pragma once` →
-  `#pragma GCC optimize("O3","fast-math")` (GCC/Clang guard) → includes `Model.hpp`,
+  includes `Model.hpp`,
   `neural_network/losses/LossContract.hpp` (N9), `numerical/math/Math.hpp`, `CompilerOptimizations.hpp`,
   `infra/util/ReallyAssert.hpp`, `<array>`, `<cstdint>`, `<optional>`, `<utility>`. `OPTIMIZE_FOR_SPEED` on
   `Accumulate` and `Step`. Add `extern template class MiniBatchTraining<float, 2, Model<float, 2, 1, Dense<float, 2, 3>, Dense<float, 3, 1>>>;`

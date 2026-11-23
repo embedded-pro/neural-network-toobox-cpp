@@ -175,5 +175,5 @@ All FD errors are far below `math::Tolerance<float>() = 1e-3`.
 - No separate soft-label, unnormalised-target or `N = 1` case: the soft label sits in the BCE-logits
   fixture, the unnormalised dense-CCE FD case already exists, and `N` is a template parameter with no
   special path.
-- No `std::isfinite` assertions: the fast-math pragma reaches the test TU; the exact `EXPECT_FLOAT_EQ`
+- No `std::isfinite` assertions: a consumer may build with `-ffast-math`; the exact `EXPECT_FLOAT_EQ`
   values already fail on `inf`/`NaN`.

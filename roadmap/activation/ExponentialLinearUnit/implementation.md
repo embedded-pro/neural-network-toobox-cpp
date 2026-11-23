@@ -142,7 +142,7 @@ pre-activations are again ≈ `N(0, 1)`, so the fixed point propagates through d
 ## Deployment
 
 - Header: `neural_network/activation/ExponentialLinearUnit.hpp` — `#pragma once` →
-  `#pragma GCC optimize("O3","fast-math")`, `#include "neural_network/activation/ActivationFunction.hpp"`,
+  `#include "neural_network/activation/ActivationFunction.hpp"`,
   `#include "numerical/math/Math.hpp"`, `OPTIMIZE_FOR_SPEED` on all four overrides, and
   `extern template class ExponentialLinearUnit<float>;` under `#ifdef NEURAL_NETWORK_TOOLBOX_COVERAGE_BUILD`.
 - Coverage: `neural_network/activation/ExponentialLinearUnit.cpp` → `template class ExponentialLinearUnit<float>;`

@@ -91,7 +91,7 @@ until N8).
 ## Deployment
 
 - Header: `neural_network/activation/Identity.hpp` — `#pragma once` →
-  `#pragma GCC optimize("O3","fast-math")`, `#include "neural_network/activation/ActivationFunction.hpp"`,
+  `#include "neural_network/activation/ActivationFunction.hpp"`,
   `OPTIMIZE_FOR_SPEED` on all four overrides, and `extern template class Identity<float>;` under
   `#ifdef NEURAL_NETWORK_TOOLBOX_COVERAGE_BUILD`.
 - Coverage: `neural_network/activation/Identity.cpp` → `template class Identity<float>;`

@@ -240,7 +240,7 @@ Push(x_n) returns true ⇔ n mod S = 0, and then
 ## Deployment
 
 - Header: `neural_network/layer/Convolution1D.hpp` — `#pragma once` →
-  `#pragma GCC optimize("O3","fast-math")` → includes (the N8 layer header, `ActivationFunction.hpp`,
+  includes (the N8 layer header, `ActivationFunction.hpp`,
   `numerical/math/Matrix.hpp`, `numerical/math/CompilerOptimizations.hpp`, `infra/util/ReallyAssert.hpp`,
   `<array>`). `OPTIMIZE_FOR_SPEED` on `Forward`/`Backward`/`Push`. Under
   `#ifdef NEURAL_NETWORK_TOOLBOX_COVERAGE_BUILD`:

@@ -308,7 +308,7 @@ later `h` values, which is exactly what the `d̂c ⊙ f_s` recursion carries bac
 
 ## Deployment
 
-- Header: `neural_network/layer/Lstm.hpp` — `#pragma once` → `#pragma GCC optimize("O3","fast-math")` →
+- Header: `neural_network/layer/Lstm.hpp` — `#pragma once` →
   includes (`neural_network/layer/TrainableLayerInterface.hpp`, `neural_network/layer/StatefulLayer.hpp`,
   `neural_network/layer/FlashResidentWeights.hpp`, `neural_network/activation/Sigmoid.hpp`,
   `neural_network/activation/Tanh.hpp`, `numerical/math/Matrix.hpp`, `numerical/math/CompilerOptimizations.hpp`,

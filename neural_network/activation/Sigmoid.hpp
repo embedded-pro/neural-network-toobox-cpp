@@ -1,9 +1,5 @@
 #pragma once
 
-#if defined(__GNUC__) || defined(__clang__)
-#pragma GCC optimize("O3", "fast-math")
-#endif
-
 #include "neural_network/activation/ActivationFunction.hpp"
 #include "numerical/math/CompilerOptimizations.hpp"
 #include "numerical/math/Math.hpp"

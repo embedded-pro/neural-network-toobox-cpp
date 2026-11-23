@@ -346,7 +346,7 @@ Sigmoid `σ(1 − σ)`, Tanh `1 − t²`).
 
 - Header: `neural_network/layer/DepthwiseSeparableConvolution.hpp` (`detail::DepthwiseKernel`,
   `DepthwiseConvolution2D`, `DepthwiseSeparableConvolution2D`, both 1D aliases) — `#pragma once` →
-  `#pragma GCC optimize("O3","fast-math")` → includes (`neural_network/layer/TrainableLayerInterface.hpp`
+  includes (`neural_network/layer/TrainableLayerInterface.hpp`
   from N8, `neural_network/activation/ActivationFunction.hpp`, `numerical/math/Matrix.hpp`,
   `numerical/math/CompilerOptimizations.hpp`, `infra/util/ReallyAssert.hpp`, `<cstddef>`, `<span>`).
   `OPTIMIZE_FOR_SPEED` on both kernel functions and every `Forward`/`Backward`. Under

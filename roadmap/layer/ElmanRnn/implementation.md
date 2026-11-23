@@ -286,7 +286,7 @@ per-sample `Backward` contract of N8.
 ## Deployment
 
 - Header: `neural_network/layer/ElmanRnn.hpp` — `#pragma once` →
-  `#pragma GCC optimize("O3","fast-math")` → includes (`neural_network/layer/TrainableLayerInterface.hpp`,
+  includes (`neural_network/layer/TrainableLayerInterface.hpp`,
   `neural_network/layer/StatefulLayer.hpp`, `neural_network/layer/FlashResidentWeights.hpp`,
   `neural_network/activation/Tanh.hpp`, `numerical/math/Matrix.hpp`,
   `numerical/math/CompilerOptimizations.hpp`, `infra/util/ReallyAssert.hpp`, `<array>`, `<span>`).
@@ -294,7 +294,7 @@ per-sample `Backward` contract of N8.
   `#ifdef NEURAL_NETWORK_TOOLBOX_COVERAGE_BUILD`:
   `extern template class ElmanRnn<float, 2, 3, 4>;` and `extern template class FlashElmanRnn<float, 2, 3>;`
 - Header: `neural_network/layer/StatefulLayer.hpp` — pure interface, like `Layer.hpp`: no
-  `#pragma GCC optimize`, no `OPTIMIZE_FOR_SPEED`, no coverage source.
+  `OPTIMIZE_FOR_SPEED`, no coverage source.
 - Coverage: `neural_network/layer/ElmanRnn.cpp` →
   `template class ElmanRnn<float, 2, 3, 4>; template class FlashElmanRnn<float, 2, 3>;`
 - `Model.hpp`: add `detail::StatefulLayerType` and `ResetState()`. The existing `Model.cpp` coverage
