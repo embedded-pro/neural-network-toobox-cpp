@@ -239,7 +239,7 @@ agree in exact arithmetic.
 ## Deployment
 
 - Header: `neural_network/metrics/ClassificationMetrics.hpp`. Order: `#pragma once`, then
-  `#pragma GCC optimize("O3","fast-math")`, then `numerical/math/Matrix.hpp`,
+  `numerical/math/Matrix.hpp`,
   `numerical/math/CompilerOptimizations.hpp`, `infra/util/ReallyAssert.hpp`, `<array>`, `<cstddef>`,
   `<cstdint>`, `<optional>`, `<type_traits>`. `OPTIMIZE_FOR_SPEED` on `ArgMax`, `BinaryLabel`,
   `Add`, `AddScores`. Under `#ifdef NEURAL_NETWORK_TOOLBOX_COVERAGE_BUILD`:

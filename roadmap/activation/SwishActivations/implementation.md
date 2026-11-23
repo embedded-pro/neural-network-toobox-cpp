@@ -174,7 +174,7 @@ set and does not affect imported weights.
 ## Deployment
 
 - Header: `neural_network/activation/SwishActivations.hpp` — `#pragma once` →
-  `#pragma GCC optimize("O3","fast-math")`, `#include "neural_network/activation/ActivationFunction.hpp"`,
+  `#include "neural_network/activation/ActivationFunction.hpp"`,
   `#include "neural_network/activation/Sigmoid.hpp"`, the three classes, `OPTIMIZE_FOR_SPEED` on all four
   overrides of each, and under `#ifdef NEURAL_NETWORK_TOOLBOX_COVERAGE_BUILD`:
   `extern template class SiLU<float>; extern template class HardSigmoid<float>; extern template class HardSwish<float>;`

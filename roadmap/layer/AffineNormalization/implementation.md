@@ -160,7 +160,7 @@ post-activation BN (which can also be folded into the following Dense with the f
 ## Deployment
 
 - Header: `neural_network/layer/AffineNormalization.hpp`. Order: `#pragma once`, then
-  `#pragma GCC optimize("O3","fast-math")`, then the includes `neural_network/layer/Layer.hpp`,
+  the includes `neural_network/layer/Layer.hpp`,
   `numerical/math/Math.hpp`, `numerical/math/CompilerOptimizations.hpp` and `infra/util/ReallyAssert.hpp`.
   Put `OPTIMIZE_FOR_SPEED` on `Forward`/`Backward`, and add
   `extern template class AffineNormalization<float, 3>;` under `#ifdef NEURAL_NETWORK_TOOLBOX_COVERAGE_BUILD`.

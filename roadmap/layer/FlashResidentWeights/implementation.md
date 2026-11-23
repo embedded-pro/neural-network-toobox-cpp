@@ -211,7 +211,7 @@ and is not part of this item. `Model::Backward` therefore requires `FullyTrainab
 ## Deployment
 
 - Header: `neural_network/layer/FlashResidentWeights.hpp`. Order: `#pragma once`, then
-  `#pragma GCC optimize("O3","fast-math")`, then the includes `neural_network/layer/TrainableLayerInterface.hpp`
+  the includes `neural_network/layer/TrainableLayerInterface.hpp`
   (N8's `InferenceLayer`), `neural_network/activation/ActivationFunction.hpp`,
   `numerical/math/CompilerOptimizations.hpp`, `numerical/math/Matrix.hpp` and `<span>`. It holds
   `FlashWeights` and `FlashDense`. Put `OPTIMIZE_FOR_SPEED` on `FlashDense::Forward`, and add these under

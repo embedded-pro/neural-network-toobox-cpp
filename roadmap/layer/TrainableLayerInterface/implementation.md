@@ -217,7 +217,7 @@ inlined into the Dense loops. The math and the gradients are identical. If deplo
 ## Deployment
 
 - Header: `neural_network/layer/TrainableLayerInterface.hpp` (a `git mv` of `Layer.hpp`, extended).
-  It holds `InferenceLayer`, the `Layer` primary template and the `Layer<…, 0>` specialisation. It is a pure interface, so it needs no `#pragma GCC optimize` and no `OPTIMIZE_FOR_SPEED`,
+  It holds `InferenceLayer`, the `Layer` primary template and the `Layer<…, 0>` specialisation. It is a pure interface, so it needs no `OPTIMIZE_FOR_SPEED`,
   the same as today's `Layer.hpp`. Add these under `#ifdef NEURAL_NETWORK_TOOLBOX_COVERAGE_BUILD`:
   `extern template class InferenceLayer<float, 3, 2>;`, `extern template class Layer<float, 3, 2, 8>;`,
   `extern template class Layer<float, 3, 3, 0>;`.

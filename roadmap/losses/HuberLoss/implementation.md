@@ -122,7 +122,7 @@ same function divided by `δ`; not provided separately.
 ## Deployment
 
 - Header: `neural_network/losses/HuberLoss.hpp` — `#pragma once` →
-  `#pragma GCC optimize("O3","fast-math")`, includes `neural_network/losses/Loss.hpp`,
+  includes `neural_network/losses/Loss.hpp`,
   `numerical/math/CompilerOptimizations.hpp`, `numerical/regularization/Regularization.hpp`,
   `infra/util/ReallyAssert.hpp`; `OPTIMIZE_FOR_SPEED` on `Cost`/`Gradient`, and
   `extern template class HuberLoss<float, 2>;` under `#ifdef NEURAL_NETWORK_TOOLBOX_COVERAGE_BUILD`.

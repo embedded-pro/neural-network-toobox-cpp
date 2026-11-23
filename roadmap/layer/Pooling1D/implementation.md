@@ -181,7 +181,7 @@ exact everywhere the window maximum is unique.
 ## Deployment
 
 - Header: `neural_network/layer/Pooling1D.hpp` (all three: two classes and the alias). Order:
-  `#pragma once`, then `#pragma GCC optimize("O3","fast-math")`, then the includes
+  `#pragma once`, then the includes
   `neural_network/layer/TrainableLayerInterface.hpp` (N8's successor of `Layer.hpp`),
   `numerical/math/CompilerOptimizations.hpp`, `numerical/math/Matrix.hpp`, `infra/util/ReallyAssert.hpp`,
   `<array>`, `<cstddef>`. Put `OPTIMIZE_FOR_SPEED` on both `Forward` and both `Backward`, and add under

@@ -1,9 +1,5 @@
 #pragma once
 
-#if defined(__GNUC__) || defined(__clang__)
-#pragma GCC optimize("O3", "fast-math")
-#endif
-
 #include "infra/util/ReallyAssert.hpp"
 #include "neural_network/activation/ActivationFunction.hpp"
 #include "neural_network/layer/Layer.hpp"

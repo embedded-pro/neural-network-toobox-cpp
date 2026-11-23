@@ -282,7 +282,7 @@ and it is stated here so that N16 does not assume otherwise.
   decimal conversion takes place. Header literals use 9 significant digits, which is the round-trip
   precision for binary32 (IEEE 754-2019 §5.12.2), so the compiler reproduces the exporter's float32 exactly
   (`0.1f` → `0.100000001f` → the same bits). `-0.0` is preserved as `-0.0f`.
-- **`-ffast-math`.** The library compiles with `-ffast-math`, and GCC may fold `std::isfinite` to `true`.
+- **`-ffast-math`.** A consumer may build with `-ffast-math`, and GCC may fold `std::isfinite` to `true`.
   Validate therefore detects NaN and Inf with an integer test on the exponent bits. Subnormals are flushed
   by the exporter, so host (no FTZ) and target (possibly FTZ) compute the same function.
 - **Why `std::array`, not `math::Vector`.** `Matrix`'s variadic constructor has a fold expression in its
@@ -335,7 +335,7 @@ and it is stated here so that N16 does not assume otherwise.
 ## Deployment
 
 - Header: `neural_network/model/WeightExport.hpp`. Order: `#pragma once`, then
-  `#pragma GCC optimize("O3","fast-math")`, then the includes `neural_network/model/Model.hpp`,
+  the includes `neural_network/model/Model.hpp`,
   `numerical/math/CompilerOptimizations.hpp`, `infra/util/ByteRange.hpp`, `infra/util/Crc.hpp`,
   `infra/util/Endian.hpp`, `infra/util/ReallyAssert.hpp`, `<array>`, `<bit>`, `<cstdint>`, `<limits>`,
   `<optional>`, `<span>` and `<type_traits>`. It holds `BlobStatus`, `detail::Fnv1a32`,

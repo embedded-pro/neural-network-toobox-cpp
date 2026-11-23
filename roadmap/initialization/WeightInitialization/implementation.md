@@ -234,7 +234,7 @@ Normal:   w = σ z,  z = √(−2 ln u1) cos(2π u2)   ⇒  z ~ N(0, 1)  (Box & 
 ## Deployment
 
 - Header: `neural_network/initialization/WeightInitialization.hpp`. Order: `#pragma once`, then
-  `#pragma GCC optimize("O3","fast-math")`, then the includes `numerical/math/Math.hpp`,
+  the includes `numerical/math/Math.hpp`,
   `numerical/math/Matrix.hpp`, `numerical/math/CompilerOptimizations.hpp`, `infra/util/ReallyAssert.hpp`,
   `<cstdint>`, `<numbers>` and `<span>`. Put `OPTIMIZE_FOR_SPEED` on `Next`/`Fill`. Under
   `#ifdef NEURAL_NETWORK_TOOLBOX_COVERAGE_BUILD` declare `extern template class Xorshift32<float>;`,

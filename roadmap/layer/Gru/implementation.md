@@ -293,7 +293,7 @@ Truncated BPTT is the same per-step `BPTT(h)` with depth `h = K` as N17 (William
 
 ## Deployment
 
-- Header: `neural_network/layer/Gru.hpp` — `#pragma once` → `#pragma GCC optimize("O3","fast-math")` →
+- Header: `neural_network/layer/Gru.hpp` — `#pragma once` →
   includes (`neural_network/layer/TrainableLayerInterface.hpp`, `neural_network/layer/StatefulLayer.hpp`,
   `neural_network/layer/FlashResidentWeights.hpp`, `neural_network/activation/Sigmoid.hpp`,
   `neural_network/activation/Tanh.hpp`, `numerical/math/Matrix.hpp`, `numerical/math/CompilerOptimizations.hpp`,
