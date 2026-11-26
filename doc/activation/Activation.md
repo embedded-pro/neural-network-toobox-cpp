@@ -23,11 +23,11 @@ Every activation function provides two operations on a pre-activation vector $z 
 | **Forward**  | $a = f(z)$                                                          | Transform the pre-activation           |
 | **Backward** | $\delta = J_f(z)^T g$, with $g = \partial \mathcal{L} / \partial a$ | Propagate the upstream gradient to $z$ |
 
-$J_f(z) = \partial a / \partial z$ is the $k \times k$ Jacobian. For the **element-wise** functions (ReLU, Leaky ReLU, Sigmoid, Tanh), $a_i$ depends only on $z_i$, so the Jacobian is diagonal and the backward pass reduces to a Hadamard product:
+$J_f(z) = \partial a / \partial z$ is the $k \times k$ Jacobian. For the **element-wise** functions (ReLU, Leaky ReLU, Sigmoid, Tanh), $a_i$ depends only on $z_i$. The Jacobian is therefore diagonal, and the backward pass reduces to a Hadamard product:
 
 $$\delta = g \odot f'(z), \qquad \delta_i = g_i \, f'(z_i)$$
 
-For **Softmax**, every output depends on every input, so the Jacobian is dense; the backward pass is still computed in $O(k)$ as a Jacobian-vector product (see [Softmax](#softmax)). The derivatives of Sigmoid and Tanh are written in terms of the output $a$, so the backward pass reuses the cached forward result instead of re-evaluating the exponential.
+For **Softmax**, every output depends on every input, so the Jacobian is dense. The backward pass still computes it in $O(k)$ as a Jacobian-vector product (see [Softmax](#softmax)). The derivatives of Sigmoid and Tanh use the output $a$. Thus the backward pass reuses the cached forward result and does not re-evaluate the exponential.
 
 ### Catalogue
 

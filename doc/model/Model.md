@@ -10,7 +10,7 @@ A **model** composes a sequence of layers — today [dense layers](../layer/Dens
 4. Verifies dimensional compatibility **at compile time**: the model input size, every layer-to-layer interface and the model output size must agree, and there must be at least one layer.
 5. Offers a **parameter-space training step**: an optimizer minimises a user-supplied objective $J(\theta)$ over the flat parameter vector and the minimiser is loaded into the layers.
 
-The model is fully statically typed — layer dimensions, parameter counts, and memory footprints are all known at compile time, enabling zero-overhead abstraction on embedded targets.
+The model is fully statically typed. Layer dimensions, parameter counts, and memory footprints are all known at compile time. This enables zero-overhead abstraction on embedded targets.
 
 ## Mathematical Theory
 
@@ -26,7 +26,7 @@ Each $f_\ell$ is a dense layer: $a_\ell = f_\ell(a_{\ell-1}) = \sigma_\ell(W_\el
 
 ### Parameter Vector
 
-All weights and biases are concatenated in layer order; each $W_\ell$ is flattened **row-major** (row $i$ = weights of output neuron $i$), followed by its bias:
+All weights and biases are concatenated in layer order. Each $W_\ell$ is flattened **row-major** (row $i$ = weights of output neuron $i$), followed by its bias:
 
 $$\theta = [\, \operatorname{rows}(W_1),\ b_1,\ \operatorname{rows}(W_2),\ b_2,\ \ldots,\ \operatorname{rows}(W_L),\ b_L \,] \in \mathbb{R}^P, \qquad P = \sum_{\ell=1}^L m_\ell(n_\ell + 1)$$
 
@@ -53,10 +53,10 @@ The training step takes an optimizer, an objective $J: \mathbb{R}^P \to \mathbb{
 
 $$\theta^* = \operatorname{Optimize}(J, \theta_0) \approx \arg\min_\theta J(\theta), \qquad \text{then load } \theta^* \text{ into the layers}$$
 
-It does **not** iterate over a dataset and does not call the forward or backward pass: the objective
+It does **not** iterate over a dataset and does not call the forward or backward pass. The objective
 must itself encode whatever it measures about $\theta$ (for example a user-written empirical risk).
 If a per-sample [loss](../losses/Loss.md) is passed as $J$, its argument is $\theta$ and its target
-is a parameter vector — it regresses the parameters onto that target. End-to-end back-propagation
+is a parameter vector. It then regresses the parameters onto that target. End-to-end back-propagation
 training — per-sample loss on $\hat{y}$ (N9), exported parameter gradients (N8) and a mini-batch
 gradient step (N16) — is on the roadmap.
 

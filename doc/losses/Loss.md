@@ -8,7 +8,7 @@ $$\theta^* = \arg\min_\theta \; \mathbb{E}[\mathcal{L}(f_\theta(x), y)]$$
 
 The loss function defines the **entire learning objective** — different losses lead to different optimal models even on the same data. It must also provide the **gradient** $\nabla_{\hat{y}} \mathcal{L}$ that seeds back-propagation.
 
-In this library every loss is an objective over **one vector argument** $v \in \mathbb{R}^N$ — the $N$ outputs of one sample — compared against a target $y \in \mathbb{R}^N$ fixed when the loss is created. A regularization term $R$ from numerical-toolbox-cpp is added to the same argument:
+In this library every loss is an objective over **one vector argument** $v \in \mathbb{R}^N$: the $N$ outputs of one sample. The loss compares it against a target $y \in \mathbb{R}^N$, fixed when the loss is created. A regularization term $R$ from numerical-toolbox-cpp is added to the same argument:
 
 $$J(v) = \mathcal{L}(v, y) + R(v), \qquad \nabla J(v) = \nabla_v \mathcal{L}(v, y) + \nabla R(v)$$
 
@@ -56,12 +56,7 @@ $$\mathcal{L}_{\text{CCE}} = -\sum_{i=1}^{k} y_i \log \operatorname{softmax}(z)_
 $$\frac{\partial \mathcal{L}}{\partial z_i} = \operatorname{softmax}(z)_i \sum_{j} y_j - y_i$$
 
 - For a one-hot or probability target ($\sum_j y_j = 1$) the gradient is the familiar $\operatorname{softmax}(z) - y$.
-- The log-sum-exp is evaluated with the max shift, $\operatorname{LSE}(z) = z_{\max} + \log \sum_j
-  e^{z_j - z_{\max}}$, so every exponent is $\le 0$, the sum is in $[1, k]$ and no clamping is
-  needed. $z_{\max}$ itself is never added to a small term: the cost is $\log \sum_j e^{z_j -
-  z_{\max}} \sum_j y_j - \sum_j y_j (z_j - z_{\max})$ and the softmax is $e^{z_i - z_{\max}} /
-  \sum_j e^{z_j - z_{\max}}$. Cost and gradient therefore stay finite and accurate for logits of
-  magnitude up to $10^{30}$, including ties at the maximum.
+- The log-sum-exp is evaluated with the max shift, $\operatorname{LSE}(z) = z_{\max} + \log \sum_j e^{z_j - z_{\max}}$, so every exponent is $\le 0$, the sum is in $[1, k]$ and no clamping is needed. $z_{\max}$ itself is never added to a small term: the cost is $\log \sum_j e^{z_j - z_{\max}} \sum_j y_j - \sum_j y_j (z_j - z_{\max})$ and the softmax is $e^{z_i - z_{\max}} / \sum_j e^{z_j - z_{\max}}$. Cost and gradient therefore stay finite and accurate for logits of magnitude up to $10^{30}$, including ties at the maximum.
 - **Do not pair with a Softmax output layer.** The softmax is inside the loss; the last layer must emit raw logits (identity activation, roadmap N1). A Softmax layer in front would apply softmax twice.
 - Unlike the other losses, the data term is a **sum** over classes, the standard convention for cross-entropy of one sample.
 
