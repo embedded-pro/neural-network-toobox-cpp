@@ -56,7 +56,7 @@ $$\mathcal{L}_{\text{CCE}} = -\sum_{i=1}^{k} y_i \log \operatorname{softmax}(z)_
 $$\frac{\partial \mathcal{L}}{\partial z_i} = \operatorname{softmax}(z)_i \sum_{j} y_j - y_i$$
 
 - For a one-hot or probability target ($\sum_j y_j = 1$) the gradient is the familiar $\operatorname{softmax}(z) - y$.
-- The log-sum-exp is evaluated with the max shift, $\operatorname{LSE}(z) = z_{\max} + \log \sum_j e^{z_j - z_{\max}}$, so every exponent is $\le 0$, the sum is in $[1, k]$ and no clamping is needed. $z_{\max}$ itself is never added to a small term: the cost is $\log \sum_j e^{z_j - z_{\max}} \sum_j y_j - \sum_j y_j (z_j - z_{\max})$ and the softmax is $e^{z_i - z_{\max}} / \sum_j e^{z_j - z_{\max}}$. Cost and gradient therefore stay finite and accurate for logits of magnitude up to $10^{30}$, including ties at the maximum.
+- The log-sum-exp is evaluated with the max shift, $\operatorname{LSE}(z) = z_{\max} + \log \sum_j e^{z_j - z_{\max}}$. Every exponent is then $\le 0$, the sum is in $[1, k]$ and no clamping is needed. $z_{\max}$ itself is never added to a small term. The cost is $\log \sum_j e^{z_j - z_{\max}} \sum_j y_j - \sum_j y_j (z_j - z_{\max})$ and the softmax is $e^{z_i - z_{\max}} / \sum_j e^{z_j - z_{\max}}$. Cost and gradient therefore stay finite and accurate for logits of magnitude up to $10^{30}$, including ties at the maximum.
 - **Do not pair with a Softmax output layer.** The softmax is inside the loss; the last layer must emit raw logits (identity activation, roadmap N1). A Softmax layer in front would apply softmax twice.
 - Unlike the other losses, the data term is a **sum** over classes, the standard convention for cross-entropy of one sample.
 
@@ -96,7 +96,7 @@ $$\mathcal{L}_{\text{BCE}} = -\tfrac{1}{2}\bigl[\log 0.9 + \log 0.8\bigr] = 0.16
 
 ## Pitfalls & Edge Cases
 
-- **$\log(0)$ in BCE.** Probabilities are clamped to $[\varepsilon, 1 - \varepsilon]$ with $\varepsilon = 10^{-7}$. Near the clamp the gradient is large (up to $\approx 10^7/N$); predictions that saturate a Sigmoid at exactly $0$ or $1$ therefore produce very steep but finite updates. A logit-input BCE (fusing Sigmoid and BCE like CCE fuses Softmax) avoids this and is roadmap N9.
+- **$\log(0)$ in BCE.** Probabilities are clamped to $[\varepsilon, 1 - \varepsilon]$ with $\varepsilon = 10^{-7}$. Near the clamp the gradient is large (up to $\approx 10^7/N$). Predictions that saturate a Sigmoid at exactly $0$ or $1$ therefore produce very steep but finite updates. A logit-input BCE (fusing Sigmoid and BCE like CCE fuses Softmax) avoids this and is roadmap N9.
 - **Softmax + CCE applied twice.** Categorical cross-entropy already applies softmax to its input. Feeding it Softmax probabilities computes the loss of $\operatorname{softmax}(\operatorname{softmax}(z))$ — a different, much flatter objective.
 - **Target sum.** The CCE gradient is $\operatorname{softmax}(z)\sum_j y_j - y$. Only when $\sum_j y_j = 1$ does it reduce to $\operatorname{softmax}(z) - y$; unnormalised targets scale the log-sum-exp term accordingly.
 - **Mismatched activation and loss.** Sigmoid ↔ BCE (probabilities), identity ↔ CCE (logits), identity ↔ MSE/MAE (regression). Softmax + BCE or Sigmoid + CCE give meaningless gradients.

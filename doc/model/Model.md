@@ -7,7 +7,7 @@ A **model** composes a sequence of layers — today [dense layers](../layer/Dens
 1. Chains layers so the output of each feeds into the next (**forward pass**).
 2. Propagates the output gradient backward through the chain (**backward pass**), returning $\partial \mathcal{L} / \partial x$; each layer computes its own parameter gradients on the way.
 3. Exports and imports all layer parameters as **one flat vector** $\theta \in \mathbb{R}^P$.
-4. Verifies dimensional compatibility **at compile time**: the model input size, every layer-to-layer interface and the model output size must agree, and there must be at least one layer.
+4. Verifies dimensional compatibility **at compile time**. The model input size, every layer-to-layer interface and the model output size must agree. There must be at least one layer.
 5. Offers a **parameter-space training step**: an optimizer minimises a user-supplied objective $J(\theta)$ over the flat parameter vector and the minimiser is loaded into the layers.
 
 The model is fully statically typed. Layer dimensions, parameter counts, and memory footprints are all known at compile time. This enables zero-overhead abstraction on embedded targets.
@@ -132,7 +132,7 @@ Note where $\text{ReLU}'(z_1)$ enters: inside layer 1's own backward pass, not i
 - **Training step is not back-propagation.** It minimises $J(\theta)$ exactly as supplied. It never sees training samples; if $J$ is a per-sample loss, the "prediction" it compares against the target is the parameter vector itself. Use it only with an objective written over $\theta$, until roadmap N8/N9/N16 add gradient export, a per-sample loss contract and a mini-batch step.
 - **Objective size.** The objective's dimension must equal the total parameter count $P$; a mismatch is caught at compile time.
 - **Backward before forward.** Each layer's backward pass uses the caches of the last forward pass; the model backward pass must follow a forward pass on the same sample.
-- **Memory.** Each dense layer keeps its parameters and a same-sized gradient buffer, so the resident model is about $2P$ values plus activation caches; parameter export adds a transient $P$-sized vector. A model with $P = 10{,}000$ float parameters needs roughly 80 KB resident, not 40 KB — allocate it statically rather than on a small task stack.
+- **Memory.** Each dense layer keeps its parameters and a same-sized gradient buffer. The resident model is therefore about $2P$ values plus activation caches. Parameter export adds a transient $P$-sized vector. A model with $P = 10{,}000$ float parameters needs roughly 80 KB resident, not 40 KB — allocate it statically rather than on a small task stack.
 
 ## Variants & Generalizations
 
@@ -147,8 +147,8 @@ Note where $\text{ReLU}'(z_1)$ enters: inside layer 1's own backward pass, not i
 
 - **Embedded inference** — Parameters trained offline are imported once and only the forward pass runs at runtime.
 - **Gradient-based input sensitivity** — The backward pass yields $\partial \mathcal{L} / \partial x$ for saliency or for inverting a small model.
-- **Parameter-space fitting** — Small problems where an objective over $\theta$ can be written directly (e.g. matching a known parameter vector, or a hand-written empirical risk) can use the training step today.
-- **System identification and sensor fusion** — Small models (2–3 layers) mapping sensor inputs to plant outputs or state estimates, trained offline today and on-device once roadmap N16 lands.
+- **Parameter-space fitting** — Some small problems have an objective over $\theta$ that can be written directly. Examples are matching a known parameter vector, or a hand-written empirical risk. They can use the training step today.
+- **System identification and sensor fusion** — Small models (2–3 layers) map sensor inputs to plant outputs or state estimates. They are trained offline today, and on-device once roadmap N16 lands.
 
 ## Connections to Other Algorithms
 

@@ -137,7 +137,7 @@ The outputs sum to $1$ and the gradient sums to $0$ ($\sum_i \delta_i = \langle 
 
 - **Vanishing gradients with Sigmoid/Tanh.** For deep networks, gradients shrink exponentially through saturated activations. Use ReLU or Leaky ReLU in hidden layers.
 - **Dead ReLU neurons.** If a neuron's bias drifts negative enough that no input ever produces $z > 0$, it stops learning. Leaky ReLU or He initialization prevents this.
-- **Exponential overflow.** In single precision $e^{z}$ overflows for $z > 88.7$. Sigmoid is evaluated with the sign-branched form and Softmax with the max shift, so neither overflows for any finite input; the saturated outputs round to exactly $0$ or $1$, which makes the derivative $0$ there.
+- **Exponential overflow.** In single precision $e^{z}$ overflows for $z > 88.7$. Sigmoid is evaluated with the sign-branched form and Softmax with the max shift. Neither overflows for any finite input. The saturated outputs round to exactly $0$ or $1$, which makes the derivative $0$ there.
 - **Softmax sums.** After the max shift the largest exponential is exactly $1$, so the normaliser is in $[1, k]$ and never underflows to zero. The outputs are not clamped: clamping each probability would break $\sum_i a_i = 1$ and make the backward pass inconsistent with the forward pass.
 - **Softmax is not element-wise.** Its scalar form is degenerate (constant $1$, derivative $0$); only the vector form is meaningful. Do not place a Softmax output in front of a loss that already applies softmax to its input (see [Loss Functions](../losses/Loss.md#categorical-cross-entropy)).
 - **Non-differentiable points.** ReLU and Leaky ReLU are not differentiable at $z = 0$; the sub-gradient $f'(0) = 0$ (ReLU) and $f'(0) = \alpha$ (Leaky ReLU) is used.
