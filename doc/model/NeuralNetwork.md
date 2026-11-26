@@ -6,7 +6,7 @@ A neural network is a parameterized function $f_\theta: \mathbb{R}^n \to \mathbb
 
 ![Feed-forward network: input layer, hidden layers, output layer](NeuralNetworkArchitecture.png)
 
-Neural networks are powerful because of the **universal approximation theorem**: a single hidden layer with enough neurons can approximate any continuous function on a compact set to arbitrary accuracy. In practice, *depth* (many layers) is more parameter-efficient than width for learning hierarchical features.
+Neural networks are powerful because of the **universal approximation theorem**. A single hidden layer with enough neurons can approximate any continuous function on a compact set. It can do so to arbitrary accuracy. In practice, *depth* (many layers) is more parameter-efficient than width for learning hierarchical features.
 
 This library provides a minimal, statically-sized neural network framework designed for **embedded inference** — no heap allocation, no dynamic shapes, full compile-time dimension checking. The forward and backward passes described below are implemented; the parameter update loop that turns them into on-device training is roadmap N8/N9/N16 (see [Model](Model.md)).
 

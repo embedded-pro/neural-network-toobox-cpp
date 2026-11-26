@@ -8,7 +8,7 @@ $$a_{\text{out}} = f(W \, a_{\text{in}} + b)$$
 
 Every input neuron is connected to every output neuron — hence "fully connected." The layer's **parameters** are the weight matrix $W$ and bias vector $b$; training adjusts these to minimize the loss.
 
-In this library, input size, output size, and parameter count are all **compile-time constants**, enabling static allocation and dimension checking with zero runtime overhead. The caller supplies the initial weights; the biases start at zero.
+In this library, input size, output size, and parameter count are all **compile-time constants**. This enables static allocation and dimension checking with zero runtime overhead. The caller supplies the initial weights; the biases start at zero.
 
 ## Mathematical Theory
 
@@ -37,7 +37,7 @@ $$\frac{\partial \mathcal{L}}{\partial b} = \delta$$
 4. **Input gradient** (propagated to the previous layer):
 $$\frac{\partial \mathcal{L}}{\partial a_{\text{in}}} = W^T \delta$$
 
-The backward pass requires a preceding forward pass (it uses the cached $a_{\text{in}}$, $z$, $a_{\text{out}}$). Each call **overwrites** the stored parameter gradients with those of the current sample; they are not accumulated and are not yet exposed to an optimizer (roadmap N8).
+The backward pass requires a preceding forward pass (it uses the cached $a_{\text{in}}$, $z$, $a_{\text{out}}$). Each call **overwrites** the stored parameter gradients with those of the current sample. The layer does not accumulate them. It does not yet expose them to an optimizer (roadmap N8).
 
 ### Parameter Vector
 
@@ -56,7 +56,7 @@ For a layer with 128 inputs and 64 outputs: $P = 64 \times 129 = 8{,}256$ parame
 
 The matrix-vector products dominate both passes. For embedded networks (e.g. $n = 32, m = 16$), a single forward pass takes 512 multiply-accumulate operations.
 
-**Resident memory per layer.** The object holds the parameters ($P$ values), a parameter-gradient buffer of the same size ($P$), and the cached input, pre-activation, output and input-gradient vectors ($2n + 2m$):
+**Resident memory per layer.** The object holds the parameters ($P$ values) and a parameter-gradient buffer of the same size ($P$). It also caches the input, pre-activation, output and input-gradient vectors ($2n + 2m$):
 
 $$\text{values} = 2P + 2n + 2m = 2mn + 4m + 2n$$
 

@@ -23,11 +23,11 @@ Every activation function provides two operations on a pre-activation vector $z 
 | **Forward**  | $a = f(z)$                                                          | Transform the pre-activation           |
 | **Backward** | $\delta = J_f(z)^T g$, with $g = \partial \mathcal{L} / \partial a$ | Propagate the upstream gradient to $z$ |
 
-$J_f(z) = \partial a / \partial z$ is the $k \times k$ Jacobian. For the **element-wise** functions (ReLU, Leaky ReLU, Sigmoid, Tanh), $a_i$ depends only on $z_i$, so the Jacobian is diagonal and the backward pass reduces to a Hadamard product:
+$J_f(z) = \partial a / \partial z$ is the $k \times k$ Jacobian. For the **element-wise** functions (ReLU, Leaky ReLU, Sigmoid, Tanh), $a_i$ depends only on $z_i$. The Jacobian is therefore diagonal, and the backward pass reduces to a Hadamard product:
 
 $$\delta = g \odot f'(z), \qquad \delta_i = g_i \, f'(z_i)$$
 
-For **Softmax**, every output depends on every input, so the Jacobian is dense; the backward pass is still computed in $O(k)$ as a Jacobian-vector product (see [Softmax](#softmax)). The derivatives of Sigmoid and Tanh are written in terms of the output $a$, so the backward pass reuses the cached forward result instead of re-evaluating the exponential.
+For **Softmax**, every output depends on every input, so the Jacobian is dense. The backward pass still computes it in $O(k)$ as a Jacobian-vector product (see [Softmax](#softmax)). The derivatives of Sigmoid and Tanh use the output $a$. Thus the backward pass reuses the cached forward result and does not re-evaluate the exponential.
 
 ### Catalogue
 
@@ -137,7 +137,7 @@ The outputs sum to $1$ and the gradient sums to $0$ ($\sum_i \delta_i = \langle 
 
 - **Vanishing gradients with Sigmoid/Tanh.** For deep networks, gradients shrink exponentially through saturated activations. Use ReLU or Leaky ReLU in hidden layers.
 - **Dead ReLU neurons.** If a neuron's bias drifts negative enough that no input ever produces $z > 0$, it stops learning. Leaky ReLU or He initialization prevents this.
-- **Exponential overflow.** In single precision $e^{z}$ overflows for $z > 88.7$. Sigmoid is evaluated with the sign-branched form and Softmax with the max shift, so neither overflows for any finite input; the saturated outputs round to exactly $0$ or $1$, which makes the derivative $0$ there.
+- **Exponential overflow.** In single precision $e^{z}$ overflows for $z > 88.7$. Sigmoid is evaluated with the sign-branched form and Softmax with the max shift. Neither overflows for any finite input. The saturated outputs round to exactly $0$ or $1$, which makes the derivative $0$ there.
 - **Softmax sums.** After the max shift the largest exponential is exactly $1$, so the normaliser is in $[1, k]$ and never underflows to zero. The outputs are not clamped: clamping each probability would break $\sum_i a_i = 1$ and make the backward pass inconsistent with the forward pass.
 - **Softmax is not element-wise.** Its scalar form is degenerate (constant $1$, derivative $0$); only the vector form is meaningful. Do not place a Softmax output in front of a loss that already applies softmax to its input (see [Loss Functions](../losses/Loss.md#categorical-cross-entropy)).
 - **Non-differentiable points.** ReLU and Leaky ReLU are not differentiable at $z = 0$; the sub-gradient $f'(0) = 0$ (ReLU) and $f'(0) = \alpha$ (Leaky ReLU) is used.
